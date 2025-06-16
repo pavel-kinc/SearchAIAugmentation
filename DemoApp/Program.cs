@@ -1,3 +1,6 @@
+using DemoApp.Services;
+using PromptEnhancer.Extensions;
+
 namespace DemoApp
 {
     public class Program
@@ -6,12 +9,21 @@ namespace DemoApp
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.AddServiceDefaults();
+
+            builder.Configuration.AddJsonFile("appsettings.secrets.json", optional: false, reloadOnChange: true);
+
             // Add services to the container.
             builder.Services.AddRazorPages();
 
+            builder.Services.AddSingleton<IConfigurationSetupService, ConfigurationSetupService>();
+
+            builder.Services.AddPromptEnhancer();
+
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            app.MapDefaultEndpoints();
+
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Error");

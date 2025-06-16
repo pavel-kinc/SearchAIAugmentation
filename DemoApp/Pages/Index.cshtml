@@ -1,10 +1,87 @@
 ﻿@page
 @model IndexModel
+
 @{
     ViewData["Title"] = "Home page";
+    var prefixedViewData = new ViewDataDictionary(ViewData)
+            {
+                TemplateInfo = { HtmlFieldPrefix = "ViewModel.ConfigurationSetup" }
+            };
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<h2 class="mb-3">Configuration Setup</h2>
+
+<ul class="nav nav-tabs mb-2" id="configTabs">
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#overview">Overview</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#kernel">Kernel Config</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#search">Search Config</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#prompt">Prompt Config</a></li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade" id="overview">
+        @await Html.PartialAsync("_ConfigOverview", Model.ViewModel.ConfigurationSetup)
+    </div>
+    <div class="tab-pane fade" id="kernel">
+        <form method="post" asp-page-handler="UpdateKernelConf">
+            @await Html.PartialAsync("_AIServiceFormValuesView", Model.ViewModel.ConfigurationSetup, prefixedViewData)
+
+            <button type="submit" class="btn btn-primary">Save Kernel configuration</button>
+        </form>
+    </div>
+
+    <div class="tab-pane fade" id="search">
+        <form method="post" asp-page-handler="UpdateSearchConf">
+            @await Html.PartialAsync("_SearchConfigFormValuesView", Model.ViewModel.ConfigurationSetup, prefixedViewData)
+            <button type="submit" class="btn btn-primary">Save Search configuration</button>
+        </form>
+    </div>
+
+    <div class="tab-pane fade" id="prompt">
+        <form method="post" asp-page-handler="UpdatePromptConf">
+            @await Html.PartialAsync("_PromptConfigFormValuesView", Model.ViewModel.ConfigurationSetup, prefixedViewData)
+            <button type="submit" class="btn btn-primary">Save Prompt configuration</button>
+        </form>
+    </div>
 </div>
+
+<hr />
+<form method="post" asp-page-handler="ProcessResultModel">
+    <button class="btn btn-success">Finish and Show Results</button>
+</form>
+
+
+@await Html.PartialAsync("_ResultView", Model.ViewModel.ResultModel)
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const hash = window.location.hash;
+        if (hash) {
+            const tabTrigger = document.querySelector(`a[href="${hash}"]`);
+            if (tabTrigger) {
+                new bootstrap.Tab(tabTrigger).show();
+            }
+        } else {
+            const firstTab = document.querySelector('#configTabs a[data-bs-toggle="tab"]');
+            if (firstTab) new bootstrap.Tab(firstTab).show();
+        }
+
+        document.querySelectorAll('#configTabs a[data-bs-toggle="tab"]').forEach(tab => {
+            tab.addEventListener('shown.bs.tab', e => {
+                history.replaceState(null, null, e.target.getAttribute('href'));
+            });
+        });
+    });
+
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function () {
+            const activeTab = document.querySelector('#configTabs .nav-link.active');
+            if (activeTab) {
+                const hash = activeTab.getAttribute('href');
+                if (hash) {
+                    form.setAttribute('action', form.getAttribute('action') + hash);
+                }
+            }
+        });
+    });
+</script>

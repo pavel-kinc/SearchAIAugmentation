@@ -1,0 +1,20 @@
+﻿@model PromptEnhancer.Models.ResultModel
+
+@if (!string.IsNullOrEmpty(Model?.SearchResult))
+{
+    <div>
+        <strong>Search Result:</strong> @Model.SearchResult
+    </div>
+}
+@if (!string.IsNullOrEmpty(Model?.Prompt))
+{
+    <div>
+        <strong>Prompt:</strong> @Model.Prompt
+    </div>
+}
+@if (!string.IsNullOrEmpty(Model?.AIResult))
+{
+    <div>
+        <strong>Result of the AI:</strong> @Model.AIResult
+    </div>
+}

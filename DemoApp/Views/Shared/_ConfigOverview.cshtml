@@ -1,0 +1,45 @@
+﻿@model DemoApp.Models.ConfigurationSetup
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <strong>Configuration Overview</strong>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            @* ── Kernel Configuration ── *@
+            @if (!string.IsNullOrWhiteSpace(Model.KernelConfiguration?.Model))
+            {
+                <dt class="col-sm-4">@Html.LabelFor(m => m.KernelConfiguration.Model, new { @class = "mb-0 fw-semibold" })</dt>
+                <dd class="col-sm-8">@Model.KernelConfiguration.Model</dd>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Model.KernelConfiguration?.Provider.ToString()))
+            {
+                <dt class="col-sm-4">@Html.LabelFor(m => m.KernelConfiguration.Provider, new { @class = "mb-0 fw-semibold" })</dt>
+                <dd class="col-sm-8">@Model.KernelConfiguration.Provider</dd>
+            }
+
+            <dt class="col-sm-4">@Html.LabelFor(m => m.KernelConfiguration.AIApiKey, new { @class = "mb-0 fw-semibold" })</dt>
+            <dd class="col-sm-8">@Model.DemoAppConfigSetup.AIApiKeyFromInput</dd>
+
+            @* ── Search Configuration ── *@
+            @if (!string.IsNullOrWhiteSpace(Model.SearchConfiguration?.QueryString))
+            {
+                <dt class="col-sm-4">@Html.LabelFor(m => m.SearchConfiguration.QueryString, new { @class = "mb-0 fw-semibold" })</dt>
+                <dd class="col-sm-8">@Model.SearchConfiguration.QueryString</dd>
+            }
+
+            <dt class="col-sm-4">@Html.LabelFor(m => m.SearchConfiguration.SearchProviderData.SearchApiKey, new { @class = "mb-0 fw-semibold" })</dt>
+            <dd class="col-sm-8">@Model.DemoAppConfigSetup.SearchApiKeyFromInput</dd>
+
+            <dt class="col-sm-4">@Html.LabelFor(m => m.SearchConfiguration.SearchProviderData.Engine, new { @class = "mb-0 fw-semibold" })</dt>
+            <dd class="col-sm-8">@Model.DemoAppConfigSetup.SearchEngineFromInput</dd>
+
+            @if (!string.IsNullOrWhiteSpace(Model.SearchConfiguration?.SearchProviderData?.Provider.ToString()))
+            {
+                <dt class="col-sm-4">@Html.LabelFor(m => m.SearchConfiguration.SearchProviderData.Provider, new { @class = "mb-0 fw-semibold" })</dt>
+                <dd class="col-sm-8">@Model.SearchConfiguration.SearchProviderData.Provider</dd>
+            }
+        </dl>
+    </div>
+</div>
