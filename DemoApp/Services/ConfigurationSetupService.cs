@@ -1,5 +1,6 @@
 ﻿using DemoApp.Models;
 using Mapster;
+using PromptEnhancer.ConfigurationHelper;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Services;
@@ -21,12 +22,13 @@ namespace DemoApp.Services
             _enhancerConfig = GetDefaultConfiguration();
         }
 
-        public ConfigurationSetup GetConfiguration()
+        public ConfigurationSetup GetConfiguration(bool withSecrets = false)
         {
             var config = _enhancerConfig.Adapt<ConfigurationSetup>();
-            config.KernelConfiguration.AIApiKey = null;
-            config.SearchConfiguration.SearchProviderData.SearchApiKey = null;
-            config.SearchConfiguration.SearchProviderData.Engine = null;
+            if (!withSecrets)
+            {
+                SensitiveDataResolver.HideSensitiveProperties(config);
+            }
             return config;
         }
 
@@ -60,21 +62,38 @@ namespace DemoApp.Services
             _enhancerConfig.DemoAppConfigSetup = demoAppConfigSetup;
         }
 
+        public void UploadConfiguration(ConfigurationSetup configuration)
+        {
+            _enhancerConfig = configuration;
+            SetDefaultDemoAppConfig(_enhancerConfig);
+        }
+
         private ConfigurationSetup GetDefaultConfiguration()
         {
             var enhancerConfig = _enhancerService.CreateDefaultConfiguration(aiApiKey: _configuration["AIServices:OpenAI:ApiKey"], searchApiKey: _configuration["SearchConfigurations:Google:ApiKey"], searchEngine: _configuration["SearchConfigurations:Google:SearchEngineId"]);
             var configSetup = enhancerConfig.Adapt<ConfigurationSetup>();
+            
+            SetDefaultDemoAppConfig(configSetup);
+            return configSetup;
+        }
+
+        private void SetDefaultDemoAppConfig(ConfigurationSetup configSetup)
+        {
             var searchProvider = configSetup.SearchConfiguration.SearchProviderData.Provider.ToString();
             configSetup.DemoAppConfigSetup.AIApiKeyFromInput = GetLoadedFromString(configSetup.KernelConfiguration.AIApiKey is not null ? false : null, configSetup.KernelConfiguration.Provider.ToString());
             configSetup.DemoAppConfigSetup.SearchApiKeyFromInput = GetLoadedFromString(configSetup.SearchConfiguration.SearchProviderData.SearchApiKey is not null ? false : null, searchProvider);
             configSetup.DemoAppConfigSetup.SearchEngineFromInput = GetLoadedFromString(configSetup.SearchConfiguration.SearchProviderData.Engine is not null ? false : null, searchProvider);
-            return configSetup;
         }
 
         private string GetLoadedFromString(bool? loadedFromInput, string? provider)
         {
             var loadedText = loadedFromInput is null ? "not loaded" : (((bool)loadedFromInput ? "loaded from input" : "loaded from configuration") + $" for provider {provider ?? "No Provider was chosen"}");
             return $"This key is currently {loadedText}.";
+        }
+
+        public void UpdatePromptConfig(PromptConfiguration promptConfiguration)
+        {
+            _enhancerConfig.PromptConfiguration = promptConfiguration;
         }
     }
 }

@@ -7,6 +7,7 @@ namespace DemoApp.Models
     {
         public KernelConfiguration KernelConfiguration { get; set; } = new();
         public SearchConfiguration SearchConfiguration { get; set; } = new();
+        public PromptConfiguration PromptConfiguration { get; set; } = new();
         public DemoAppConfigSetup DemoAppConfigSetup { get; set; } = new();
     }
 }

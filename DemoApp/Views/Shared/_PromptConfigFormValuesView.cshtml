@@ -1,3 +1,33 @@
 ﻿@model DemoApp.Models.ConfigurationSetup
 
-TODO
+<div class="mb-3">
+    @Html.LabelFor(m => m.PromptConfiguration.SystemInstructions,
+            new { @class = "form-label", title = "Required system-level instructions." })
+    @Html.TextAreaFor(m => m.PromptConfiguration.SystemInstructions,
+            new { @class = "form-control", rows = "3" })
+    @Html.ValidationMessageFor(m => m.PromptConfiguration.SystemInstructions, "", new { @class = "text-danger" })
+</div>
+
+<div class="mb-3">
+    @Html.LabelFor(m => m.PromptConfiguration.MacroDefinition,
+            new { @class = "form-label", title = "Prefix/suffix that marks a macro." })
+    @Html.TextBoxFor(m => m.PromptConfiguration.MacroDefinition,
+            new { @class = "form-control", placeholder = "Possible macro value." })
+    @Html.ValidationMessageFor(m => m.PromptConfiguration.MacroDefinition, "", new { @class = "text-danger" })
+</div>
+
+<div class="mb-3">
+    @Html.LabelFor(m => m.PromptConfiguration.AdditionalInstructions,
+            new { @class = "form-label", title = "Optional extra instructions." })
+    @Html.TextAreaFor(m => m.PromptConfiguration.AdditionalInstructions,
+            new { @class = "form-control", rows = "3", placeholder = "Any additional instructions." })
+    @Html.ValidationMessageFor(m => m.PromptConfiguration.AdditionalInstructions, "", new { @class = "text-danger" })
+</div>
+
+<div class="mb-3">
+    @Html.LabelFor(m => m.PromptConfiguration.TargetOutputLength,
+            new { @class = "form-label", title = "Approximate desired length of the generated output, in words." })
+    @Html.TextBoxFor(m => m.PromptConfiguration.TargetOutputLength,
+            new { @class = "form-control", type = "number" })
+    @Html.ValidationMessageFor(m => m.PromptConfiguration.TargetOutputLength, "", new { @class = "text-danger" })
+</div>

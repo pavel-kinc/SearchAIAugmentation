@@ -1,0 +1,14 @@
+﻿@page
+@model dynamic
+<hr style="margin:5px;" />
+<div class="config-actions">
+
+    <form method="post" asp-page-handler="DownloadConfiguration">
+        <button type="submit" class="btn btn-download">Download Config</button>
+    </form>
+
+    <form method="post" enctype="multipart/form-data" asp-page-handler="Upload" class="upload-form">
+        <input type="file" name="configFile" class="file-input" required />
+        <button type="submit" class="btn btn-upload">Upload Config</button>
+    </form>
+</div>
