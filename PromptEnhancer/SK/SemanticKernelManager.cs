@@ -16,7 +16,7 @@ namespace PromptEnhancer.SK
     {
         public static Kernel? CreateKernel(KernelConfiguration kernelData)
         {
-            if(kernelData.Provider == AIProviderEnum.OpenAI)
+            if (kernelData.Provider == AIProviderEnum.OpenAI)
             {
                 IKernelBuilder kernelBuilder = Kernel.CreateBuilder();
                 kernelBuilder.AddOpenAIChatCompletion(
@@ -25,7 +25,7 @@ namespace PromptEnhancer.SK
                 Kernel kernel = kernelBuilder.Build();
                 return kernel;
             }
-            else if(kernelData.Provider == AIProviderEnum.GoogleGemini)
+            else if (kernelData.Provider == AIProviderEnum.GoogleGemini)
             {
                 IKernelBuilder kernelBuilder = Kernel.CreateBuilder();
 #pragma warning disable SKEXP0070
@@ -60,6 +60,7 @@ namespace PromptEnhancer.SK
             var kernelData = config.KernelConfiguration;
             var searchConf = config.SearchConfiguration;
             var searchData = searchConf?.SearchProviderData;
+            var promptConf = config.PromptConfiguration;
 
             resultView.Query = searchConf?.QueryString;
 
@@ -67,9 +68,13 @@ namespace PromptEnhancer.SK
             var res = await SearchProviderManager.GetSearchResults(textSearch, searchConf!.QueryString!);
             var results = await res.Results.ToListAsync();
             resultView.SearchResult = string.Join('\n', results.Select(x => x.Value));
-            resultView.Prompt = @$"""System: Create SEO description of product with the help of Used Search Query and Augmented Data
+            //TODO build prompt
+            resultView.Prompt = @$"""System: {promptConf.SystemInstructions}.
+                                Generated output should concise of about {promptConf.TargetOutputLength} words.
+                                {(!string.IsNullOrEmpty(promptConf.MacroDefinition) ? $" Any phrase wrapped in {promptConf.MacroDefinition} is a macro and must be kept exactly as-is." : string.Empty)}
                                 Used Search Query: {resultView.Query}
-                                Augmented Data: {resultView.SearchResult}""";
+                                Augmented Data: {resultView.SearchResult}""
+                                {(!string.IsNullOrEmpty(promptConf.AdditionalInstructions) ? promptConf.AdditionalInstructions : string.Empty)}";
             var kernel = CreateKernel(kernelData!);
             resultView.AIResult = await GetAICompletionResult(kernel!, resultView.Prompt);
             return resultView;

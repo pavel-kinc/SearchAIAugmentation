@@ -1,4 +1,6 @@
-﻿using PromptEnhancer.Models;
+﻿using Newtonsoft.Json;
+using PromptEnhancer.CustomJsonResolver;
+using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using System;
 using System.Collections.Generic;
@@ -27,6 +29,45 @@ namespace PromptEnhancer.Services
                 Provider = searchProvider,
             };
             return enhancerConfiguration;
+        }
+
+        public void DownloadConfiguration(EnhancerConfiguration configuration, string filePath = "config.json", bool hideSecrets = true)
+        {
+            var json = GetConfigurationJson(configuration, hideSecrets);
+            File.WriteAllText("filePath", json);
+        }
+
+        public byte[] ExportConfigurationToBytes(EnhancerConfiguration configuration, bool hideSecrets = true)
+        {
+            var json = GetConfigurationJson(configuration, hideSecrets);
+            return Encoding.UTF8.GetBytes(json);
+        }
+
+        public EnhancerConfiguration? ImportConfigurationFromFile(string filePath)
+        {
+            var json = File.ReadAllText(filePath);
+            return JsonConvert.DeserializeObject<EnhancerConfiguration>(json);
+        }
+
+        public EnhancerConfiguration? ImportConfigurationFromBytes(byte[] jsonBytes)
+        {
+            var json = Encoding.UTF8.GetString(jsonBytes);
+            return JsonConvert.DeserializeObject<EnhancerConfiguration>(json);
+        }
+
+        private string GetConfigurationJson(EnhancerConfiguration configuration, bool hideSecrets = true)
+        {
+            var settings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented
+            };
+
+            if (hideSecrets)
+            {
+                settings.ContractResolver = new SensitiveContractResolver();
+            }
+
+            return JsonConvert.SerializeObject(configuration, settings);
         }
     }
 }
