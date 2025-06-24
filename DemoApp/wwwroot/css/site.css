@@ -58,3 +58,36 @@ body {
 .file-input {
     font-size: 0.95rem;
 }
+
+.select2-container {
+    width: 15rem !important; /* Adjust the width as necessary */
+}
+
+.select2-container .select2-selection--single {
+    height: calc(1.5em + .75rem + 2px) !important;
+    border: 1px solid #ced4da !important;
+    border-radius: .25rem !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: calc(1.5em + .75rem + 2px) !important;
+    padding-left: .75rem !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: calc(1.5em + .75rem + 2px) !important;
+    width: 2rem !important;
+}
+
+.select2-dropdown {
+    border-radius: .25rem !important;
+    font-size: .875rem;
+}
+
+.select2-results__option {
+    padding: .5rem .75rem;
+}
+
+.input-container {
+    width: 300px !important; /* Fixed width for the dropdown */
+}

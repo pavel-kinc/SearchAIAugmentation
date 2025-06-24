@@ -32,22 +32,15 @@
     @Html.ValidationMessageFor(m => m.PromptConfiguration.TargetOutputLength, "", new { @class = "text-danger" })
 </div>
 
-@* <div class="mb-3">
-    @Html.LabelFor(m => m.PromptConfiguration.TargetLanguageCultureCode,
-            new { @class = "form-label", title = "Culture code of the output translation" })
+<div class="input-container">
+    <div class="mb-3">
+        @Html.LabelFor(m => m.PromptConfiguration.TargetLanguageCultureCode,
+                 new { @class = "form-label", title = "Culture code of the output translation" })
 
-    @Html.DropDownListFor(m => m.PromptConfiguration.TargetLanguageCultureCode,
-            new SelectList(ViewBag.CultureCodes, Model.PromptConfiguration.TargetLanguageCultureCode),
-            "Select a culture code", new { @class = "form-control js-example-basic-single" })
+        @Html.DropDownListFor(m => m.PromptConfiguration.TargetLanguageCultureCode,
+                 new SelectList(Model.DemoAppConfigSetup.AvailableCultureCodes, Model.PromptConfiguration.TargetLanguageCultureCode),
+                 "Select a culture code", new { @class = "form-control js-example-basic-single" })
 
-    @Html.ValidationMessageFor(m => m.PromptConfiguration.TargetLanguageCultureCode, "", new { @class = "text-danger" })
-</div> *@
-
-<script>
-    $(document).ready(function () {
-        $('.js-example-basic-single').select2({
-            placeholder: "Select a culture code",
-            allowClear: true
-        });
-    });
-</script>
+        @Html.ValidationMessageFor(m => m.PromptConfiguration.TargetLanguageCultureCode, "", new { @class = "text-danger" })
+    </div>
+</div>

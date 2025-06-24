@@ -1,4 +1,6 @@
-﻿using System.Globalization;
+﻿using PromptEnhancer.Models;
+using System.Globalization;
+using System.Linq;
 
 namespace DemoApp.Models
 {
@@ -10,6 +12,5 @@ namespace DemoApp.Models
         public IEnumerable<string> AvailableCultureCodes { get; set; } = CultureInfo.GetCultures(CultureTypes.SpecificCultures)
                                   .Select(c => c.Name)
                                   .ToList();
-
     }
 }

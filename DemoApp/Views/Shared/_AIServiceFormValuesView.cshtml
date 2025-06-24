@@ -1,4 +1,12 @@
-﻿@model DemoApp.Models.ConfigurationSetup
+﻿@using PromptEnhancer.Models
+@model DemoApp.Models.ConfigurationSetup
+
+@{
+    var aiProviders = Enum.GetValues(typeof(AIProviderEnum))
+                   .Cast<AIProviderEnum>()
+                   .Select(e => e.ToString())
+                   .ToList();
+}
 
 <div class="mb-3">
     @Html.LabelFor(m => m.KernelConfiguration.Model, new { @class = "form-label", title = "The name of the AI model to use (e.g., gpt-4, gpt-4o)." })
@@ -15,8 +23,13 @@
     </div>
 </div>
 
-<div class="mb-3">
-    @Html.LabelFor(m => m.KernelConfiguration.Provider, new { @class = "form-label", title = "The name of the provider (e.g., OpenAI, Gemini)." })
-    @Html.TextBoxFor(m => m.KernelConfiguration.Provider, new { @class = "form-control" })
-    @Html.ValidationMessageFor(m => m.KernelConfiguration.Provider, "", new { @class = "text-danger" })
+<div class="input-container">
+    <div class="mb-3">
+        @Html.LabelFor(m => m.KernelConfiguration.Provider, new { @class = "form-label", title = "The name of the provider (e.g., OpenAI, Gemini)." })
+        @Html.DropDownListFor(m => m.KernelConfiguration.Provider,
+                 new SelectList(aiProviders, Model.KernelConfiguration.Provider),
+                 "Select AI provider", new { @class = "form-control js-example-basic-single" })
+        @Html.ValidationMessageFor(m => m.KernelConfiguration.Provider, "", new { @class = "text-danger" })
+    </div>
 </div>
+
