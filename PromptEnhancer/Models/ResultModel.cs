@@ -14,6 +14,6 @@ namespace PromptEnhancer.Models
 
         public string SearchResult { get; set; } = string.Empty;
 
-        public string AIResult { get; set; } = string.Empty;
+        public ChatCompletionResult? AIResult { get; set; }
     }
 }

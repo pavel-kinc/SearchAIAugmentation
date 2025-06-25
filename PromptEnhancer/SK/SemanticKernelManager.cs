@@ -39,7 +39,7 @@ namespace PromptEnhancer.SK
             return null;
         }
 
-        public async static Task<string> GetAICompletionResult(Kernel kernel, string prompt)
+        public async static Task<ChatCompletionResult> GetAICompletionResult(Kernel kernel, string prompt)
         {
             OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
             {
@@ -51,11 +51,18 @@ namespace PromptEnhancer.SK
                 openAIPromptExecutionSettings,
                 kernel
                 );
-            return result?.Content!;
+            //TODO: handle other providers - response is specifig to openai - no built in abstraction from .net it seems
+            var replyInnerContent = result.InnerContent as OpenAI.Chat.ChatCompletion;
+            return new ChatCompletionResult
+            {
+                AIOutput = result?.Content,
+                TokensUsed = replyInnerContent?.Usage.TotalTokenCount ?? 0,
+            };
         }
 
         public static async Task<ResultModel?> ProcessConfiguration(EnhancerConfiguration config)
         {
+            //TODO move to EnhancerService probably
             var resultView = new ResultModel();
             var kernelData = config.KernelConfiguration;
             var searchConf = config.SearchConfiguration;
@@ -68,16 +75,25 @@ namespace PromptEnhancer.SK
             var res = await SearchProviderManager.GetSearchResults(textSearch, searchConf!.QueryString!);
             var results = await res.Results.ToListAsync();
             resultView.SearchResult = string.Join('\n', results.Select(x => x.Value));
-            //TODO build prompt
-            resultView.Prompt = @$"""System: {promptConf.SystemInstructions}.
-                                Generated output should concise of about {promptConf.TargetOutputLength} words.
-                                {(!string.IsNullOrEmpty(promptConf.MacroDefinition) ? $" Any phrase wrapped in {promptConf.MacroDefinition} is a macro and must be kept exactly as-is." : string.Empty)}
-                                Used Search Query: {resultView.Query}
-                                Augmented Data: {resultView.SearchResult}""
-                                {(!string.IsNullOrEmpty(promptConf.AdditionalInstructions) ? promptConf.AdditionalInstructions : string.Empty)}";
+            var usedUrls = results?.Where(x => !string.IsNullOrEmpty(x.Link)).Select(x => x.Link!);
+            resultView.Prompt = BuildPrompt(resultView, promptConf);
             var kernel = CreateKernel(kernelData!);
             resultView.AIResult = await GetAICompletionResult(kernel!, resultView.Prompt);
+            resultView.AIResult.UsedURLs = usedUrls;
             return resultView;
+        }
+
+        private static string BuildPrompt(ResultModel resultView, PromptConfiguration promptConf)
+        {
+            //TODO build prompt better
+            return @$"""
+                        System: {promptConf.SystemInstructions}.
+                        Generated output should concise of about {promptConf.TargetOutputLength} words.
+                        {(!string.IsNullOrEmpty(promptConf.MacroDefinition) ? $" Any phrase wrapped in {promptConf.MacroDefinition} is a macro and must be kept exactly as-is." : string.Empty)}
+                        Used Search Query: {resultView.Query}
+                        Augmented Data: {resultView.SearchResult}
+                        {(!string.IsNullOrEmpty(promptConf.AdditionalInstructions) ? promptConf.AdditionalInstructions : string.Empty)}
+                    """;
         }
     }
 }

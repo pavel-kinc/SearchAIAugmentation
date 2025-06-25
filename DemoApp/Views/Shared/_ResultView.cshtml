@@ -12,9 +12,27 @@
         <strong>Prompt:</strong> @Model.Prompt
     </div>
 }
-@if (!string.IsNullOrEmpty(Model?.AIResult))
+@if (!string.IsNullOrEmpty(Model?.AIResult?.AIOutput))
 {
     <div>
-        <strong>Result of the AI:</strong> @Model.AIResult
+        <strong>Result of the AI:</strong> @Model.AIResult.AIOutput
+    </div>
+}
+@if (Model?.AIResult?.UsedURLs is not null)
+{
+    <div>
+        <strong>Sources:</strong>
+        <ul>
+            @foreach (var url in Model.AIResult.UsedURLs.Where(u => !string.IsNullOrWhiteSpace(u)))
+            {
+                <li><a href="@url" target="_blank" rel="noopener noreferrer">@url</a></li>
+            }
+        </ul>
+    </div>
+}
+@if (Model?.AIResult?.TokensUsed is not null)
+{
+    <div>
+        <strong>Total tokens used:</strong> @Model.AIResult.TokensUsed
     </div>
 }
