@@ -12,7 +12,7 @@ namespace PromptEnhancer.Services
 {
     public class EnhancerService : IEnhancerService
     {
-        public EnhancerConfiguration CreateDefaultConfiguration(string? aiApiKey = null, AIProviderEnum aiProvider = AIProviderEnum.OpenAI, string aiModel = "gpt-4o", string? searchApiKey = null, SearchProviderEnum searchProvider = SearchProviderEnum.Google, string? searchEngine = null)
+        public EnhancerConfiguration CreateDefaultConfiguration(string? aiApiKey = null, AIProviderEnum aiProvider = AIProviderEnum.OpenAI, string aiModel = "gpt-4o-mini", string? searchApiKey = null, SearchProviderEnum searchProvider = SearchProviderEnum.Google, string? searchEngine = null)
         {
             var enhancerConfiguration = new EnhancerConfiguration();
             enhancerConfiguration.KernelConfiguration = new KernelConfiguration

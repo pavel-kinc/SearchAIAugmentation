@@ -41,22 +41,26 @@ namespace PromptEnhancer.SK
 
         public async static Task<ChatCompletionResult> GetAICompletionResult(Kernel kernel, string prompt)
         {
+            if(prompt.Length > 1000)
+            {
+                throw new Exception("Prompt length exceeds limit.");
+            }
             OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
             {
                 FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
             };
             var chatCompletionService = kernel.Services.GetRequiredService<IChatCompletionService>();
-            var result = await chatCompletionService.GetChatMessageContentAsync(
-                prompt,
-                openAIPromptExecutionSettings,
-                kernel
-                );
+            //var result = await chatCompletionService.GetChatMessageContentAsync(
+            //    prompt,
+            //    openAIPromptExecutionSettings,
+            //    kernel
+            //    );
             //TODO: handle other providers - response is specifig to openai - no built in abstraction from .net it seems
-            var replyInnerContent = result.InnerContent as OpenAI.Chat.ChatCompletion;
+            //var replyInnerContent = result.InnerContent as OpenAI.Chat.ChatCompletion;
             return new ChatCompletionResult
             {
-                AIOutput = result?.Content,
-                TokensUsed = replyInnerContent?.Usage.TotalTokenCount ?? 0,
+                AIOutput = null,//result?.Content,
+                TokensUsed = 0//replyInnerContent?.Usage.TotalTokenCount ?? 0,
             };
         }
 
@@ -71,11 +75,23 @@ namespace PromptEnhancer.SK
 
             resultView.Query = searchConf?.QueryString;
 
+            // will be needed to search by params/config
             var textSearch = SearchProviderManager.CreateTextSearch(searchData!)!;
             var res = await SearchProviderManager.GetSearchResults(textSearch, searchConf!.QueryString!);
-            var results = await res.Results.ToListAsync();
-            resultView.SearchResult = string.Join('\n', results.Select(x => x.Value));
-            var usedUrls = results?.Where(x => !string.IsNullOrEmpty(x.Link)).Select(x => x.Link!);
+            var searchResults = await res.Results.ToListAsync();
+            var usedUrls = searchResults.Where(x => !string.IsNullOrEmpty(x.Link)).Select(x => x.Link!);
+            //temporary
+            var useScraper = true;
+            if (useScraper)
+            {
+                //will be needed some specifications from config what to search for maybe?
+                resultView.SearchResult = await SearchWebScraper.ScrapeDataFromUrlsAsync(usedUrls);
+            }
+            else
+            {
+                //this uses snippets from search only
+                resultView.SearchResult = string.Join('\n', searchResults.Select(x => x.Value));
+            }
             resultView.Prompt = BuildPrompt(resultView, promptConf);
             var kernel = CreateKernel(kernelData!);
             resultView.AIResult = await GetAICompletionResult(kernel!, resultView.Prompt);
@@ -85,7 +101,7 @@ namespace PromptEnhancer.SK
 
         private static string BuildPrompt(ResultModel resultView, PromptConfiguration promptConf)
         {
-            //TODO build prompt better
+            //TODO build prompt better, this is temporary
             return @$"""
                         System: {promptConf.SystemInstructions}.
                         Generated output should concise of about {promptConf.TargetOutputLength} words.
