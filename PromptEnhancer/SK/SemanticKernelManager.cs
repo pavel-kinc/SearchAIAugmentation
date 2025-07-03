@@ -85,7 +85,9 @@ namespace PromptEnhancer.SK
             if (useScraper)
             {
                 //will be needed some specifications from config what to search for maybe?
-                resultView.SearchResult = await SearchWebScraper.ScrapeDataFromUrlsAsync(usedUrls);
+                var rawScrapedContent = await SearchWebScraper.ScrapeDataFromUrlsAsync(usedUrls);
+                var chunks = ChunkGenerator.GenerateChunksFromData(rawScrapedContent);
+                resultView.SearchResult = ChunkRanker.ExtractRelevantDataFromChunks(chunks, resultView.Query!);
             }
             else
             {

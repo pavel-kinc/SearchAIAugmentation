@@ -1,13 +1,8 @@
 ﻿using AngleSharp;
 using AngleSharp.Dom;
-using Microsoft.AspNetCore.Mvc.Internal;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Concurrent;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace PromptEnhancer.Search
 {
@@ -23,39 +18,42 @@ namespace PromptEnhancer.Search
             {
                 return string.Empty;
             }
-            var result = new StringBuilder();
             var config = Configuration.Default.WithDefaultLoader();
             var context = BrowsingContext.New(config);
+            var cb = new ConcurrentBag<string>();
 
-            foreach (var url in usedUrls)
+            await Parallel.ForEachAsync(usedUrls, async (url, _) =>
             {
-                // maybe make this per url so that it can be parallelized (and then joined per url - do not send SB)
-                await ScrapeUrlContent(result, context, url);
-            }
-
-            var res =  result.ToString();
+                var scrapedContent = await ScrapeUrlContent(context, url);
+                cb.Add(scrapedContent);
+            });
+            
+            var result = cb.ToList();
+            var res = string.Join(Environment.NewLine, result);
             return res;
         }
 
-        private static async Task ScrapeUrlContent(StringBuilder result, IBrowsingContext context, string url)
+        private static async Task<string> ScrapeUrlContent(IBrowsingContext context, string url)
         {
             var document = await context.OpenAsync(url);
+            var sb = new StringBuilder();
 
-            var seen = new HashSet<string>();
+            //var seen = new HashSet<string>();
             foreach (var node in document.QuerySelectorAll("style, script"))
             {
                 node.Remove();
             }
-            var relevantParts = document.QuerySelectorAll("p, li, h1, h2, h3, h4, span, section");
+            var relevantParts = document.QuerySelectorAll("p, li, h1, h2, h3, h4, span, section, [class*='description']");
             var testtext = document.DocumentElement.Text();
             foreach (var part in relevantParts)
             {
                 var text = Normalize(part.TextContent);
-                if (text is not null && seen.Add(text))
+                if (text is not null) // && seen.Add(text)
                 {
-                    result.AppendLine(text);
+                    sb.AppendLine(text);
                 }
             }
+            return sb.ToString();
         }
 
         private static string? Normalize(string text)
