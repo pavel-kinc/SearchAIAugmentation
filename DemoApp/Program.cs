@@ -1,4 +1,5 @@
 using DemoApp.Services;
+
 using PromptEnhancer.Extensions;
 
 namespace DemoApp

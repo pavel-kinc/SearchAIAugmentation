@@ -2,6 +2,7 @@
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 
@@ -37,7 +38,7 @@ namespace PromptEnhancer.SK
 
         public async static Task<ChatCompletionResult> GetAICompletionResult(Kernel kernel, string prompt, int? maxPromptLength = null)
         {
-            if(prompt.Length > (maxPromptLength ?? MaxPromptLength))
+            if (prompt.Length > (maxPromptLength ?? MaxPromptLength))
             {
                 throw new Exception("Prompt length exceeds limit.");
             }

@@ -27,7 +27,7 @@ namespace PromptEnhancer.Search
                 var scrapedContent = await ScrapeUrlContent(context, url);
                 cb.Add(scrapedContent);
             });
-            
+
             var result = cb.ToList();
             var res = string.Join(Environment.NewLine, result);
             return res;

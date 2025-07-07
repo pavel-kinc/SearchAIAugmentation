@@ -1,4 +1,5 @@
 ﻿using DemoApp.Models;
+
 using PromptEnhancer.Models.Configurations;
 
 namespace DemoApp.Services

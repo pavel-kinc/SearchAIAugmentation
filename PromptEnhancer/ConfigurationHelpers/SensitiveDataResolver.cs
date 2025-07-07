@@ -1,11 +1,5 @@
 ﻿using PromptEnhancer.CustomAttributes;
-using PromptEnhancer.Models.Configurations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PromptEnhancer.ConfigurationHelper
 {
@@ -24,7 +18,9 @@ namespace PromptEnhancer.ConfigurationHelper
             foreach (var prop in props)
             {
                 if (!prop.CanRead || !prop.CanWrite)
+                {
                     continue;
+                }
 
                 var value = prop.GetValue(obj);
                 var propType = prop.PropertyType;

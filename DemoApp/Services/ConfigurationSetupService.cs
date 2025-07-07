@@ -1,7 +1,8 @@
 ﻿using DemoApp.Models;
+
 using Mapster;
+
 using PromptEnhancer.ConfigurationHelper;
-using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Services;
 
@@ -34,7 +35,7 @@ namespace DemoApp.Services
 
         public void UpdateKernelConfig(KernelConfiguration kernelConfiguration)
         {
-            if(kernelConfiguration.AIApiKey is not null)
+            if (kernelConfiguration.AIApiKey is not null)
             {
                 _enhancerConfig.DemoAppConfigSetup.AIApiKeyFromInput = GetLoadedFromString(true, _enhancerConfig.KernelConfiguration.Provider.ToString());
             }
@@ -72,7 +73,7 @@ namespace DemoApp.Services
         {
             var enhancerConfig = _enhancerService.CreateDefaultConfiguration(aiApiKey: _configuration["AIServices:OpenAI:ApiKey"], searchApiKey: _configuration["SearchConfigurations:Google:ApiKey"], searchEngine: _configuration["SearchConfigurations:Google:SearchEngineId"]);
             var configSetup = enhancerConfig.Adapt<ConfigurationSetup>();
-            
+
             SetDefaultDemoAppConfig(configSetup);
             return configSetup;
         }

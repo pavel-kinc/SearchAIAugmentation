@@ -1,11 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using PromptEnhancer.Models;
-using PromptEnhancer.Models.Configurations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using PromptEnhancer.Models;
 
 namespace DemoApp.Models
 {

@@ -1,6 +1,4 @@
-﻿using PromptEnhancer.Models;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 
 namespace DemoApp.Models
 {

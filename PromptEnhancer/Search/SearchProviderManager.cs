@@ -1,12 +1,7 @@
-﻿using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Data;
-using PromptEnhancer.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.SemanticKernel.Data;
 using Microsoft.SemanticKernel.Plugins.Web.Google;
+
+using PromptEnhancer.Models;
 
 namespace PromptEnhancer.Search
 {

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using PromptEnhancer.Models.Configurations;
+﻿using PromptEnhancer.Models.Configurations;
 
 namespace DemoApp.Models
 {

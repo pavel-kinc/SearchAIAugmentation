@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+
 using PromptEnhancer.CustomAttributes;
-using System.Reflection;
 
 namespace PromptEnhancer.CustomJsonResolver
 {
@@ -13,7 +13,9 @@ namespace PromptEnhancer.CustomJsonResolver
                 .Where(p =>
                 {
                     if (string.IsNullOrEmpty(p.PropertyName))
+                    {
                         return true;
+                    }
 
                     var propInfo = type.GetProperty(p.PropertyName);
                     return propInfo == null || !propInfo.IsDefined(typeof(SensitiveAttribute), true);

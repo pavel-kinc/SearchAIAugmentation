@@ -1,15 +1,13 @@
 using DemoApp.Models;
 using DemoApp.Services;
+
 using Mapster;
+
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Configuration;
-using PromptEnhancer.Models;
-using PromptEnhancer.Models.Configurations;
-using PromptEnhancer.Search;
-using PromptEnhancer.SK;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Services;
 
 namespace DemoApp.Pages
@@ -35,7 +33,7 @@ namespace DemoApp.Pages
 
         public void OnGet()
         {
-           number++;
+            number++;
         }
 
         public IActionResult OnPostUpdateKernelConf()
