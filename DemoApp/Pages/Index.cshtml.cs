@@ -80,7 +80,7 @@ namespace DemoApp.Pages
         public async Task<IActionResult> OnPostProcessResultModel()
         {
             var config = _configurationService.GetConfiguration(true).Adapt<EnhancerConfiguration>();
-            ViewModel.ResultModel = await SemanticKernelManager.ProcessConfiguration(config);
+            ViewModel.ResultModel = await _enhancerService.ProcessConfiguration(config);
             return Page();
         }
 

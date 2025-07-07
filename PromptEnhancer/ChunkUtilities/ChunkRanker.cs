@@ -10,7 +10,7 @@ using AllMiniLmL6V2Sharp.Tokenizer;
 using System.Reflection;
 using AngleSharp.Dom;
 
-namespace PromptEnhancer.Search
+namespace PromptEnhancer.ChunkUtilities
 {
     public static class ChunkRanker
     {

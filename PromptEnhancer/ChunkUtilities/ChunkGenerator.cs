@@ -5,13 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using SemanticSlicer;
 
-namespace PromptEnhancer.Search
+namespace PromptEnhancer.ChunkUtilities
 {
     public static class ChunkGenerator
     {
         private static readonly Slicer SlicerInstance = new(new SlicerOptions
         {
-            MaxChunkTokenCount = 500,
+            MaxChunkTokenCount = 200,
             Separators = Separators.Text,
             StripHtml = false
         });
