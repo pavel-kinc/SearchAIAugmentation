@@ -1,5 +1,5 @@
 using DemoApp.Services;
-
+using DemoApp.Services.Interfaces;
 using PromptEnhancer.Extensions;
 
 namespace DemoApp
@@ -18,6 +18,7 @@ namespace DemoApp
             builder.Services.AddRazorPages();
 
             builder.Services.AddSingleton<IConfigurationSetupService, ConfigurationSetupService>();
+            builder.Services.AddSingleton<IEntrySetupService, EntrySetupService>();
 
             builder.Services.AddPromptEnhancer();
 

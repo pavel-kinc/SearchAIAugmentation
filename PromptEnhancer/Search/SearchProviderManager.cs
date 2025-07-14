@@ -2,6 +2,7 @@
 using Microsoft.SemanticKernel.Plugins.Web.Google;
 
 using PromptEnhancer.Models;
+using PromptEnhancer.Models.Enums;
 
 namespace PromptEnhancer.Search
 {

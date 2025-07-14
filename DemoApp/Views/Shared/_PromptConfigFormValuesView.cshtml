@@ -26,7 +26,7 @@
 
 <div class="mb-3">
     @Html.LabelFor(m => m.PromptConfiguration.TargetOutputLength,
-            new { @class = "form-label", title = "Approximate desired length of the generated output, in words." })
+            new { @class = "form-label", title = "Approximate desired length of the generated output (in words)." })
     @Html.TextBoxFor(m => m.PromptConfiguration.TargetOutputLength,
             new { @class = "form-control", type = "number" })
     @Html.ValidationMessageFor(m => m.PromptConfiguration.TargetOutputLength, "", new { @class = "text-danger" })

@@ -1,12 +1,11 @@
 using DemoApp.Models;
-using DemoApp.Services;
-
+using DemoApp.Services.Interfaces;
 using Mapster;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-
+using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Services;
 
@@ -17,23 +16,25 @@ namespace DemoApp.Pages
         private readonly ILogger<IndexModel> _logger;
 
         private readonly IConfigurationSetupService _configurationService;
+        private readonly IEntrySetupService _entrySetupService;
         private readonly IEnhancerService _enhancerService;
 
         [BindProperty]
-        public EnhancerConfiguratorViewModel ViewModel { get; set; } = new();
+        public EnhancerViewModel ViewModel { get; set; } = new();
+        [BindProperty]
+        public List<Entry> Entries { get; set; } = [];
 
-        private int number = 0;
-
-        public IndexModel(ILogger<IndexModel> logger, IConfiguration configuration, IConfigurationSetupService configurationService, IEnhancerService enhancerService)
+        public IndexModel(ILogger<IndexModel> logger, IConfiguration configuration, IConfigurationSetupService configurationService, IEnhancerService enhancerService, IEntrySetupService entrySetupService)
         {
             _logger = logger;
             _configurationService = configurationService;
             _enhancerService = enhancerService;
+            _entrySetupService = entrySetupService;
         }
 
         public void OnGet()
         {
-            number++;
+
         }
 
         public IActionResult OnPostUpdateKernelConf()
@@ -51,6 +52,12 @@ namespace DemoApp.Pages
         public IActionResult OnPostUpdatePromptConf()
         {
             _configurationService.UpdatePromptConfig(ViewModel.ConfigurationSetup.PromptConfiguration);
+            return Page();
+        }
+
+        public IActionResult OnPostUpdateEntry()
+        {
+            _entrySetupService.UpdateEntry(Entries);
             return Page();
         }
 
@@ -78,7 +85,8 @@ namespace DemoApp.Pages
         public async Task<IActionResult> OnPostProcessResultModel()
         {
             var config = _configurationService.GetConfiguration(true).Adapt<EnhancerConfiguration>();
-            ViewModel.ResultModel = await _enhancerService.ProcessConfiguration(config);
+            var entries = _entrySetupService.GetEntries();
+            ViewModel.ResultModel = await _enhancerService.ProcessConfiguration(config, entries);
             return Page();
         }
 
@@ -87,6 +95,7 @@ namespace DemoApp.Pages
             base.OnPageHandlerExecuted(context);
 
             ViewModel.ConfigurationSetup = _configurationService.GetConfiguration();
+            Entries = _entrySetupService.GetEntries().ToList();
         }
     }
 }

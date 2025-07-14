@@ -3,6 +3,7 @@ using PromptEnhancer.ChunkUtilities;
 using PromptEnhancer.CustomJsonResolver;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
+using PromptEnhancer.Models.Enums;
 using PromptEnhancer.Prompt;
 using PromptEnhancer.Search;
 using PromptEnhancer.SK;
@@ -55,7 +56,7 @@ namespace PromptEnhancer.Services
             return JsonConvert.DeserializeObject<EnhancerConfiguration>(json);
         }
 
-        public async Task<ResultModel?> ProcessConfiguration(EnhancerConfiguration config)
+        public async Task<ResultModel?> ProcessConfiguration(EnhancerConfiguration config, IEnumerable<Entry> entries)
         {
             var resultView = new ResultModel();
             var kernelData = config.KernelConfiguration;
@@ -63,11 +64,12 @@ namespace PromptEnhancer.Services
             var searchData = searchConf?.SearchProviderData;
             var promptConf = config.PromptConfiguration;
 
-            resultView.Query = searchConf?.QueryString;
+            resultView.Query = entries?.FirstOrDefault()?.QueryString;
 
             // will be needed to search by params/config
+            // refactor into pipeline
             var textSearch = SearchProviderManager.CreateTextSearch(searchData!)!;
-            var res = await SearchProviderManager.GetSearchResults(textSearch, searchConf!.QueryString!);
+            var res = await SearchProviderManager.GetSearchResults(textSearch, resultView.Query!);
             var searchResults = await res.Results.ToListAsync();
             var usedUrls = searchResults.Where(x => !string.IsNullOrEmpty(x.Link)).Select(x => x.Link!);
             //temporary

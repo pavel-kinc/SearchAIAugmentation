@@ -1,4 +1,4 @@
-﻿namespace PromptEnhancer.Models
+﻿namespace PromptEnhancer.Models.Enums
 {
     public enum AIProviderEnum
     {

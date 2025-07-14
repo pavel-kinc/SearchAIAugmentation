@@ -22,13 +22,6 @@
             <dt class="col-sm-4">@Html.LabelFor(m => m.KernelConfiguration.AIApiKey, new { @class = "mb-0 fw-semibold" })</dt>
             <dd class="col-sm-8">@Model.DemoAppConfigSetup.AIApiKeyFromInput</dd>
 
-            @* ── Search Configuration ── *@
-            @if (!string.IsNullOrWhiteSpace(Model.SearchConfiguration?.QueryString))
-            {
-                <dt class="col-sm-4">@Html.LabelFor(m => m.SearchConfiguration.QueryString, new { @class = "mb-0 fw-semibold" })</dt>
-                <dd class="col-sm-8">@Model.SearchConfiguration.QueryString</dd>
-            }
-
             <dt class="col-sm-4">@Html.LabelFor(m => m.SearchConfiguration.SearchProviderData.SearchApiKey, new { @class = "mb-0 fw-semibold" })</dt>
             <dd class="col-sm-8">@Model.DemoAppConfigSetup.SearchApiKeyFromInput</dd>
 

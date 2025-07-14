@@ -1,8 +1,7 @@
 ﻿using DemoApp.Models;
-
 using PromptEnhancer.Models.Configurations;
 
-namespace DemoApp.Services
+namespace DemoApp.Services.Interfaces
 {
     public interface IConfigurationSetupService
     {

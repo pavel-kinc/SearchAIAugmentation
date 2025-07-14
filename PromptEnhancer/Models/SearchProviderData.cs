@@ -1,4 +1,5 @@
 ﻿using PromptEnhancer.CustomAttributes;
+using PromptEnhancer.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace PromptEnhancer.Models

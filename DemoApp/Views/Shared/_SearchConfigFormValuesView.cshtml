@@ -1,4 +1,4 @@
-﻿@using PromptEnhancer.Models
+﻿@using PromptEnhancer.Models.Enums
 @model DemoApp.Models.ConfigurationSetup
 
 @{
@@ -7,12 +7,6 @@
                .Select(e => e.ToString())
                .ToList();
 }
-
-<div class="mb-3">
-    @Html.LabelFor(m => m.SearchConfiguration.QueryString, new { @class = "form-label", title = "The query string to send to the search provider." })
-    @Html.TextBoxFor(m => m.SearchConfiguration.QueryString, new { @class = "form-control" })
-    @Html.ValidationMessageFor(m => m.SearchConfiguration.QueryString, "", new { @class = "text-danger" })
-</div>
 
 <div class="mb-3">
     @Html.LabelFor(m => m.SearchConfiguration.SearchProviderData.SearchApiKey, new { @class = "form-label", title = "The API key used to authenticate with the search provider." })
