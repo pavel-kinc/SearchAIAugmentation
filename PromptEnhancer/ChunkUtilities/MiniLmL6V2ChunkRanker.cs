@@ -1,15 +1,22 @@
 ﻿using AllMiniLmL6V2Sharp;
 using AllMiniLmL6V2Sharp.Tokenizer;
+using PromptEnhancer.ChunkUtilities.Interfaces;
 using System.Reflection;
 
 namespace PromptEnhancer.ChunkUtilities
 {
-    public static class ChunkRanker
+    internal class MiniLmL6V2ChunkRanker : IChunkRanker
     {
-        private static readonly AllMiniLmL6V2Embedder _embedder = new(
+        private readonly AllMiniLmL6V2Embedder _embedder;
+
+        public MiniLmL6V2ChunkRanker()
+        {
+            _embedder = new(
             Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/model/model.onnx",
             new BertTokenizer(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/model/vocab.txt"));
-        public static string ExtractRelevantDataFromChunks(
+        }
+
+        public string ExtractRelevantDataFromChunks(
         IList<string> chunks,
         string query,
         int top = 4)

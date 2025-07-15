@@ -6,5 +6,6 @@ namespace DemoApp.Services.Interfaces
     {
         IEnumerable<Entry> GetEntries();
         void UpdateEntry(IEnumerable<Entry> entries);
+        public void AddEntry(Entry entry);
     }
 }

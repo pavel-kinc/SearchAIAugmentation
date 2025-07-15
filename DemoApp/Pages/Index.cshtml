@@ -2,7 +2,7 @@
 @model IndexModel
 
 @{
-    if(Model.Entries.Count == 0)
+    if (Model.Entries.Count == 0)
     {
         Model.Entries.Add(new PromptEnhancer.Models.Entry());
     }
@@ -13,7 +13,7 @@
             };
 }
 
-<h2 class="mb-3">Configuration Setup</h2>
+<h2 class="mb-3">Enhancer Setup</h2>
 
 <ul class="nav nav-tabs mb-2" id="configTabs">
     <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#overview">Overview</a></li>
@@ -67,20 +67,26 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const hash = window.location.hash;
-        if (hash) {
-            const tabTrigger = document.querySelector(`a[href="${hash}"]`);
-            if (tabTrigger) {
-                new bootstrap.Tab(tabTrigger).show();
+        const tabLinks = document.querySelectorAll('#configTabs a[data-bs-toggle="tab"]');
+        const activeTab = localStorage.getItem('activeTab');
+
+        if (activeTab) {
+            const activeTabElement = document.querySelector(`a[href="${activeTab}"]`);
+            if (activeTabElement) {
+                new bootstrap.Tab(activeTabElement).show();
             }
         } else {
-            const firstTab = document.querySelector('#configTabs a[data-bs-toggle="tab"]');
-            if (firstTab) new bootstrap.Tab(firstTab).show();
+            const firstTab = tabLinks[0];
+            if (firstTab) {
+                new bootstrap.Tab(firstTab).show();
+            }
         }
 
-        document.querySelectorAll('#configTabs a[data-bs-toggle="tab"]').forEach(tab => {
+        tabLinks.forEach(tab => {
             tab.addEventListener('shown.bs.tab', e => {
-                history.replaceState(null, null, e.target.getAttribute('href'));
+                const href = e.target.getAttribute('href');
+                localStorage.setItem('activeTab', href);
+                window.history.replaceState(null, null, href);
             });
         });
     });

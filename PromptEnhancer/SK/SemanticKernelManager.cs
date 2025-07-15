@@ -1,25 +1,25 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
 
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
+using PromptEnhancer.SK.Interfaces;
 
 namespace PromptEnhancer.SK
 {
-    public static class SemanticKernelManager
+    public class SemanticKernelManager : ISemanticKernelManager
     {
-        public static int MaxPromptLength = 3000;
-        public static Kernel? CreateKernel(KernelConfiguration kernelData)
+        private readonly int MaxPromptLength = 3000;
+        public Kernel? CreateKernel(KernelConfiguration kernelData)
         {
             if (kernelData.Provider == AIProviderEnum.OpenAI)
             {
                 IKernelBuilder kernelBuilder = Kernel.CreateBuilder();
                 kernelBuilder.AddOpenAIChatCompletion(
-                        modelId: kernelData.Model,
-                        apiKey: kernelData.AIApiKey);
+                        modelId: kernelData.Model!,
+                        apiKey: kernelData.AIApiKey!);
                 Kernel kernel = kernelBuilder.Build();
                 return kernel;
             }
@@ -28,8 +28,8 @@ namespace PromptEnhancer.SK
                 IKernelBuilder kernelBuilder = Kernel.CreateBuilder();
 #pragma warning disable SKEXP0070
                 kernelBuilder.AddGoogleAIGeminiChatCompletion(
-                        modelId: kernelData.Model,
-                        apiKey: kernelData.AIApiKey);
+                        modelId: kernelData.Model!,
+                        apiKey: kernelData.AIApiKey!);
                 Kernel kernel = kernelBuilder.Build();
 #pragma warning restore SKEXP0070
                 return kernel;
@@ -37,7 +37,7 @@ namespace PromptEnhancer.SK
             return null;
         }
 
-        public async static Task<ChatCompletionResult> GetAICompletionResult(Kernel kernel, string prompt, int? maxPromptLength = null)
+        public async Task<ChatCompletionResult> GetAICompletionResult(Kernel kernel, string prompt, int? maxPromptLength = null)
         {
             if (prompt.Length > (maxPromptLength ?? MaxPromptLength))
             {

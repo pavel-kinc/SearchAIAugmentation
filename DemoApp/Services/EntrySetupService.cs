@@ -15,9 +15,17 @@ namespace DemoApp.Services
 
         public void UpdateEntry(IEnumerable<Entry> entries)
         {
-            if(entries is not null && entries.Any())
+            if (entries is not null && entries.Any())
             {
                 _entries = entries.ToList();
+            }
+        }
+
+        public void AddEntry(Entry entry)
+        {
+            if (entry is not null)
+            {
+                _entries.Add(entry);
             }
         }
     }

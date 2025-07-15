@@ -1,18 +1,20 @@
 ﻿using AngleSharp;
 using AngleSharp.Dom;
+using PromptEnhancer.Search.Interfaces;
 using System.Collections.Concurrent;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace PromptEnhancer.Search
 {
-    internal partial class SearchWebScraper
+    internal partial class SearchWebScraper : ISearchWebScraper
     {
+        private const int MinHtmlTextPartLength = 50;
+
         [GeneratedRegex(@"\s{2,}", RegexOptions.Compiled)]
         private static partial Regex NormalizeWhitespaceRegex();
 
-        private const int MinHtmlTextPartLength = 50;
-        internal static async Task<string> ScrapeDataFromUrlsAsync(IEnumerable<string> usedUrls)
+        public async Task<string> ScrapeDataFromUrlsAsync(IEnumerable<string> usedUrls)
         {
             if (!usedUrls.Any())
             {
@@ -33,7 +35,7 @@ namespace PromptEnhancer.Search
             return res;
         }
 
-        private static async Task<string> ScrapeUrlContent(IBrowsingContext context, string url)
+        private async Task<string> ScrapeUrlContent(IBrowsingContext context, string url)
         {
             var document = await context.OpenAsync(url);
             var sb = new StringBuilder();
@@ -56,7 +58,7 @@ namespace PromptEnhancer.Search
             return sb.ToString();
         }
 
-        private static string? Normalize(string text)
+        private string? Normalize(string text)
         {
             text = NormalizeWhitespaceRegex().Replace(text.Replace("\r", " ").Replace("\n", " "), " ");
             text = text.Trim();

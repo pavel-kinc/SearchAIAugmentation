@@ -1,18 +1,32 @@
 ﻿using Newtonsoft.Json;
-using PromptEnhancer.ChunkUtilities;
+using PromptEnhancer.ChunkUtilities.Interfaces;
 using PromptEnhancer.CustomJsonResolver;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
 using PromptEnhancer.Prompt;
-using PromptEnhancer.Search;
-using PromptEnhancer.SK;
+using PromptEnhancer.Search.Interfaces;
+using PromptEnhancer.SK.Interfaces;
 using System.Text;
 
 namespace PromptEnhancer.Services
 {
     public class EnhancerService : IEnhancerService
     {
+        private readonly ISemanticKernelManager _semanticKernelManager;
+        private readonly ISearchProviderManager _searchProviderManager;
+        private readonly ISearchWebScraper _searchWebScraper;
+        private readonly IChunkGenerator _chunkGenerator;
+        private readonly IChunkRanker _chunkRanker;
+
+        public EnhancerService(IChunkRanker chunkRanker, ISemanticKernelManager semanticKernelManager, ISearchProviderManager searchProviderManager, ISearchWebScraper searchWebScraper, IChunkGenerator chunkGenerator)
+        {
+            _chunkRanker = chunkRanker;
+            _semanticKernelManager = semanticKernelManager;
+            _searchProviderManager = searchProviderManager;
+            _searchWebScraper = searchWebScraper;
+            _chunkGenerator = chunkGenerator;
+        }
         public EnhancerConfiguration CreateDefaultConfiguration(string? aiApiKey = null, AIProviderEnum aiProvider = AIProviderEnum.OpenAI, string aiModel = "gpt-4o-mini", string? searchApiKey = null, SearchProviderEnum searchProvider = SearchProviderEnum.Google, string? searchEngine = null)
         {
             var enhancerConfiguration = new EnhancerConfiguration();
@@ -68,8 +82,8 @@ namespace PromptEnhancer.Services
 
             // will be needed to search by params/config
             // refactor into pipeline
-            var textSearch = SearchProviderManager.CreateTextSearch(searchData!)!;
-            var res = await SearchProviderManager.GetSearchResults(textSearch, resultView.Query!);
+            var textSearch = _searchProviderManager.CreateTextSearch(searchData!)!;
+            var res = await _searchProviderManager.GetSearchResults(textSearch, resultView.Query!);
             var searchResults = await res.Results.ToListAsync();
             var usedUrls = searchResults.Where(x => !string.IsNullOrEmpty(x.Link)).Select(x => x.Link!);
             //temporary
@@ -77,9 +91,9 @@ namespace PromptEnhancer.Services
             if (useScraper)
             {
                 //will be needed some specifications from config what to search for maybe?
-                var rawScrapedContent = await SearchWebScraper.ScrapeDataFromUrlsAsync(usedUrls);
-                var chunks = ChunkGenerator.GenerateChunksFromData(rawScrapedContent);
-                resultView.SearchResult = ChunkRanker.ExtractRelevantDataFromChunks(chunks, resultView.Query!);
+                var rawScrapedContent = await _searchWebScraper.ScrapeDataFromUrlsAsync(usedUrls);
+                var chunks = _chunkGenerator.GenerateChunksFromData(rawScrapedContent);
+                resultView.SearchResult = _chunkRanker.ExtractRelevantDataFromChunks(chunks, resultView.Query!);
             }
             else
             {
@@ -87,8 +101,8 @@ namespace PromptEnhancer.Services
                 resultView.SearchResult = string.Join('\n', searchResults.Select(x => x.Value));
             }
             resultView.Prompt = PromptUtility.BuildPrompt(resultView, promptConf);
-            var kernel = SemanticKernelManager.CreateKernel(kernelData!);
-            resultView.AIResult = await SemanticKernelManager.GetAICompletionResult(kernel!, resultView.Prompt);
+            var kernel = _semanticKernelManager.CreateKernel(kernelData!);
+            resultView.AIResult = await _semanticKernelManager.GetAICompletionResult(kernel!, resultView.Prompt);
             resultView.AIResult.UsedURLs = usedUrls;
             return resultView;
         }

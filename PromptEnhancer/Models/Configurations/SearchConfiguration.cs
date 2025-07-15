@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace PromptEnhancer.Models.Configurations
+﻿namespace PromptEnhancer.Models.Configurations
 {
     public class SearchConfiguration
     {
