@@ -1,38 +1,93 @@
-﻿@model PromptEnhancer.Models.ResultModel
-
-@if (!string.IsNullOrEmpty(Model?.SearchResult))
-{
-    <div>
-        <strong>Search Result:</strong> @Model.SearchResult
-    </div>
+﻿@model List<PromptEnhancer.Models.ResultModel>
+@{
+    var results = Model ?? new List<PromptEnhancer.Models.ResultModel>();
 }
-@if (!string.IsNullOrEmpty(Model?.Prompt))
-{
-    <div>
-        <strong>Prompt:</strong> @Model.Prompt
-    </div>
-}
-@if (!string.IsNullOrEmpty(Model?.AIResult?.AIOutput))
-{
-    <div>
-        <strong>Result of the AI:</strong> @Model.AIResult.AIOutput
-    </div>
-}
-@if (Model?.AIResult?.UsedURLs is not null)
-{
-    <div>
-        <strong>Sources:</strong>
-        <ul>
-            @foreach (var url in Model.AIResult.UsedURLs.Where(u => !string.IsNullOrWhiteSpace(u)))
+<div id="results-list">
+    @for (int i = 0; i < results.Count; i++)
+    {
+        <div class="result-item" style="display:@(i == 0 ? "block" : "none")">
+            <h3>Result @(i+1) of @results.Count</h3>
+            @if (!string.IsNullOrEmpty(results[i].SearchResult))
             {
-                <li><a href="@url" target="_blank" rel="noopener noreferrer">@url</a></li>
+                <div><strong>Search Result:</strong> @results[i].SearchResult</div>
             }
-        </ul>
-    </div>
-}
-@if (Model?.AIResult?.TokensUsed is not null)
-{
-    <div>
-        <strong>Total tokens used:</strong> @Model.AIResult.TokensUsed
-    </div>
-}
+            @if (!string.IsNullOrEmpty(results[i].Prompt))
+            {
+                <div><strong>Prompt:</strong> @results[i].Prompt</div>
+            }
+            @if (!string.IsNullOrEmpty(results[i].AIResult?.AIOutput))
+            {
+                <div><strong>Result of the AI:</strong> @results[i].AIResult?.AIOutput</div>
+            }
+            @if (results[i].AIResult?.UsedURLs is not null)
+            {
+                <div>
+                    <strong>Sources:</strong>
+                    <ul>
+                        @foreach (var url in results[i].AIResult!.UsedURLs!.Where(u => !string.IsNullOrWhiteSpace(u)))
+                        {
+                            <li><a href="@url" target="_blank" rel="noopener noreferrer">@url</a></li>
+                        }
+                    </ul>
+                </div>
+            }
+            @if (results[i].AIResult?.TokensUsed is not null)
+            {
+                <div><strong>Total tokens used:</strong> @results[i].AIResult!.TokensUsed</div>
+            }
+        </div>
+    }
+</div>
+
+<div id="paging-controls" style="margin-top:10px;">
+    <button id="prev-btn" disabled>Previous</button>
+    <span id="page-info">Page 1 of @results.Count</span>
+    <button id="next-btn" @(results.Count <= 1 ? "disabled" : "")>Next</button>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const resultItems = document.querySelectorAll('.result-item');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const pageInfo = document.getElementById('page-info');
+        let current = 0;
+        const total = resultItems.length;
+
+        function updateDisplay() {
+            resultItems.forEach((el, idx) => {
+                el.style.display = (idx === current) ? 'block' : 'none';
+            });
+            pageInfo.textContent = `Page ${current+1} of ${total}`;
+            prevBtn.disabled = current === 0;
+            nextBtn.disabled = current === total-1;
+        }
+
+        prevBtn.addEventListener('click', function () {
+            if (current > 0) {
+                current--;
+                updateDisplay();
+            }
+        });
+
+        nextBtn.addEventListener('click', function () {
+            if (current < total-1) {
+                current++;
+                updateDisplay();
+            }
+        });
+
+        // Optional: Keyboard navigation
+        document.addEventListener('keydown', function (e) {
+            if (e.key === "ArrowRight") {
+                nextBtn.click();
+            }
+            if (e.key === "ArrowLeft") {
+                prevBtn.click();
+            }
+        });
+
+        // Ensure correct initial state
+        updateDisplay();
+    });
+</script>

@@ -7,6 +7,7 @@ using PromptEnhancer.Models.Enums;
 using PromptEnhancer.Prompt;
 using PromptEnhancer.Search.Interfaces;
 using PromptEnhancer.SK.Interfaces;
+using System.Collections.Concurrent;
 using System.Text;
 
 namespace PromptEnhancer.Services
@@ -70,41 +71,52 @@ namespace PromptEnhancer.Services
             return JsonConvert.DeserializeObject<EnhancerConfiguration>(json);
         }
 
-        public async Task<ResultModel?> ProcessConfiguration(EnhancerConfiguration config, IEnumerable<Entry> entries)
+        public async Task<IList<ResultModel>> ProcessConfiguration(EnhancerConfiguration config, IEnumerable<Entry> entries)
         {
-            var resultView = new ResultModel();
+            
             var kernelData = config.KernelConfiguration;
             var searchConf = config.SearchConfiguration;
             var searchData = searchConf?.SearchProviderData;
             var promptConf = config.PromptConfiguration;
 
-            resultView.Query = entries?.FirstOrDefault()?.QueryString;
+            //change to list of results, deal with errors in result creation
 
             // will be needed to search by params/config
             // refactor into pipeline
-            var textSearch = _searchProviderManager.CreateTextSearch(searchData!)!;
-            var res = await _searchProviderManager.GetSearchResults(textSearch, resultView.Query!);
-            var searchResults = await res.Results.ToListAsync();
-            var usedUrls = searchResults.Where(x => !string.IsNullOrEmpty(x.Link)).Select(x => x.Link!);
-            //temporary
-            var useScraper = true;
-            if (useScraper)
-            {
-                //will be needed some specifications from config what to search for maybe?
-                var rawScrapedContent = await _searchWebScraper.ScrapeDataFromUrlsAsync(usedUrls);
-                var chunks = _chunkGenerator.GenerateChunksFromData(rawScrapedContent);
-                resultView.SearchResult = _chunkRanker.ExtractRelevantDataFromChunks(chunks, resultView.Query!);
-            }
-            else
-            {
-                //this uses snippets from search only
-                resultView.SearchResult = string.Join('\n', searchResults.Select(x => x.Value));
-            }
-            resultView.Prompt = PromptUtility.BuildPrompt(resultView, promptConf);
             var kernel = _semanticKernelManager.CreateKernel(kernelData!);
-            resultView.AIResult = await _semanticKernelManager.GetAICompletionResult(kernel!, resultView.Prompt);
-            resultView.AIResult.UsedURLs = usedUrls;
-            return resultView;
+            var textSearch = _searchProviderManager.CreateTextSearch(searchData!)!;
+
+            var cb = new ConcurrentBag<ResultModel>();
+
+            await Parallel.ForEachAsync(entries, async (entry, _) =>
+            {
+                var query = entry.QueryString!;
+                var resultView = new ResultModel();
+                var res = await _searchProviderManager.GetSearchResults(textSearch, query);
+                var searchResults = await res.Results.ToListAsync();
+                var usedUrls = searchResults.Where(x => !string.IsNullOrEmpty(x.Link)).Select(x => x.Link!);
+                //temporary
+                var useScraper = true;
+                if (useScraper)
+                {
+                    //will be needed some specifications from config what to search for maybe?
+                    var rawScrapedContent = await _searchWebScraper.ScrapeDataFromUrlsAsync(usedUrls);
+                    var chunks = _chunkGenerator.GenerateChunksFromData(rawScrapedContent);
+                    resultView.SearchResult = _chunkRanker.ExtractRelevantDataFromChunks(chunks, query);
+                }
+                else
+                {
+                    //this uses snippets from search only
+                    resultView.SearchResult = string.Join('\n', searchResults.Select(x => x.Value));
+                }
+                resultView.Prompt = PromptUtility.BuildPrompt(promptConf, query, resultView.SearchResult);
+                resultView.AIResult = await _semanticKernelManager.GetAICompletionResult(kernel!, resultView.Prompt);
+                resultView.AIResult.UsedURLs = usedUrls;
+                cb.Add(resultView);
+            });
+            
+            
+            return [.. cb];
         }
 
         private string GetConfigurationJson(EnhancerConfiguration configuration, bool hideSecrets = true)

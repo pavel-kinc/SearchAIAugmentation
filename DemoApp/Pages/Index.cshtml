@@ -2,10 +2,6 @@
 @model IndexModel
 
 @{
-    if (Model.Entries.Count == 0)
-    {
-        Model.Entries.Add(new PromptEnhancer.Models.Entry());
-    }
     ViewData["Title"] = "Home page";
     var prefixedViewData = new ViewDataDictionary(ViewData)
             {
@@ -50,10 +46,11 @@
     </div>
 
     <div class="tab-pane fade" id="entry">
-        <form method="post" asp-page-handler="UpdateEntry">
+        <form method="post" asp-page-handler="UpdateEntries">
             @await Html.PartialAsync("_EntriesFormValuesView", Model.Entries)
-            <button type="submit" class="btn btn-primary">Save Entry</button>
+            <button type="submit" class="btn btn-primary">Save Entries</button>
         </form>
+        @await Html.PartialAsync("_AddEntry", null)
     </div>
 </div>
 
@@ -62,8 +59,10 @@
     <button class="btn btn-success">Finish and Show Results</button>
 </form>
 
-
-@await Html.PartialAsync("_ResultView", Model.ViewModel.ResultModel)
+@if (Model.ViewModel.ResultModelList.Count > 0)
+{
+    @await Html.PartialAsync("_ResultView", Model.ViewModel.ResultModelList)
+}
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {

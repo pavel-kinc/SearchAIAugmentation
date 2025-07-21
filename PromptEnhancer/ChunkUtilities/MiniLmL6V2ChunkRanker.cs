@@ -19,7 +19,7 @@ namespace PromptEnhancer.ChunkUtilities
         public string ExtractRelevantDataFromChunks(
         IList<string> chunks,
         string query,
-        int top = 4)
+        int top = 5)
         {
             if (chunks == null || chunks.Count == 0 || string.IsNullOrEmpty(query))
             {

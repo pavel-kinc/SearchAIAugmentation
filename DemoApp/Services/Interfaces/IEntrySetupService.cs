@@ -5,7 +5,7 @@ namespace DemoApp.Services.Interfaces
     public interface IEntrySetupService
     {
         IEnumerable<Entry> GetEntries();
-        void UpdateEntry(IEnumerable<Entry> entries);
-        public void AddEntry(Entry entry);
+        void AddEntry(Entry entry);
+        void UpdateEntries(IEnumerable<Entry> entries);
     }
 }

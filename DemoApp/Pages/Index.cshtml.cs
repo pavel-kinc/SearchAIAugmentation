@@ -34,7 +34,11 @@ namespace DemoApp.Pages
 
         public void OnGet()
         {
-
+            var entries = _entrySetupService.GetEntries();
+            if (!entries.Any())
+            {
+                _entrySetupService.AddEntry(new Entry());
+            }
         }
 
         public IActionResult OnPostUpdateKernelConf()
@@ -55,9 +59,15 @@ namespace DemoApp.Pages
             return Page();
         }
 
-        public IActionResult OnPostUpdateEntry()
+        public IActionResult OnPostUpdateEntries()
         {
-            _entrySetupService.UpdateEntry(Entries);
+            _entrySetupService.UpdateEntries(Entries);
+            return Page();
+        }
+
+        public IActionResult OnPostAddEntry()
+        {
+            _entrySetupService.AddEntry(new Entry());
             return Page();
         }
 
@@ -86,7 +96,7 @@ namespace DemoApp.Pages
         {
             var config = _configurationService.GetConfiguration(true).Adapt<EnhancerConfiguration>();
             var entries = _entrySetupService.GetEntries();
-            ViewModel.ResultModel = await _enhancerService.ProcessConfiguration(config, entries);
+            ViewModel.ResultModelList = await _enhancerService.ProcessConfiguration(config, entries);
             return Page();
         }
 
