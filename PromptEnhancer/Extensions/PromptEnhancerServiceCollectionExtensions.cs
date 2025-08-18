@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using PromptEnhancer.ChunkUtilities;
 using PromptEnhancer.ChunkUtilities.Interfaces;
 using PromptEnhancer.Search;
 using PromptEnhancer.Search.Interfaces;
 using PromptEnhancer.Services;
+using PromptEnhancer.Services.Interfaces;
 using PromptEnhancer.SK;
 using PromptEnhancer.SK.Interfaces;
 
@@ -21,11 +23,11 @@ namespace PromptEnhancer.Extensions
 
         private static IServiceCollection AddInternalServices(this IServiceCollection services)
         {
-            services.AddTransient<IChunkGenerator, SemanticSlicerChunkGenerator>();
+            services.TryAddSingleton<IChunkGenerator, SemanticSlicerChunkGenerator>();
             services.AddSingleton<IChunkRanker, MiniLmL6V2ChunkRanker>();
-            services.AddTransient<ISearchProviderManager, SearchProviderManager>();
-            services.AddTransient<ISearchWebScraper, SearchWebScraper>();
-            services.AddTransient<ISemanticKernelManager, SemanticKernelManager>();
+            services.AddSingleton<ISearchProviderManager, SearchProviderManager>();
+            services.AddSingleton<ISearchWebScraper, SearchWebScraper>();
+            services.AddSingleton<ISemanticKernelManager, SemanticKernelManager>();
             return services;
         }
     }

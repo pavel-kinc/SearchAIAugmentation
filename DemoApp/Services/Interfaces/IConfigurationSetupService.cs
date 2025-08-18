@@ -10,5 +10,6 @@ namespace DemoApp.Services.Interfaces
         void UpdateSearchConfig(SearchConfiguration searchConfiguration);
         void UpdatePromptConfig(PromptConfiguration promptConfiguration);
         void UploadConfiguration(ConfigurationSetup configuration);
+        void ClearSession();
     }
 }

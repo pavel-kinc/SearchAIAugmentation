@@ -1,5 +1,7 @@
-﻿using PromptEnhancer.ChunkUtilities.Interfaces;
+﻿using Microsoft.SemanticKernel;
+using PromptEnhancer.ChunkUtilities.Interfaces;
 using SemanticSlicer;
+using System.ComponentModel;
 
 namespace PromptEnhancer.ChunkUtilities
 {
@@ -17,6 +19,8 @@ namespace PromptEnhancer.ChunkUtilities
             });
         }
 
+        [KernelFunction("generate_chunks_from_string")]
+        [Description("Generates chunks from string and returns List of strings")]
         public IList<string> GenerateChunksFromData(string rawText)
         {
             var documentChunks = _slicerInstance.GetDocumentChunks(rawText);

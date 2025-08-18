@@ -6,7 +6,7 @@
     @for (int i = 0; i < results.Count; i++)
     {
         <div class="result-item" style="display:@(i == 0 ? "block" : "none")">
-            <h3>Result @(i+1) of @results.Count</h3>
+            <h3>Result @(i + 1) of @results.Count</h3>
             @if (!string.IsNullOrEmpty(results[i].SearchResult))
             {
                 <div><strong>Search Result:</strong> @results[i].SearchResult</div>
@@ -17,7 +17,7 @@
             }
             @if (!string.IsNullOrEmpty(results[i].AIResult?.AIOutput))
             {
-                <div><strong>Result of the AI:</strong> @results[i].AIResult?.AIOutput</div>
+                <div><strong>Result of the AI:</strong> @results[i].AIResult!.AIOutput</div>
             }
             @if (results[i].AIResult?.UsedURLs is not null)
             {
@@ -39,55 +39,121 @@
     }
 </div>
 
-<div id="paging-controls" style="margin-top:10px;">
-    <button id="prev-btn" disabled>Previous</button>
-    <span id="page-info">Page 1 of @results.Count</span>
-    <button id="next-btn" @(results.Count <= 1 ? "disabled" : "")>Next</button>
-</div>
+@if (results.Count > 1)
+{
+    <div id="paging-controls" style="margin-top:10px;">
+        <button id="prev-btn" style="border:none;background:none;padding:0 6px;font-size:1.1em;line-height:1;cursor:pointer;">&lt</button>
+        <span id="page-buttons"></span>
+        <button id="next-btn" style="border:none;background:none;padding:0 6px;font-size:1.1em;line-height:1;cursor:pointer;">&gt</button>
+    </div>
+}
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        // Elements
         const resultItems = document.querySelectorAll('.result-item');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
-        const pageInfo = document.getElementById('page-info');
-        let current = 0;
+        const pageBtnsContainer = document.getElementById('page-buttons');
         const total = resultItems.length;
+        let current = 0;
+
+        // Utility: create one page button (Bootstrap styled)
+        function createPageBtn(pageIdx, isCurrent, text) {
+            const btn = document.createElement('button');
+            btn.textContent = text || (pageIdx + 1);
+            btn.className = 'btn btn-primary mx-1' + (isCurrent ? ' active' : '');
+            btn.disabled = isCurrent;
+            btn.setAttribute('data-page', pageIdx);
+            btn.style.minWidth = "44px";
+            return btn;
+        }
 
         function updateDisplay() {
+            // Show/hide result
             resultItems.forEach((el, idx) => {
                 el.style.display = (idx === current) ? 'block' : 'none';
             });
-            pageInfo.textContent = `Page ${current+1} of ${total}`;
+            // Prev/next enabled?
             prevBtn.disabled = current === 0;
-            nextBtn.disabled = current === total-1;
+            nextBtn.disabled = current === total - 1;
+
+            // Remove old page buttons
+            pageBtnsContainer.innerHTML = '';
+            let btns = [];
+
+            // --- Logic for which page buttons to show ---
+            let maxButtons = 5;
+            let lastIdx = total - 1;
+            let cutoff = Math.min(maxButtons - 1, lastIdx); // how many beside last
+
+            let pagesToShow = [];
+
+            // Always show current page and up to 3 after it
+            let startPage = current;
+            let endPage = Math.min(startPage + 3, lastIdx);
+
+            for (let i = startPage; i <= endPage; ++i) {
+                pagesToShow.push(i);
+            }
+
+            // Always show last page if not already in pagesToShow
+            if (!pagesToShow.includes(lastIdx)) {
+                pagesToShow.push(lastIdx);
+            }
+
+            // If current page is not 0, but buttons would be less than max, show previous pages
+            while (pagesToShow.length < maxButtons && pagesToShow[0] > 0) {
+                pagesToShow.unshift(pagesToShow[0] - 1);
+            }
+
+            // Render page buttons
+            for (let i = 0; i < pagesToShow.length; i++) {
+                let pageIdx = pagesToShow[i];
+                let isCurrent = pageIdx === current;
+                // If there's a gap, show ellipsis before last page
+                if (i > 0 && pagesToShow[i] !== pagesToShow[i - 1] + 1) {
+                    let span = document.createElement('span');
+                    span.textContent = '...';
+                    span.style.padding = "0 2px";
+                    pageBtnsContainer.appendChild(span);
+                }
+                pageBtnsContainer.appendChild(createPageBtn(pageIdx, isCurrent));
+            }
         }
+
+        // --- Events ---
+        pageBtnsContainer.addEventListener('click', function (e) {
+            const btn = e.target.closest('button[data-page]');
+            if (!btn) return;
+            const pageIdx = Number(btn.getAttribute('data-page'));
+            if (!isNaN(pageIdx)) {
+                current = pageIdx;
+                updateDisplay();
+            }
+        });
 
         prevBtn.addEventListener('click', function () {
             if (current > 0) {
-                current--;
+                current -= 1;
                 updateDisplay();
             }
         });
 
         nextBtn.addEventListener('click', function () {
-            if (current < total-1) {
-                current++;
+            if (current < total - 1) {
+                current += 1;
                 updateDisplay();
             }
         });
 
-        // Optional: Keyboard navigation
+        // Keyboard navigation (optional)
         document.addEventListener('keydown', function (e) {
-            if (e.key === "ArrowRight") {
-                nextBtn.click();
-            }
-            if (e.key === "ArrowLeft") {
-                prevBtn.click();
-            }
+            if (e.key === "ArrowRight" && current < total - 1) nextBtn.click();
+            if (e.key === "ArrowLeft" && current > 0) prevBtn.click();
         });
 
-        // Ensure correct initial state
+        // Initial render
         updateDisplay();
     });
 </script>

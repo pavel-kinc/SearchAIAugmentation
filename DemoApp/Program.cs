@@ -16,8 +16,15 @@ namespace DemoApp
 
             // Add services to the container.
             builder.Services.AddRazorPages();
-
-            builder.Services.AddSingleton<IConfigurationSetupService, ConfigurationSetupService>();
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddDataProtection();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromHours(2);
+                options.Cookie.IsEssential = true;
+            });
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<IConfigurationSetupService, ConfigurationSetupService>();
             builder.Services.AddSingleton<IEntrySetupService, EntrySetupService>();
 
             builder.Services.AddPromptEnhancer();
@@ -35,7 +42,7 @@ namespace DemoApp
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
+            app.UseSession();
             app.UseRouting();
 
             app.UseAuthorization();

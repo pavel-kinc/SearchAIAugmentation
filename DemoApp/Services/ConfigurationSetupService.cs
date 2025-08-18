@@ -1,72 +1,110 @@
 ﻿using DemoApp.Models;
 using DemoApp.Services.Interfaces;
+using DemoApp.SessionUtility;
 using Mapster;
-
-using PromptEnhancer.ConfigurationHelper;
+using Newtonsoft.Json;
+using PromptEnhancer.CustomJsonResolver;
 using PromptEnhancer.Models.Configurations;
-using PromptEnhancer.Services;
+using PromptEnhancer.Services.Interfaces;
 
 namespace DemoApp.Services
 {
     public class ConfigurationSetupService : IConfigurationSetupService
     {
-        private ConfigurationSetup _enhancerConfig;
-
         private readonly IEnhancerService _enhancerService;
 
         private readonly IConfiguration _configuration;
 
-        public ConfigurationSetupService(IConfiguration configuration, IEnhancerService enhancerService)
+        private readonly ISession _session;
+
+        private const string SessionPrefix = "Config.";
+
+        public ConfigurationSetupService(IConfiguration configuration, IEnhancerService enhancerService, IHttpContextAccessor ctx)
         {
-            _configuration = configuration;
+            
+           _configuration = configuration;
             _enhancerService = enhancerService;
-            _enhancerConfig = GetDefaultConfiguration();
+            _session = ctx.HttpContext!.Session;
+            if (!_session.Keys.Any(k => k.StartsWith(SessionPrefix)))
+            {
+                var config = GetDefaultConfiguration();
+                SetConfigurationSetup(config);
+            }
         }
 
         public ConfigurationSetup GetConfiguration(bool withSecrets = false)
         {
-            var config = _enhancerConfig.Adapt<ConfigurationSetup>();
+            var config = new ConfigurationSetup
+            {
+                KernelConfiguration = _session.GetObjectFromJson<KernelConfiguration>(SessionPrefix + nameof(KernelConfiguration))!,
+                SearchConfiguration = _session.GetObjectFromJson<SearchConfiguration>(SessionPrefix + nameof(SearchConfiguration))!,
+                PromptConfiguration = _session.GetObjectFromJson<PromptConfiguration>(SessionPrefix + nameof(PromptConfiguration))!,
+                DemoAppConfigSetup = _session.GetObjectFromJson<DemoAppConfigSetup>(SessionPrefix + nameof(DemoAppConfigSetup))!,
+            };
+
             if (!withSecrets)
             {
-                SensitiveDataResolver.HideSensitiveProperties(config);
+                var serialized = JsonConvert.SerializeObject(config, new JsonSerializerSettings
+                {
+                    ContractResolver = new SensitiveContractResolver()
+                });
+                config = JsonConvert.DeserializeObject<ConfigurationSetup>(serialized);
+
             }
-            return config;
+
+            return config!;
         }
 
         public void UpdateKernelConfig(KernelConfiguration kernelConfiguration)
         {
+            var kernelConfig = _session.GetObjectFromJson<KernelConfiguration>(SessionPrefix + nameof(KernelConfiguration));
+            var demoAppConfig = _session.GetObjectFromJson<DemoAppConfigSetup>(SessionPrefix + nameof(DemoAppConfigSetup));
             if (kernelConfiguration.AIApiKey is not null)
             {
-                _enhancerConfig.DemoAppConfigSetup.AIApiKeyFromInput = GetLoadedFromString(true, _enhancerConfig.KernelConfiguration.Provider.ToString());
+                demoAppConfig!.AIApiKeyFromInput = GetLoadedFromString(true, kernelConfig!.Provider.ToString());
             }
-            kernelConfiguration.AIApiKey ??= _enhancerConfig.KernelConfiguration.AIApiKey;
-            _enhancerConfig.KernelConfiguration = kernelConfiguration;
+            kernelConfiguration.AIApiKey ??= kernelConfig!.AIApiKey;
+            _session.SetObjectAsJson(SessionPrefix + nameof(KernelConfiguration), kernelConfiguration);
         }
 
         public void UpdateSearchConfig(SearchConfiguration searchConfiguration)
         {
+            var searchConfig = _session.GetObjectFromJson<SearchConfiguration>(SessionPrefix + nameof(SearchConfiguration));
+            var demoAppConfig = _session.GetObjectFromJson<DemoAppConfigSetup>(SessionPrefix + nameof(DemoAppConfigSetup));
             if (searchConfiguration.SearchProviderData.SearchApiKey is not null)
             {
-                _enhancerConfig.DemoAppConfigSetup.SearchApiKeyFromInput = GetLoadedFromString(true, _enhancerConfig.SearchConfiguration.SearchProviderData.Provider.ToString());
+                demoAppConfig!.SearchApiKeyFromInput = GetLoadedFromString(true, searchConfig!.SearchProviderData.Provider.ToString());
             }
             if (searchConfiguration.SearchProviderData.Engine is not null)
             {
-                _enhancerConfig.DemoAppConfigSetup.SearchEngineFromInput = GetLoadedFromString(true, _enhancerConfig.SearchConfiguration.SearchProviderData.Provider.ToString());
+                demoAppConfig!.SearchEngineFromInput = GetLoadedFromString(true, searchConfig!.SearchProviderData.Provider.ToString());
             }
-            searchConfiguration.SearchProviderData.SearchApiKey ??= _enhancerConfig.SearchConfiguration.SearchProviderData.SearchApiKey;
-            searchConfiguration.SearchProviderData.Engine ??= _enhancerConfig.SearchConfiguration.SearchProviderData.Engine;
-            _enhancerConfig.SearchConfiguration = searchConfiguration;
+            searchConfiguration.SearchProviderData.SearchApiKey ??= searchConfig!.SearchProviderData.SearchApiKey;
+            searchConfiguration.SearchProviderData.Engine ??= searchConfig!.SearchProviderData.Engine;
+            _session.SetObjectAsJson(SessionPrefix + nameof(SearchConfiguration), searchConfiguration);
+        }
+
+        public void UpdatePromptConfig(PromptConfiguration promptConfiguration)
+        {
+            var promptConfig = _session.GetObjectFromJson<PromptConfiguration>(SessionPrefix + nameof(PromptConfiguration));
+            _session.SetObjectAsJson(SessionPrefix + nameof(PromptConfiguration), promptConfiguration);
         }
 
         public void UpdateDemoAppConfig(DemoAppConfigSetup demoAppConfigSetup)
         {
-            _enhancerConfig.DemoAppConfigSetup = demoAppConfigSetup;
+            var demoAppConfig = _session.GetObjectFromJson<DemoAppConfigSetup>(SessionPrefix + nameof(DemoAppConfigSetup));
+            _session.SetObjectAsJson(SessionPrefix + nameof(SearchConfiguration), demoAppConfigSetup);
         }
 
         public void UploadConfiguration(ConfigurationSetup configuration)
         {
-            _enhancerConfig = configuration;
-            SetDefaultDemoAppConfig(_enhancerConfig);
+            SetDefaultDemoAppConfig(configuration);
+            SetConfigurationSetup(configuration);
+        }
+
+        public void ClearSession()
+        {
+            _session.Clear();
         }
 
         private ConfigurationSetup GetDefaultConfiguration()
@@ -86,15 +124,18 @@ namespace DemoApp.Services
             configSetup.DemoAppConfigSetup.SearchEngineFromInput = GetLoadedFromString(configSetup.SearchConfiguration.SearchProviderData.Engine is not null ? false : null, searchProvider);
         }
 
+        private void SetConfigurationSetup(ConfigurationSetup configSetup)
+        {
+            _session.SetObjectAsJson(SessionPrefix + nameof(KernelConfiguration), configSetup.KernelConfiguration);
+            _session.SetObjectAsJson(SessionPrefix + nameof(SearchConfiguration), configSetup.SearchConfiguration);
+            _session.SetObjectAsJson(SessionPrefix + nameof(PromptConfiguration), configSetup.PromptConfiguration);
+            _session.SetObjectAsJson(SessionPrefix + nameof(DemoAppConfigSetup), configSetup.DemoAppConfigSetup);
+        }
+
         private string GetLoadedFromString(bool? loadedFromInput, string? provider)
         {
             var loadedText = loadedFromInput is null ? "not loaded" : (((bool)loadedFromInput ? "loaded from input" : "loaded from configuration") + $" for provider {provider ?? "No Provider was chosen"}");
             return $"This key is currently {loadedText}.";
-        }
-
-        public void UpdatePromptConfig(PromptConfiguration promptConfiguration)
-        {
-            _enhancerConfig.PromptConfiguration = promptConfiguration;
         }
     }
 }

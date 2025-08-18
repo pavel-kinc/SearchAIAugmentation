@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
-using PromptEnhancer.Services;
+using PromptEnhancer.Services.Interfaces;
 
 namespace DemoApp.Pages
 {
@@ -94,9 +94,11 @@ namespace DemoApp.Pages
 
         public async Task<IActionResult> OnPostProcessResultModel()
         {
+            //_configurationService.ClearSession();
             var config = _configurationService.GetConfiguration(true).Adapt<EnhancerConfiguration>();
             var entries = _entrySetupService.GetEntries();
             ViewModel.ResultModelList = await _enhancerService.ProcessConfiguration(config, entries);
+            //ViewModel.ResultModelList = [new(), new(), new(), new(), new(), new(), new(), new(), new(), new()];
             return Page();
         }
 

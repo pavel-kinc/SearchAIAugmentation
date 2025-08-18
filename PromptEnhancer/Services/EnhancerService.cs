@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Newtonsoft.Json;
+using PromptEnhancer.ChunkUtilities;
 using PromptEnhancer.ChunkUtilities.Interfaces;
 using PromptEnhancer.CustomJsonResolver;
 using PromptEnhancer.Models;
@@ -6,9 +9,12 @@ using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
 using PromptEnhancer.Prompt;
 using PromptEnhancer.Search.Interfaces;
+using PromptEnhancer.Services.Interfaces;
+using PromptEnhancer.SK;
 using PromptEnhancer.SK.Interfaces;
 using System.Collections.Concurrent;
 using System.Text;
+using System.Net.WebSockets;
 
 namespace PromptEnhancer.Services
 {
@@ -84,6 +90,34 @@ namespace PromptEnhancer.Services
             // will be needed to search by params/config
             // refactor into pipeline
             var kernel = _semanticKernelManager.CreateKernel(kernelData!);
+            _semanticKernelManager.AddPluginToSemanticKernel<SemanticSlicerChunkGenerator>(kernel!);
+            kernel!.Plugins.TryGetPlugin(typeof(SemanticSlicerChunkGenerator).Name, out var plugin);
+            //var service = kernel.GetRequiredService<IChunkGenerator>();
+
+            OpenAIPromptExecutionSettings settings = new()
+            {
+                FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
+            };
+
+            
+
+            var prompt = "{{SemanticSlicerChunkGenerator.generate_chunks_from_string $rawText}}";
+            var arg = "Multiple Implementations: If there are multiple implementations of generate_chunks_from_string, ensure that the correct one is invoked by specifying the appropriate function name or handling the selection logic.\n\nError Handling: Implement robust error handling to manage scenarios where the function might not be available or the invocation fails.\n\nFunction Signatures: Ensure that the function signatures match the expected parameters to avoid runtime errors.";
+            var c = new PromptTemplateConfig
+            {
+                Template = prompt,
+                TemplateFormat = PromptTemplateConfig.SemanticKernelTemplateFormat,
+                Name = "ChunkGenTemplate"
+            };
+            var factory = new KernelPromptTemplateFactory();
+            var b = factory.TryCreate(c, out var promptTemplate);
+            var rendered = await promptTemplate.RenderAsync(kernel, new KernelArguments { { "rawText", arg } });
+            var res = await kernel.InvokePromptAsync(prompt, new KernelArguments{ { "rawText", arg } });
+            //var result = await kernel.InvokeAsync(typeof(SemanticSlicerChunkGenerator).Name, "generate_chunks_from_string", new KernelArguments{ { "rawText", arg } });
+            //var result2 = await kernel.InvokePromptAsync($"Generate chunks from this string and return only list of strings: {arg}", new(settings));
+            //var val1 = result.GetValue<IList<string>>();
+            //var val = result2.GetValue<string>();
+            var val = res.GetValue<string>();
             var textSearch = _searchProviderManager.CreateTextSearch(searchData!)!;
 
             var cb = new ConcurrentBag<ResultModel>();
@@ -110,7 +144,7 @@ namespace PromptEnhancer.Services
                     resultView.SearchResult = string.Join('\n', searchResults.Select(x => x.Value));
                 }
                 resultView.Prompt = PromptUtility.BuildPrompt(promptConf, query, resultView.SearchResult);
-                resultView.AIResult = await _semanticKernelManager.GetAICompletionResult(kernel!, resultView.Prompt);
+                //resultView.AIResult = await _semanticKernelManager.GetAICompletionResult(kernel!, resultView.Prompt);
                 resultView.AIResult.UsedURLs = usedUrls;
                 cb.Add(resultView);
             });

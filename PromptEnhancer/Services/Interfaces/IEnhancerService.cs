@@ -2,7 +2,7 @@
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
 
-namespace PromptEnhancer.Services
+namespace PromptEnhancer.Services.Interfaces
 {
     public interface IEnhancerService
     {
