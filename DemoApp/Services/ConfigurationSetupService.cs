@@ -21,8 +21,7 @@ namespace DemoApp.Services
 
         public ConfigurationSetupService(IConfiguration configuration, IEnhancerService enhancerService, IHttpContextAccessor ctx)
         {
-            
-           _configuration = configuration;
+            _configuration = configuration;
             _enhancerService = enhancerService;
             _session = ctx.HttpContext!.Session;
             if (!_session.Keys.Any(k => k.StartsWith(SessionPrefix)))
@@ -59,29 +58,24 @@ namespace DemoApp.Services
         {
             var kernelConfig = _session.GetObjectFromJson<KernelConfiguration>(SessionPrefix + nameof(KernelConfiguration));
             var demoAppConfig = _session.GetObjectFromJson<DemoAppConfigSetup>(SessionPrefix + nameof(DemoAppConfigSetup));
-            if (kernelConfiguration.AIApiKey is not null)
-            {
-                demoAppConfig!.AIApiKeyFromInput = GetLoadedFromString(true, kernelConfig!.Provider.ToString());
-            }
+
+            demoAppConfig!.AIApiKeyFromInput = kernelConfiguration.AIApiKey is not null ? GetLoadedFromString(true, kernelConfig?.Provider.ToString()) : demoAppConfig!.AIApiKeyFromInput;
+
             kernelConfiguration.AIApiKey ??= kernelConfig!.AIApiKey;
-            _session.SetObjectAsJson(SessionPrefix + nameof(KernelConfiguration), kernelConfiguration);
+            SetSessionPartialConfigAndDemoAppConfig(nameof(KernelConfiguration), kernelConfiguration, demoAppConfig);
         }
 
         public void UpdateSearchConfig(SearchConfiguration searchConfiguration)
         {
             var searchConfig = _session.GetObjectFromJson<SearchConfiguration>(SessionPrefix + nameof(SearchConfiguration));
             var demoAppConfig = _session.GetObjectFromJson<DemoAppConfigSetup>(SessionPrefix + nameof(DemoAppConfigSetup));
-            if (searchConfiguration.SearchProviderData.SearchApiKey is not null)
-            {
-                demoAppConfig!.SearchApiKeyFromInput = GetLoadedFromString(true, searchConfig!.SearchProviderData.Provider.ToString());
-            }
-            if (searchConfiguration.SearchProviderData.Engine is not null)
-            {
-                demoAppConfig!.SearchEngineFromInput = GetLoadedFromString(true, searchConfig!.SearchProviderData.Provider.ToString());
-            }
+
+            demoAppConfig!.SearchApiKeyFromInput = searchConfiguration.SearchProviderData.SearchApiKey is not null ? GetLoadedFromString(true, searchConfig?.SearchProviderData.Provider.ToString()) : demoAppConfig.SearchApiKeyFromInput;
+            demoAppConfig!.SearchEngineFromInput = searchConfiguration.SearchProviderData.Engine is not null ? GetLoadedFromString(true, searchConfig?.SearchProviderData.Provider.ToString()) : demoAppConfig.SearchEngineFromInput;
+
             searchConfiguration.SearchProviderData.SearchApiKey ??= searchConfig!.SearchProviderData.SearchApiKey;
             searchConfiguration.SearchProviderData.Engine ??= searchConfig!.SearchProviderData.Engine;
-            _session.SetObjectAsJson(SessionPrefix + nameof(SearchConfiguration), searchConfiguration);
+            SetSessionPartialConfigAndDemoAppConfig(nameof(SearchConfiguration), searchConfiguration, demoAppConfig);
         }
 
         public void UpdatePromptConfig(PromptConfiguration promptConfiguration)
@@ -105,6 +99,17 @@ namespace DemoApp.Services
         public void ClearSession()
         {
             _session.Clear();
+            var config = GetDefaultConfiguration();
+            SetConfigurationSetup(config);
+        }
+
+        public void SetSessionPartialConfigAndDemoAppConfig(string configName, object partialConfig, object? demoAppConfig)
+        {
+            _session.SetObjectAsJson(SessionPrefix + configName, partialConfig);
+            if (demoAppConfig is not null)
+            {
+                _session.SetObjectAsJson(SessionPrefix + nameof(DemoAppConfigSetup), demoAppConfig);
+            }
         }
 
         private ConfigurationSetup GetDefaultConfiguration()

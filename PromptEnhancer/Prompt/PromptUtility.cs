@@ -1,5 +1,4 @@
-﻿using PromptEnhancer.Models;
-using PromptEnhancer.Models.Configurations;
+﻿using PromptEnhancer.Models.Configurations;
 
 namespace PromptEnhancer.Prompt
 {

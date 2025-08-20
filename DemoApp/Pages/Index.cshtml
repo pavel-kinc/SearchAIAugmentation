@@ -55,9 +55,14 @@
 </div>
 
 <hr />
-<form method="post" asp-page-handler="ProcessResultModel">
-    <button class="btn btn-success">Finish and Show Results</button>
-</form>
+<div class="d-flex gap-3">
+    <form method="post" asp-page-handler="ProcessResultModel">
+        <button class="btn btn-success">Finish and Show Results</button>
+    </form>
+    <form method="post" asp-page-handler="ClearSession">
+        <button class="btn btn-danger">Reset Setup</button>
+    </form>
+</div>
 
 @if (Model.ViewModel.ResultModelList.Count > 0)
 {

@@ -102,6 +102,13 @@ namespace DemoApp.Pages
             return Page();
         }
 
+        public IActionResult OnPostClearSession()
+        {
+            _configurationService.ClearSession();
+            _entrySetupService.AddEntry(new Entry());
+            return Page();
+        }
+
         public override void OnPageHandlerExecuted(PageHandlerExecutedContext context)
         {
             base.OnPageHandlerExecuted(context);

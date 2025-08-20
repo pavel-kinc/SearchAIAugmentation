@@ -25,7 +25,7 @@ namespace DemoApp
             });
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<IConfigurationSetupService, ConfigurationSetupService>();
-            builder.Services.AddSingleton<IEntrySetupService, EntrySetupService>();
+            builder.Services.AddScoped<IEntrySetupService, EntrySetupService>();
 
             builder.Services.AddPromptEnhancer();
 

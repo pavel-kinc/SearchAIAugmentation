@@ -16,7 +16,7 @@ namespace PromptEnhancer.Extensions
         public static IServiceCollection AddPromptEnhancer(this IServiceCollection services, ServiceLifetime lifetime = ServiceLifetime.Singleton)
         {
             var descriptor = new ServiceDescriptor(typeof(IEnhancerService), typeof(EnhancerService), lifetime);
-            services.Add(descriptor);
+            services.TryAdd(descriptor);
             services.AddInternalServices();
             return services;
         }
@@ -24,10 +24,10 @@ namespace PromptEnhancer.Extensions
         private static IServiceCollection AddInternalServices(this IServiceCollection services)
         {
             services.TryAddSingleton<IChunkGenerator, SemanticSlicerChunkGenerator>();
-            services.AddSingleton<IChunkRanker, MiniLmL6V2ChunkRanker>();
-            services.AddSingleton<ISearchProviderManager, SearchProviderManager>();
-            services.AddSingleton<ISearchWebScraper, SearchWebScraper>();
-            services.AddSingleton<ISemanticKernelManager, SemanticKernelManager>();
+            services.TryAddSingleton<IChunkRanker, MiniLmL6V2ChunkRanker>();
+            services.TryAddSingleton<ISearchProviderManager, SearchProviderManager>();
+            services.TryAddSingleton<ISearchWebScraper, SearchWebScraper>();
+            services.TryAddSingleton<ISemanticKernelManager, SemanticKernelManager>();
             return services;
         }
     }
