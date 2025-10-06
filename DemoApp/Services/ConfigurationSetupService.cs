@@ -21,6 +21,8 @@ namespace DemoApp.Services
 
         public ConfigurationSetupService(IConfiguration configuration, IEnhancerService enhancerService, IHttpContextAccessor ctx)
         {
+            
+            
             _configuration = configuration;
             _enhancerService = enhancerService;
             _session = ctx.HttpContext!.Session;

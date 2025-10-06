@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.SemanticKernel;
 using PromptEnhancer.ChunkUtilities;
 using PromptEnhancer.ChunkUtilities.Interfaces;
 using PromptEnhancer.Search;
@@ -23,6 +24,7 @@ namespace PromptEnhancer.Extensions
 
         private static IServiceCollection AddInternalServices(this IServiceCollection services)
         {
+            services.AddInMemoryVectorStore();
             services.TryAddSingleton<IChunkGenerator, SemanticSlicerChunkGenerator>();
             services.TryAddSingleton<IChunkRanker, MiniLmL6V2ChunkRanker>();
             services.TryAddSingleton<ISearchProviderManager, SearchProviderManager>();

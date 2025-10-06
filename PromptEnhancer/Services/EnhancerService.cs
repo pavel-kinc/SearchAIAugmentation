@@ -1,4 +1,6 @@
-﻿using Microsoft.SemanticKernel;
+﻿using Microsoft.Extensions.AI;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Connectors.InMemory;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Newtonsoft.Json;
 using PromptEnhancer.ChunkUtilities;
@@ -99,6 +101,7 @@ namespace PromptEnhancer.Services
 
 
 
+
             var prompt = "{{SemanticSlicerChunkGenerator.generate_chunks_from_string $rawText}}";
             var arg = "Multiple Implementations: If there are multiple implementations of generate_chunks_from_string, ensure that the correct one is invoked by specifying the appropriate function name or handling the selection logic.\n\nError Handling: Implement robust error handling to manage scenarios where the function might not be available or the invocation fails.\n\nFunction Signatures: Ensure that the function signatures match the expected parameters to avoid runtime errors.";
             var c = new PromptTemplateConfig
@@ -109,16 +112,41 @@ namespace PromptEnhancer.Services
             };
             var factory = new KernelPromptTemplateFactory();
             var b = factory.TryCreate(c, out var promptTemplate);
-            var rendered = await promptTemplate.RenderAsync(kernel, new KernelArguments { { "rawText", arg } });
-            var res = await kernel.InvokePromptAsync(prompt, new KernelArguments { { "rawText", arg } });
+            //var rendered = await promptTemplate.RenderAsync(kernel, new KernelArguments { { "rawText", arg } });
+            //var res = await kernel.InvokePromptAsync(prompt, new KernelArguments { { "rawText", arg } });
             //var result = await kernel.InvokeAsync(typeof(SemanticSlicerChunkGenerator).Name, "generate_chunks_from_string", new KernelArguments{ { "rawText", arg } });
             //var result2 = await kernel.InvokePromptAsync($"Generate chunks from this string and return only list of strings: {arg}", new(settings));
             //var val1 = result.GetValue<IList<string>>();
             //var val = result2.GetValue<string>();
-            var val = res.GetValue<string>();
+            //var val = res.GetValue<string>();
             var textSearch = _searchProviderManager.CreateTextSearch(searchData!)!;
-
             var cb = new ConcurrentBag<ResultModel>();
+
+            var strings = new List<string> { "Pes šel do lesa.", "Kočka spí v koši.", "Auto jede rychle." };
+            var embeddingGenerator = kernel.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>();
+            var emb = await embeddingGenerator.GenerateAsync("závodní vůz.");
+            var vectorStore = new InMemoryVectorStore();
+            var collection = new InMemoryCollection<string, VectorStore>("myCollection");
+            await collection.EnsureCollectionExistsAsync();
+            //var embeddings = await embeddingGenerator.GenerateAsync(strings.ToArray());
+
+            for (int i = 0; i < strings.Count; i++)
+            {
+                var e = await embeddingGenerator.GenerateAsync(strings[i]);
+                await collection.UpsertAsync(new VectorStore
+                {
+                    Id = $"doc-{i}",
+                    Text = strings[i],
+                    Embedding = e.Vector
+                });
+            }
+            var searchResult = collection.SearchAsync(emb, top: 3);
+
+            await foreach (var record in searchResult)
+            {
+                Console.WriteLine($"Best match: {record.Record.Text}");
+                Console.WriteLine($"Score: {record.Score}");
+            }
 
             await Parallel.ForEachAsync(entries, async (entry, _) =>
             {

@@ -27,7 +27,7 @@ namespace PromptEnhancer.SK
                         apiKey: kernelData.AIApiKey!);
 #pragma warning disable SKEXP0010
                 kernelBuilder.AddOpenAIEmbeddingGenerator(
-                        modelId: kernelData.Model!,
+                        modelId: "text-embedding-3-small",
                         apiKey: kernelData.AIApiKey!);
 #pragma warning restore SKEXP0010
                 Kernel kernel = kernelBuilder.Build();
