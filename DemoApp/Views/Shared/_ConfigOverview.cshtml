@@ -13,6 +13,12 @@
                 <dd class="col-sm-8">@Model.KernelConfiguration.Model</dd>
             }
 
+            @if (!string.IsNullOrWhiteSpace(Model.KernelConfiguration?.EmbeddingModel))
+            {
+                <dt class="col-sm-4">@Html.LabelFor(m => m.KernelConfiguration.EmbeddingModel, new { @class = "mb-0 fw-semibold" })</dt>
+                <dd class="col-sm-8">@Model.KernelConfiguration.EmbeddingModel</dd>
+            }
+
             @if (!string.IsNullOrWhiteSpace(Model.KernelConfiguration?.Provider.ToString()))
             {
                 <dt class="col-sm-4">@Html.LabelFor(m => m.KernelConfiguration.Provider, new { @class = "mb-0 fw-semibold" })</dt>

@@ -15,6 +15,12 @@
 </div>
 
 <div class="mb-3">
+    @Html.LabelFor(m => m.KernelConfiguration.EmbeddingModel, new { @class = "form-label", title = "The name of the AI embedding model to use (e.g., text-embedding-3-small, text-embedding-3-large)." })
+    @Html.TextBoxFor(m => m.KernelConfiguration.EmbeddingModel, new { @class = "form-control" })
+    @Html.ValidationMessageFor(m => m.KernelConfiguration.EmbeddingModel, "", new { @class = "text-danger" })
+</div>
+
+<div class="mb-3">
     @Html.LabelFor(m => m.KernelConfiguration.AIApiKey, new { @class = "form-label", title = "Your API key for accessing the AI provider. Keep this secret." })
     @Html.TextBoxFor(m => m.KernelConfiguration.AIApiKey, new { @class = "form-control", type = "password", autocomplete = "off", placeholder = "Enter new API key" })
     @Html.ValidationMessageFor(m => m.KernelConfiguration.AIApiKey, "", new { @class = "text-danger" })

@@ -1,6 +1,5 @@
 using DemoApp.Services;
 using DemoApp.Services.Interfaces;
-using Microsoft.SemanticKernel;
 using PromptEnhancer.Extensions;
 
 namespace DemoApp
@@ -27,7 +26,6 @@ namespace DemoApp
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<IConfigurationSetupService, ConfigurationSetupService>();
             builder.Services.AddScoped<IEntrySetupService, EntrySetupService>();
-            builder.Services.AddInMemoryVectorStore();
 
             builder.Services.AddPromptEnhancer();
 

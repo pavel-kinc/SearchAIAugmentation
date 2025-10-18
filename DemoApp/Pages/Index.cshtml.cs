@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
-using PromptEnhancer.Services.Interfaces;
+using PromptEnhancer.Services.EnhancerService;
 
 namespace DemoApp.Pages
 {

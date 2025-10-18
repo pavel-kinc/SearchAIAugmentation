@@ -5,7 +5,7 @@ using Mapster;
 using Newtonsoft.Json;
 using PromptEnhancer.CustomJsonResolver;
 using PromptEnhancer.Models.Configurations;
-using PromptEnhancer.Services.Interfaces;
+using PromptEnhancer.Services.EnhancerService;
 
 namespace DemoApp.Services
 {
@@ -21,8 +21,8 @@ namespace DemoApp.Services
 
         public ConfigurationSetupService(IConfiguration configuration, IEnhancerService enhancerService, IHttpContextAccessor ctx)
         {
-            
-            
+
+
             _configuration = configuration;
             _enhancerService = enhancerService;
             _session = ctx.HttpContext!.Session;
