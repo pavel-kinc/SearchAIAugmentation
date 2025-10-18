@@ -13,5 +13,7 @@ namespace PromptEnhancer.Models.Configurations
         public string? AIApiKey { get; set; }
         [Display(Name = "AI Provider:")]
         public AIProviderEnum Provider { get; set; }
+        [Display(Name = "Embedding Model:")]
+        public string? EmbeddingModel { get; set; }
     }
 }

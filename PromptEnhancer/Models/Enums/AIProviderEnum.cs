@@ -4,6 +4,9 @@
     {
         OpenAI,
         GoogleGemini,
+        AzureOpenAI,
+        Ollama,
+        Onnx,
         Other
     }
 }

@@ -11,12 +11,11 @@ using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
 using PromptEnhancer.Prompt;
 using PromptEnhancer.Search.Interfaces;
-using PromptEnhancer.Services.Interfaces;
 using PromptEnhancer.SK.Interfaces;
 using System.Collections.Concurrent;
 using System.Text;
 
-namespace PromptEnhancer.Services
+namespace PromptEnhancer.Services.EnhancerService
 {
     public class EnhancerService : IEnhancerService
     {
@@ -34,7 +33,9 @@ namespace PromptEnhancer.Services
             _searchWebScraper = searchWebScraper;
             _chunkGenerator = chunkGenerator;
         }
-        public EnhancerConfiguration CreateDefaultConfiguration(string? aiApiKey = null, AIProviderEnum aiProvider = AIProviderEnum.OpenAI, string aiModel = "gpt-4o-mini", string? searchApiKey = null, SearchProviderEnum searchProvider = SearchProviderEnum.Google, string? searchEngine = null)
+
+        // supports single completion and embedding
+        public EnhancerConfiguration CreateDefaultConfiguration(string? aiApiKey = null, AIProviderEnum aiProvider = AIProviderEnum.OpenAI, string aiModel = "gpt-4o-mini", string embeddingModel = "text-embedding-3-small", string? searchApiKey = null, SearchProviderEnum searchProvider = SearchProviderEnum.Google, string? searchEngine = null)
         {
             var enhancerConfiguration = new EnhancerConfiguration();
             enhancerConfiguration.KernelConfiguration = new KernelConfiguration
@@ -42,6 +43,7 @@ namespace PromptEnhancer.Services
                 AIApiKey = aiApiKey,
                 Model = aiModel,
                 Provider = aiProvider,
+                EmbeddingModel = embeddingModel,
             };
 
             enhancerConfiguration.SearchConfiguration.SearchProviderData = new SearchProviderData

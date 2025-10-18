@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
+using PromptEnhancer.Extensions;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
@@ -12,6 +13,13 @@ namespace PromptEnhancer.SK
     {
         private readonly int MaxPromptLength = 3000;
 
+        public IKernelServiceFactory KernelServiceFactory { get; }
+
+        public SemanticKernelManager(IKernelServiceFactory kernelServiceFactory)
+        {
+            KernelServiceFactory = kernelServiceFactory;
+        }
+
         public void AddPluginToSemanticKernel<Plugin>(Kernel kernel) where Plugin : class
         {
             kernel.Plugins.AddFromType<Plugin>(typeof(Plugin).Name);
@@ -19,35 +27,10 @@ namespace PromptEnhancer.SK
 
         public Kernel? CreateKernel(KernelConfiguration kernelData)
         {
-            if (kernelData.Provider == AIProviderEnum.OpenAI)
-            {
-                IKernelBuilder kernelBuilder = Kernel.CreateBuilder();
-                kernelBuilder.AddOpenAIChatCompletion(
-                        modelId: kernelData.Model!,
-                        apiKey: kernelData.AIApiKey!);
-#pragma warning disable SKEXP0010
-                kernelBuilder.AddOpenAIEmbeddingGenerator(
-                        modelId: "text-embedding-3-small",
-                        apiKey: kernelData.AIApiKey!);
-#pragma warning restore SKEXP0010
-                Kernel kernel = kernelBuilder.Build();
-                return kernel;
-            }
-            else if (kernelData.Provider == AIProviderEnum.GoogleGemini)
-            {
-                IKernelBuilder kernelBuilder = Kernel.CreateBuilder();
-#pragma warning disable SKEXP0070
-                kernelBuilder.AddGoogleAIGeminiChatCompletion(
-                        modelId: kernelData.Model!,
-                        apiKey: kernelData.AIApiKey!);
-                kernelBuilder.AddGoogleAIEmbeddingGenerator(
-                        modelId: kernelData.Model!,
-                        apiKey: kernelData.AIApiKey!);
-                Kernel kernel = kernelBuilder.Build();
-#pragma warning restore SKEXP0070
-                return kernel;
-            }
-            return null;
+            var factory = KernelServiceFactory ?? new KernelServiceFactory();
+            IKernelBuilder kernelBuilder = Kernel.CreateBuilder();
+            factory.CreateKernelServicesConfig(ConvertConfig(kernelData));
+            return kernelBuilder.Build();
         }
 
         public async Task<ChatCompletionResult> GetAICompletionResult(Kernel kernel, string prompt, int? maxPromptLength = null)
@@ -73,6 +56,19 @@ namespace PromptEnhancer.SK
                 AIOutput = result?.Content,
                 TokensUsed = replyInnerContent?.Usage.TotalTokenCount ?? 0,
             };
+        }
+
+        private IEnumerable<KernelServiceBaseConfig> ConvertConfig(KernelConfiguration kernelData)
+        {
+            var configs = new List<KernelServiceBaseConfig>
+            {
+                new(kernelData.Provider, kernelData.Model!, kernelData.AIApiKey!)
+            };
+            if (!string.IsNullOrWhiteSpace(kernelData.EmbeddingModel))
+            {
+                configs.Add(new KernelServiceBaseConfig(kernelData.Provider, kernelData.Model!, kernelData.AIApiKey!, serviceType: KernelServiceEnum.EmbeddingGenerator));
+            }
+            return configs;
         }
     }
 }

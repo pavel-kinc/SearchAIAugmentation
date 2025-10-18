@@ -18,15 +18,15 @@ namespace PromptEnhancer.ChunkUtilities
 
         public string ExtractRelevantDataFromChunks(
         IList<string> chunks,
-        string query,
+        string targetString,
         int top = 5)
         {
-            if (chunks == null || chunks.Count == 0 || string.IsNullOrEmpty(query))
+            if (chunks == null || chunks.Count == 0 || string.IsNullOrEmpty(targetString))
             {
                 return string.Empty;
             }
 
-            var queryEmbedding = _embedder.GenerateEmbedding(query + " product description").ToArray();
+            var queryEmbedding = _embedder.GenerateEmbedding(targetString + " product description").ToArray();
 
             var chunkEmbeddings = _embedder.GenerateEmbeddings(chunks).ToList();
 
