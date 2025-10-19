@@ -37,7 +37,7 @@ namespace PromptEnhancer.Extensions
         {
             foreach (var template in kernelServices)
             {
-                services = template.AddToServices(services);
+                template.AddToServices(services);
             }
 
             return services;

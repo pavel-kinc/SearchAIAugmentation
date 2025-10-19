@@ -2,6 +2,7 @@
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using PromptEnhancer.Extensions;
+using PromptEnhancer.KernelServiceTemplates.ChatClients;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
@@ -29,7 +30,8 @@ namespace PromptEnhancer.SK
         {
             var factory = KernelServiceFactory ?? new KernelServiceFactory();
             IKernelBuilder kernelBuilder = Kernel.CreateBuilder();
-            factory.CreateKernelServicesConfig(ConvertConfig(kernelData));
+            var kernelServices = factory.CreateKernelServicesConfig(ConvertConfig(kernelData));
+            kernelBuilder.Services.AddKernelServices(kernelServices);
             return kernelBuilder.Build();
         }
 
