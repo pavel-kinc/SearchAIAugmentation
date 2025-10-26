@@ -4,6 +4,8 @@ using Microsoft.SemanticKernel;
 using PromptEnhancer.ChunkUtilities;
 using PromptEnhancer.ChunkUtilities.Interfaces;
 using PromptEnhancer.KernelServiceTemplates;
+using PromptEnhancer.Plugins;
+using PromptEnhancer.Plugins.Interfaces;
 using PromptEnhancer.Search;
 using PromptEnhancer.Search.Interfaces;
 using PromptEnhancer.Services.EnhancerService;
@@ -43,7 +45,7 @@ namespace PromptEnhancer.Extensions
             return services;
         }
 
-        private static IServiceCollection AddInternalServices(this IServiceCollection services)
+        public static void AddInternalServices(this IServiceCollection services)
         {
             services.AddInMemoryVectorStore();
             services.TryAddSingleton<IKernelServiceFactory, KernelServiceFactory>();
@@ -52,8 +54,7 @@ namespace PromptEnhancer.Extensions
             services.TryAddSingleton<ISearchProviderManager, SearchProviderManager>();
             services.TryAddSingleton<ISearchWebScraper, SearchWebScraper>();
             services.TryAddSingleton<ISemanticKernelManager, SemanticKernelManager>();
-
-            return services;
+            services.TryAddSingleton<ISemanticKernelPlugin, DateTimePlugin>();
         }
 
         private static void AddKernelToDI(this IServiceCollection services)

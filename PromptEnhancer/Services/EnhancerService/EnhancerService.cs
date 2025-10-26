@@ -1,25 +1,15 @@
 ﻿using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.Google;
-using Microsoft.SemanticKernel.Connectors.InMemory;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Newtonsoft.Json;
-using OllamaSharp;
-using PromptEnhancer.ChunkUtilities;
 using PromptEnhancer.ChunkUtilities.Interfaces;
 using PromptEnhancer.CustomJsonResolver;
-using PromptEnhancer.Extensions;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
-using PromptEnhancer.Plugins;
-using PromptEnhancer.Prompt;
 using PromptEnhancer.Search.Interfaces;
 using PromptEnhancer.SK.Interfaces;
 using System.Collections.Concurrent;
 using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PromptEnhancer.Services.EnhancerService
 {
@@ -116,7 +106,7 @@ namespace PromptEnhancer.Services.EnhancerService
             //sk!.Plugins.TryGetPlugin(typeof(SemanticSlicerChunkGenerator).Name, out var plugin);
             //var service = sk.GetRequiredService<IChunkGenerator>();
 
-            sk.Plugins.AddFromType<DateTimePlugin>(typeof(DateTimePlugin).Name);
+
 
             //var prompt = "{{SemanticSlicerChunkGenerator.generate_chunks_from_string $rawText}}";
             //var arg = "Multiple Implementations: If there are multiple implementations of generate_chunks_from_string, ensure that the correct one is invoked by specifying the appropriate function name or handling the selection logic.\n\nError Handling: Implement robust error handling to manage scenarios where the function might not be available or the invocation fails.\n\nFunction Signatures: Ensure that the function signatures match the expected parameters to avoid runtime errors.";
@@ -190,7 +180,7 @@ namespace PromptEnhancer.Services.EnhancerService
                 //resultView.AIResult.UsedURLs = usedUrls;
                 PromptExecutionSettings settings = new()
                 {
-                    FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
+                    FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
                 };
                 var kernelSettings = new KernelArguments(settings);
                 //var gemini = sk.GetRequiredService<IChatCompletionService>();
@@ -200,7 +190,7 @@ namespace PromptEnhancer.Services.EnhancerService
                 resultView.AIResult = new ChatCompletionResult
                 {
                     AIOutput = text,
-                    //TokensUsed = (int) (res?.Usage?.TotalTokenCount ?? 0),
+                    TokensUsed = (int)(res?.Usage?.TotalTokenCount ?? 0),
                 };
                 cb.Add(resultView);
             });

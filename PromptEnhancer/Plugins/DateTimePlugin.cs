@@ -1,11 +1,20 @@
 ﻿using Microsoft.SemanticKernel;
+using PromptEnhancer.ChunkUtilities.Interfaces;
+using PromptEnhancer.Plugins.Interfaces;
 using System.ComponentModel;
 using System.Globalization;
 
 namespace PromptEnhancer.Plugins
 {
-    public class DateTimePlugin
+    public class DateTimePlugin : ISemanticKernelPlugin
     {
+        private readonly IChunkRanker _kernelManager;
+
+        public DateTimePlugin(IChunkRanker kernelManager)
+        {
+            _kernelManager = kernelManager;
+        }
+
         [KernelFunction("get_current_datetime")]
         [Description("Returns the current datetime in ISO format (YYYY-MM-DD HH:mm:ss).")]
         public string GetCurrentDateTime()

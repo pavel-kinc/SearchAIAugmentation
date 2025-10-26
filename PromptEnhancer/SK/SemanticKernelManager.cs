@@ -2,10 +2,10 @@
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using PromptEnhancer.Extensions;
-using PromptEnhancer.KernelServiceTemplates.ChatClients;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
+using PromptEnhancer.Plugins.Interfaces;
 using PromptEnhancer.SK.Interfaces;
 
 namespace PromptEnhancer.SK
@@ -32,7 +32,14 @@ namespace PromptEnhancer.SK
             IKernelBuilder kernelBuilder = Kernel.CreateBuilder();
             var kernelServices = factory.CreateKernelServicesConfig(ConvertConfig(kernelData));
             kernelBuilder.Services.AddKernelServices(kernelServices);
-            return kernelBuilder.Build();
+            kernelBuilder.Services.AddInternalServices();
+            var kernel = kernelBuilder.Build();
+            foreach (var plugin in kernel.Services.GetServices<ISemanticKernelPlugin>())
+            {
+                kernel.Plugins.AddFromObject(plugin, plugin.GetType().Name);
+            }
+            //kernelBuilder.Plugins.AddFromType<DateTimePlugin>(typeof(DateTimePlugin).Name);
+            return kernel;
         }
 
         public async Task<ChatCompletionResult> GetAICompletionResult(Kernel kernel, string prompt, int? maxPromptLength = null)
