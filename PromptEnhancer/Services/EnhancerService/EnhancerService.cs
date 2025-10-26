@@ -185,7 +185,7 @@ namespace PromptEnhancer.Services.EnhancerService
                 var kernelSettings = new KernelArguments(settings);
                 //var gemini = sk.GetRequiredService<IChatCompletionService>();
                 //var res = await gemini.GetChatMessageContentAsync("What date and time is it? Then add 7 days to the time and give me that date.", settings);
-                var res = await sk.InvokePromptAsync<ChatResponse>("What date and time is it? Then add 7 days to the time and give me that date.", kernelSettings);
+                var res = await sk.InvokePromptAsync<ChatResponse>("What date and time is it? Then add 7 days to the time and give me that date. (in iso format)", kernelSettings);
                 var text = res.Text;
                 resultView.AIResult = new ChatCompletionResult
                 {

@@ -16,10 +16,9 @@ namespace PromptEnhancer.Plugins
         }
 
         [KernelFunction("get_current_datetime")]
-        [Description("Returns the current datetime in ISO format (YYYY-MM-DD HH:mm:ss).")]
+        [Description("Returns the current datetime (YYYY-MM-dd HH:mm:ss).")]
         public string GetCurrentDateTime()
         {
-            // DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
             return DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
@@ -31,16 +30,6 @@ namespace PromptEnhancer.Plugins
         {
             DateTime parsed = DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
             return parsed.AddDays(days).ToString("yyyy-MM-dd");
-        }
-
-        [KernelFunction("format_date")]
-        [Description("Formats a date according to the given format string.")]
-        public string FormatDate(
-            [Description("Date in yyyy-MM-dd format.")] string date,
-            [Description("Format string (e.g. 'MMMM dd, yyyy')")] string format)
-        {
-            DateTime parsed = DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-            return parsed.ToString(format, CultureInfo.InvariantCulture);
         }
     }
 }
