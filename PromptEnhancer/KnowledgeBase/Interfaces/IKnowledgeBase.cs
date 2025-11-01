@@ -8,5 +8,6 @@ namespace PromptEnhancer.KnowledgeBase.Interfaces
 {
     public interface IKnowledgeBase
     {
+        Task<IEnumerable<KnowledgeRecord>> SearchAsync(KnowledgeSearchRequest request, CancellationToken ct = default);
     }
 }

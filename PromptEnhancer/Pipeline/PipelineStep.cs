@@ -1,4 +1,7 @@
-﻿using System;
+﻿using ErrorOr;
+using PromptEnhancer.Models.Pipeline;
+using PromptEnhancer.Pipeline.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +9,30 @@ using System.Threading.Tasks;
 
 namespace PromptEnhancer.Pipeline
 {
-    internal class PipelineStep
+    public abstract class PipelineStep : IPipelineStep
     {
+        public async Task<ErrorOr<bool>> ExecuteAsync(PipelineContext context, bool isRequired = false, CancellationToken cancellationToken = default)
+        {
+            var check = CheckExecuteConditions(context, isRequired);
+            if (check.IsError)
+            {
+                return check;
+            }
+
+            return check.Value ? await ExecuteStepAsync(context, cancellationToken) : false;
+        }
+
+        protected abstract Task<ErrorOr<bool>> ExecuteStepAsync(PipelineContext context, CancellationToken cancellationToken = default);
+
+        //TODO: mostly for pipeline context conditions, maybe rename?
+        protected virtual ErrorOr<bool> CheckExecuteConditions(PipelineContext context, bool isRequired = false)
+        {
+            return true;
+        }
+
+        protected virtual ErrorOr<bool> FailCondition(bool isRequired)
+        {
+            return isRequired ? Error.Failure($"{GetType()}: Conditions check for this required step failed.") : false;
+        }
     }
 }

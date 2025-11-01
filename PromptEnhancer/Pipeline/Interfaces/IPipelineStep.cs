@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ErrorOr;
+using PromptEnhancer.Models.Pipeline;
 
 namespace PromptEnhancer.Pipeline.Interfaces
 {
-    internal interface IPipelineStep
+    public interface IPipelineStep
     {
+        public Task<ErrorOr<bool>> ExecuteAsync(PipelineContext context, bool isRequired = false, CancellationToken cancellationToken = default);
     }
 }
