@@ -9,6 +9,6 @@ namespace PromptEnhancer.KnowledgeBase.Interfaces
 {
     public interface IKnowledgeBase
     {
-        Task<IEnumerable<KnowledgeRecord>> SearchAsync(KnowledgeSearchRequest request, PipelineContext context, CancellationToken ct = default);
+        Task<IEnumerable<IKnowledgeRecord>> SearchAsync(KnowledgeSearchRequest request, PipelineContext context, CancellationToken ct = default);
     }
 }

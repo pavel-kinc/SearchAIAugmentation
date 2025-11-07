@@ -1,5 +1,6 @@
 ﻿using Microsoft.SemanticKernel;
 using PromptEnhancer.KnowledgeBase;
+using PromptEnhancer.KnowledgeBase.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace PromptEnhancer.Models.Pipeline
     {
         public string? QueryString { get; set; }
 
-        public List<KnowledgeRecord> RetrievedRecords { get; set; } = [];
+        public List<IKnowledgeRecord> RetrievedRecords { get; set; } = [];
 
         public IDictionary<string, object>? Metadata { get; set; }
     }
