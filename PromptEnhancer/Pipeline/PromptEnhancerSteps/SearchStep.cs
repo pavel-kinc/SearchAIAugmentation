@@ -13,10 +13,10 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
     {
         private readonly string? _knowledgeBaseKey = null;
 
-        public SearchStep(string? knowledgeBaseKey = null)
+        public SearchStep(string? knowledgeBaseKey = null, bool isRequired = false)
         {
             _knowledgeBaseKey = knowledgeBaseKey;
-            
+            _isRequired = isRequired;
         }
 
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
@@ -26,9 +26,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
                 List<KnowledgeRecord> recordsToAdd = [];
                 var kernel = settings.Kernel;
                 //TODO plugins in each step? how to choose, how to setup needed ones
-                var kb = settings.ServiceProvider.GetKeyedService<IKnowledgeBase>(_knowledgeBaseKey);
-                kernel.Services.GetKeyedServices<IKnowledgeBase>(_knowledgeBaseKey);
-                kernel.Services.GetServices<IKnowledgeBase>();
+                var kb = settings.GetService<IKnowledgeBase>(_knowledgeBaseKey);
                 context.RetrievedRecords.AddRange(await kb!.SearchAsync(new KnowledgeSearchRequest(), context, cancellationToken));
                 //TODO work with knowledge bases and processor
                 return recordsToAdd.Count != 0;
@@ -39,14 +37,14 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             }
         }
 
-        protected override ErrorOr<bool> CheckExecuteConditions(PipelineContext context, bool isRequired = false)
+        protected override ErrorOr<bool> CheckExecuteConditions(PipelineContext context)
         {
             if (!string.IsNullOrEmpty(context.QueryString))
             {
                 return true;
             }
 
-            return FailCondition(isRequired);
+            return FailCondition();
         }
 
         //private DateTimePlugin? GetDateTimePlugin(Microsoft.SemanticKernel.Kernel kernel)

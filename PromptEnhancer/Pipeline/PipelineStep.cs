@@ -11,9 +11,10 @@ namespace PromptEnhancer.Pipeline
 {
     public abstract class PipelineStep : IPipelineStep
     {
-        public async Task<ErrorOr<bool>> ExecuteAsync(PipelineSettings settings, PipelineContext context, bool isRequired = false, CancellationToken cancellationToken = default)
+        protected bool _isRequired = false;
+        public async Task<ErrorOr<bool>> ExecuteAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
         {
-            var check = CheckExecuteConditions(context, isRequired);
+            var check = CheckExecuteConditions(context);
             if (check.IsError)
             {
                 return check;
@@ -25,14 +26,14 @@ namespace PromptEnhancer.Pipeline
         protected abstract Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default);
 
         //TODO: mostly for pipeline context conditions, maybe rename?
-        protected virtual ErrorOr<bool> CheckExecuteConditions(PipelineContext context, bool isRequired = false)
+        protected virtual ErrorOr<bool> CheckExecuteConditions(PipelineContext context)
         {
             return true;
         }
 
-        protected virtual ErrorOr<bool> FailCondition(bool isRequired)
+        protected virtual ErrorOr<bool> FailCondition()
         {
-            return isRequired ? Error.Failure($"{GetType()}: Conditions check for this required step failed.") : false;
+            return _isRequired ? Error.Failure($"{GetType()}: Conditions check for this required step failed.") : false;
         }
     }
 }

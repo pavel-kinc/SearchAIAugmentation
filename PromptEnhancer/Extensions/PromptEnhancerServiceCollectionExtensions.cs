@@ -65,7 +65,6 @@ namespace PromptEnhancer.Extensions
             services.TryAddSingleton<IPipelineOrchestrator, PipelineOrchestrator>();
 
             services.TryAddKeyedSingleton<IKnowledgeBase, TestKnowledgeBaseProcessor>("test");
-            // this should be implemented for function calling too (it must be saved somewhere) - in normal pipeline usage it works, because it just fetches the context from scope in each step
             services.TryAddSingleton<IPipelineContextService, PipelineContextService>();
         }
 

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PromptEnhancer.Plugins.Interfaces
+namespace PromptEnhancer.PipelineProcessor.Interfaces
 {
     public interface IKnowledgeBaseProcessor : IKnowledgeBase
     {

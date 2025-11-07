@@ -1,4 +1,5 @@
-﻿using Microsoft.SemanticKernel;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.SemanticKernel;
 using PromptEnhancer.Pipeline.Interfaces;
 
 namespace PromptEnhancer.Models.Pipeline
@@ -10,5 +11,19 @@ namespace PromptEnhancer.Models.Pipeline
         public Kernel Kernel { get; } = kernel;
 
         public IServiceProvider ServiceProvider { get; set; } = sp;
+
+        public T? GetService<T>(string? key = null)
+            where T : class
+        {
+            if (key is null)
+            {
+                return sp.GetRequiredService<T>() ?? default;
+            }
+
+            return sp.GetRequiredKeyedService<T>(key) ?? default;
+
+
+        }
     }
+
 }
