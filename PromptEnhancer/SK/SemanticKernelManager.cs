@@ -30,6 +30,9 @@ namespace PromptEnhancer.SK
         {
             var factory = KernelServiceFactory ?? new KernelServiceFactory();
             IKernelBuilder kernelBuilder = Kernel.CreateBuilder();
+            // TODO, maybe just send in the service templates instead of this factory (getting rid of the dictionary)
+            // maybe the config is uniform way for template creation? but then again, wouldnt it be easier just to create the templates directly?
+            // think of advantages of this "factory"
             var kernelServices = factory.CreateKernelServicesConfig(ConvertConfig(kernelData));
             kernelBuilder.Services.AddKernelServices(kernelServices);
             kernelBuilder.Services.AddInternalServices();

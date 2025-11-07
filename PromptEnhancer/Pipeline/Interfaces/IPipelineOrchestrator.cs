@@ -1,4 +1,5 @@
-﻿using PromptEnhancer.Models.Pipeline;
+﻿using ErrorOr;
+using PromptEnhancer.Models.Pipeline;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,6 @@ namespace PromptEnhancer.Pipeline.Interfaces
 {
     public interface IPipelineOrchestrator
     {
-        public Task<PipelineContext> RunAsync(PipelineContext context, CancellationToken cancellationToken = default);
+        public Task<ErrorOr<bool>> RunPipelineAsync(Models.Pipeline.Pipeline pipeline, PipelineContext context);
     }
 }

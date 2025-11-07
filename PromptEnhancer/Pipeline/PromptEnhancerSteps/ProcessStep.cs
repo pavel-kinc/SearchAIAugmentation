@@ -1,19 +1,13 @@
 ﻿using ErrorOr;
 using PromptEnhancer.Models.Pipeline;
-using PromptEnhancer.Pipeline;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PromptEnhancer.PromptEnhancerSteps
+namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
-    public class PreprocessStep : PipelineStep
+    public class ProcessStep : PipelineStep
     {
-        protected override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineContext context, CancellationToken cancellationToken = default)
+        protected override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
         {
-            if(context.QueryString is null)
+            if (context.QueryString is null)
             {
                 return Task.FromResult<ErrorOr<bool>>(false);
             }

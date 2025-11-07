@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.AI;
+﻿using ErrorOr;
+using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
 using Newtonsoft.Json;
 using PromptEnhancer.ChunkUtilities.Interfaces;
@@ -6,6 +7,11 @@ using PromptEnhancer.CustomJsonResolver;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
+using PromptEnhancer.Models.Pipeline;
+using PromptEnhancer.Pipeline;
+using PromptEnhancer.Pipeline.Interfaces;
+using PromptEnhancer.Pipeline.PromptEnhancerSteps;
+using PromptEnhancer.Plugins.Interfaces;
 using PromptEnhancer.Search.Interfaces;
 using PromptEnhancer.SK.Interfaces;
 using System.Collections.Concurrent;
@@ -19,17 +25,23 @@ namespace PromptEnhancer.Services.EnhancerService
         private readonly ISearchProviderManager _searchProviderManager;
         private readonly ISearchWebScraper _searchWebScraper;
         private readonly IChunkGenerator _chunkGenerator;
+        private readonly IPipelineOrchestrator _pipelineOrchestrator;
         private readonly IChunkRanker _chunkRanker;
         private readonly Kernel? _kernel;
+        private readonly IPipelineContextService _pipelineContextService;
+        private readonly IServiceProvider _serviceProvider;
 
-        public EnhancerService(IChunkRanker chunkRanker, ISemanticKernelManager semanticKernelManager, ISearchProviderManager searchProviderManager, ISearchWebScraper searchWebScraper, IChunkGenerator chunkGenerator, Kernel? kernel = null)
+        public EnhancerService(IChunkRanker chunkRanker, ISemanticKernelManager semanticKernelManager, ISearchProviderManager searchProviderManager, ISearchWebScraper searchWebScraper, IChunkGenerator chunkGenerator, IPipelineOrchestrator pipelineOrchestrator, IServiceProvider serviceProvider, IPipelineContextService pipelineContextService, Kernel? kernel = null)
         {
             _chunkRanker = chunkRanker;
             _semanticKernelManager = semanticKernelManager;
             _searchProviderManager = searchProviderManager;
             _searchWebScraper = searchWebScraper;
             _chunkGenerator = chunkGenerator;
+            _pipelineOrchestrator = pipelineOrchestrator;
             _kernel = kernel;
+            _pipelineContextService = pipelineContextService;
+            _serviceProvider = serviceProvider;
         }
 
         // supports single completion and embedding
@@ -77,9 +89,8 @@ namespace PromptEnhancer.Services.EnhancerService
             return JsonConvert.DeserializeObject<EnhancerConfiguration>(json);
         }
 
-        public async Task<IList<ResultModel>> ProcessConfiguration(EnhancerConfiguration config, IEnumerable<Entry> entries, Kernel? kernel = null)
+        public async Task<ErrorOr<IList<ResultModel>>> ProcessConfiguration(EnhancerConfiguration config, IEnumerable<Entry> entries, Kernel? kernel = null)
         {
-
             var kernelData = config.KernelConfiguration;
             var searchConf = config.SearchConfiguration;
             var searchData = searchConf?.SearchProviderData;
@@ -93,8 +104,34 @@ namespace PromptEnhancer.Services.EnhancerService
             if (sk is null)
             {
                 // TODO: handle no kernel scenario better
-                throw new Exception("No semantic kernel available.");
+                return Error.Failure("No kernel could be created or resolved.");
             }
+
+            if (config.UseAutomaticFunctionCalling)
+            {
+                return await HandleAutomaticFunctionCalling(sk, entries.FirstOrDefault());
+            }
+
+            if(config.PipeLineSteps?.Any() != true)
+            {
+                return Error.Unexpected("No pipeline steps defined in configuration.");
+            }
+
+            var pipeline = new Models.Pipeline.Pipeline
+            (
+                new PipelineSettings(sk, _serviceProvider),
+                // Define steps here based on configuration
+                config.PipeLineSteps
+            );
+
+            var context = new PipelineContext
+            {
+                QueryString = "kolik je 1+1?"
+            };
+
+            _pipelineContextService.SetCurrentContext(context);
+
+            var res = _pipelineOrchestrator.RunPipelineAsync(pipeline, context);
 
 
             //change to list of results, deal with errors in result creation
@@ -195,8 +232,12 @@ namespace PromptEnhancer.Services.EnhancerService
                 cb.Add(resultView);
             });
 
+            return cb.ToList();
+        }
 
-            return [.. cb];
+        private async Task<ErrorOr<IList<ResultModel>>> HandleAutomaticFunctionCalling(Kernel sk, Entry? entry)
+        {
+            throw new NotImplementedException();
         }
 
         private string GetConfigurationJson(EnhancerConfiguration configuration, bool hideSecrets = true)

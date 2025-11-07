@@ -1,18 +1,26 @@
 ﻿using ErrorOr;
+using Microsoft.SemanticKernel;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Pipeline.Interfaces;
 
 namespace PromptEnhancer.Pipeline
 {
-    public class PipelineOrchestrator
+    public class PipelineOrchestrator : IPipelineOrchestrator
     {
         //TODO maybe add strategy for when step fails? also params - this is in the step itself now
-        public virtual async Task<ErrorOr<bool>> RunPipeline(Queue<IPipelineStep> steps, PipelineContext context)
+        //TODO Pipeline for every query or reusable - also class for only pipeline?
+        public virtual async Task<ErrorOr<bool>> RunPipelineAsync(Models.Pipeline.Pipeline pipeline, PipelineContext context)
         {
-            while (steps.Any())
+            var steps = pipeline.Steps;
+            if (steps is null || !steps.Any())
             {
-                var step = steps.Dequeue();
-                var result = await step.ExecuteAsync(context);
+                //TODO logging
+                return Error.Failure("Pipeline has no steps to execute.");
+            }
+
+            foreach (var step in steps)
+            {
+                var result = await step.ExecuteAsync(pipeline.Settings, context);
                 if (result.IsError)
                 {
                     //TODO logging

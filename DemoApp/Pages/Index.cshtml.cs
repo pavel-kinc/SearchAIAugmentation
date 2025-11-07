@@ -97,7 +97,12 @@ namespace DemoApp.Pages
             //_configurationService.ClearSession();
             var config = _configurationService.GetConfiguration(true).Adapt<EnhancerConfiguration>();
             var entries = _entrySetupService.GetEntries();
-            ViewModel.ResultModelList = await _enhancerService.ProcessConfiguration(config, entries);
+            var res = await _enhancerService.ProcessConfiguration(config, entries);
+            if (!res.IsError)
+            {
+                //TODO if it is error, show message
+                ViewModel.ResultModelList = res.Value;
+            }
             //ViewModel.ResultModelList = [new(), new(), new(), new(), new(), new(), new(), new(), new(), new()];
             return Page();
         }
