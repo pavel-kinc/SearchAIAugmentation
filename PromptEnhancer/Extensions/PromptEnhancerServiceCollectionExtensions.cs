@@ -4,7 +4,11 @@ using Microsoft.SemanticKernel;
 using PromptEnhancer.ChunkUtilities;
 using PromptEnhancer.ChunkUtilities.Interfaces;
 using PromptEnhancer.KernelServiceTemplates;
+using PromptEnhancer.KnowledgeBase;
+using PromptEnhancer.KnowledgeBase.Examples;
 using PromptEnhancer.KnowledgeBase.Interfaces;
+using PromptEnhancer.KnowledgeRecord;
+using PromptEnhancer.KnowledgeSearchRequest.Examples;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Pipeline;
 using PromptEnhancer.Pipeline.Interfaces;
@@ -56,15 +60,16 @@ namespace PromptEnhancer.Extensions
         {
             services.AddInMemoryVectorStore();
             services.TryAddSingleton<IKernelServiceFactory, KernelServiceFactory>();
-            services.TryAddSingleton<IChunkGenerator, SemanticSlicerChunkGenerator>();
-            services.TryAddSingleton<IChunkRanker, MiniLmL6V2ChunkRanker>();
+            services.TryAddSingleton<IChunkGeneratorService, SemanticSlicerChunkService>();
+            services.TryAddSingleton<IChunkRankerService, MiniLmL6V2ChunkRanker>();
             services.TryAddSingleton<ISearchProviderManager, SearchProviderManager>();
             services.TryAddSingleton<ISearchWebScraper, SearchWebScraper>();
             services.TryAddSingleton<ISemanticKernelManager, SemanticKernelManager>();
             services.TryAddSingleton<DateTimePlugin, DateTimePlugin>();
             services.TryAddSingleton<IPipelineOrchestrator, PipelineOrchestrator>();
 
-            services.TryAddKeyedSingleton<IKnowledgeBase, TestKnowledgeBaseProcessor>("test");
+            //services.TryAddKeyedSingleton<IKnowledgeBase, TestKnowledgeBaseProcessor>("test");
+            services.TryAddSingleton<IKnowledgeBase<KnowledgeRecord<UrlRecord>, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter>, GoogleKnowledgeBase>();
             services.TryAddSingleton<IPipelineContextService, PipelineContextService>();
         }
 

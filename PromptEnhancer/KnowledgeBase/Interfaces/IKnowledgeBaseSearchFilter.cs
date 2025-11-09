@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace PromptEnhancer.KnowledgeBase.Interfaces
 {
-    internal interface IKnowledgeBaseFilter
+    public interface IKnowledgeBaseSearchFilter
     {
+
     }
 }

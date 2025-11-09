@@ -1,6 +1,6 @@
 ﻿using Microsoft.SemanticKernel;
-using PromptEnhancer.KnowledgeBase;
 using PromptEnhancer.KnowledgeBase.Interfaces;
+using PromptEnhancer.KnowledgeRecord.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

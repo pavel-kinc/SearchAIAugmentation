@@ -4,6 +4,8 @@ using Microsoft.SemanticKernel;
 using Newtonsoft.Json;
 using PromptEnhancer.ChunkUtilities.Interfaces;
 using PromptEnhancer.CustomJsonResolver;
+using PromptEnhancer.KnowledgeBase;
+using PromptEnhancer.KnowledgeBase.Interfaces;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
@@ -112,16 +114,21 @@ namespace PromptEnhancer.Services.EnhancerService
                 return await HandleAutomaticFunctionCalling(sk, entries.FirstOrDefault());
             }
 
-            if(config.PipeLineSteps?.Any() != true)
-            {
-                return Error.Unexpected("No pipeline steps defined in configuration.");
-            }
+            //if(config.PipeLineSteps?.Any() != true)
+            //{
+            //    return Error.Unexpected("No pipeline steps defined in configuration.");
+            //}
 
             var pipeline = new Models.Pipeline.Pipeline
             (
                 new PipelineSettings(sk, _serviceProvider),
                 // Define steps here based on configuration
-                config.PipeLineSteps
+                //config.PipeLineSteps
+                new List<IPipelineStep>
+                {
+                    new PreprocessStep(),
+                    new SearchStep<KnowledgeRecord<UrlRecord>, GoogleSearchFilterModel, UrlRecordFilter>(new GoogleSearchFilterModel())
+                }
             );
 
             var context = new PipelineContext

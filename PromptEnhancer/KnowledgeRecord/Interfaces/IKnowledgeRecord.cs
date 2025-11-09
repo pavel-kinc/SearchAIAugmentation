@@ -1,0 +1,21 @@
+﻿using System.Text.Json;
+
+namespace PromptEnhancer.KnowledgeBase
+{
+    public interface IKnowledgeRecord
+    {
+        public string? Id { get; set; }
+        public IDictionary<string, string>? Metadata { get; set; }
+        public string Source { get; set; }
+        // optional precomputed embeddings, use only with same model!
+        public float[]? GivenEmbeddings { get; set; }
+
+        public float? RankSimilarity { get; set; }
+
+        public (string property, int chunkSize)? ChunkableProperty { get; }
+        public string? EmbeddingRepresentationString { get; }
+        // optional property weights for embedding generation
+        public IDictionary<string, int>? PropertyWeights { get; }
+        public object? SourceObject { get; }
+    }
+}

@@ -12,15 +12,15 @@ namespace PromptEnhancer.Models.Pipeline
 
         public IServiceProvider ServiceProvider { get; set; } = sp;
 
-        public T? GetService<T>(string? key = null)
+        public T GetService<T>(string? key = null)
             where T : class
         {
             if (key is null)
             {
-                return sp.GetRequiredService<T>() ?? default;
+                return sp.GetRequiredService<T>();
             }
 
-            return sp.GetRequiredKeyedService<T>(key) ?? default;
+            return sp.GetRequiredKeyedService<T>(key);
 
 
         }

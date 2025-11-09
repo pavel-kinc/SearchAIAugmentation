@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PromptEnhancer.PipelineProcessor.Interfaces
 {
-    public interface IKnowledgeBaseProcessor : IKnowledgeBase
+    public interface IKnowledgeBaseProcessor
     {
     }
 }

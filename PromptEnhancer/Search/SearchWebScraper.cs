@@ -1,5 +1,8 @@
 ﻿using AngleSharp;
+using AngleSharp.Css.Dom;
 using AngleSharp.Dom;
+using PromptEnhancer.KnowledgeRecord;
+using PromptEnhancer.Models;
 using PromptEnhancer.Search.Interfaces;
 using System.Collections.Concurrent;
 using System.Text;
@@ -14,28 +17,27 @@ namespace PromptEnhancer.Search
         [GeneratedRegex(@"\s{2,}", RegexOptions.Compiled)]
         private static partial Regex NormalizeWhitespaceRegex();
 
-        public async Task<string> ScrapeDataFromUrlsAsync(IEnumerable<string> usedUrls)
+        public async Task<IEnumerable<UrlData>> ScrapeDataFromUrlsAsync(IEnumerable<string> usedUrls, string selectors = "body")
         {
             if (!usedUrls.Any())
             {
-                return string.Empty;
+                return [];
             }
             var config = Configuration.Default.WithDefaultLoader();
             var context = BrowsingContext.New(config);
-            var cb = new ConcurrentBag<string>();
+            var cb = new ConcurrentBag<UrlData>();
 
             await Parallel.ForEachAsync(usedUrls, async (url, _) =>
             {
-                var scrapedContent = await ScrapeUrlContent(context, url);
+                var scrapedContent = await ScrapeUrlContent(context, url, selectors);
                 cb.Add(scrapedContent);
             });
 
             var result = cb.ToList();
-            var res = string.Join(Environment.NewLine, result);
-            return res;
+            return result;
         }
 
-        private async Task<string> ScrapeUrlContent(IBrowsingContext context, string url)
+        private async Task<UrlData> ScrapeUrlContent(IBrowsingContext context, string url, string selectors)
         {
             var document = await context.OpenAsync(url);
             var sb = new StringBuilder();
@@ -45,7 +47,8 @@ namespace PromptEnhancer.Search
             {
                 node.Remove();
             }
-            var relevantParts = document.QuerySelectorAll("p, li, h1, h2, h3, h4, span, section, [class*='description']");
+            //"p, li, h1, h2, h3, h4, span, section, [class*='description']"
+            var relevantParts = document.QuerySelectorAll(selectors);
             var testtext = document.DocumentElement.Text();
             foreach (var part in relevantParts)
             {
@@ -55,7 +58,7 @@ namespace PromptEnhancer.Search
                     sb.AppendLine(text);
                 }
             }
-            return sb.ToString();
+            return new UrlData { Content = sb.ToString(), Url = url };
         }
 
         private string? Normalize(string text)
