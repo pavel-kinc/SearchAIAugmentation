@@ -1,4 +1,6 @@
-﻿namespace PromptEnhancer.KnowledgeRecord.Interfaces
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace PromptEnhancer.KnowledgeRecord.Interfaces
 {
     public interface IKnowledgeRecord
     {
@@ -6,7 +8,8 @@
         public IDictionary<string, string>? Metadata { get; set; }
         public string Source { get; set; }
         // optional precomputed embeddings, use only with same model!
-        public float[]? GivenEmbeddings { get; set; }
+        // maybe just getter to underlying object field?
+        public ReadOnlyMemory<float>? GivenEmbeddings { get; set; }
 
         public float? RankSimilarity { get; set; }
 

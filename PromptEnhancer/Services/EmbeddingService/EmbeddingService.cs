@@ -10,17 +10,19 @@ namespace PromptEnhancer.Services.EmbeddingService
     {
         public virtual async Task<IEnumerable<PipelineEmbeddingsModel>> GetEmbeddingsForRecordsWithoutEmbeddingDataAsync(Kernel kernel, IReadOnlyList<IKnowledgeRecord> retrievedRecords, string? generatorKey = null, EmbeddingGenerationOptions? options = null)
         {
+            //TODO maybe key cant be null? but there is no keyed service so mb okay
             var generator = kernel.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>(generatorKey);
-            //TODO maybe override options for overriding given embeddings?
             //TODO now this generates embedding for all records without embeddings data
-            var recordsNoEmbedChunks = retrievedRecords.Where(x => !x.HasEmbeddingData).Chunk(200);
+            //TODO maybe add settings for embedding limitations, like max number of records or max size of record/records
+            var recordsNoEmbed = retrievedRecords.Where(x => !x.HasEmbeddingData);
+            var recordsChunked = recordsNoEmbed.Chunk(200);
 
-            var cb = new ConcurrentBag<PipelineEmbeddingsModel>();
-            return await GetEmbeddingModels(options, generator, recordsNoEmbedChunks, cb);
+            return await GetEmbeddingModels(options, generator, recordsChunked);
         }
 
-        protected virtual async Task<IEnumerable<PipelineEmbeddingsModel>> GetEmbeddingModels(EmbeddingGenerationOptions? options, IEmbeddingGenerator<string, Embedding<float>> generator, IEnumerable<IKnowledgeRecord[]> recordsNoEmbedChunks, ConcurrentBag<PipelineEmbeddingsModel> cb)
+        protected virtual async Task<IEnumerable<PipelineEmbeddingsModel>> GetEmbeddingModels(EmbeddingGenerationOptions? options, IEmbeddingGenerator<string, Embedding<float>> generator, IEnumerable<IKnowledgeRecord[]> recordsNoEmbedChunks)
         {
+            var cb = new ConcurrentBag<PipelineEmbeddingsModel>();
             await Parallel.ForEachAsync(recordsNoEmbedChunks, async (recordsChunk, _) =>
             {
                 var embeddings = await generator.GenerateAsync(recordsChunk.Select(r => r.EmbeddingRepresentationString), options, _);

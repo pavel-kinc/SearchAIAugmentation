@@ -68,6 +68,8 @@ namespace PromptEnhancer.KnowledgeBase
 
         protected virtual T CreateRecord(TModel o, string queryString)
         {
+            //TODO embedding data (Rank, embeddings) here somehow, maybe through concrete knowledgeBase (where there will be property picker)
+            // or maybe let it in concrete knowledgeBase to assign the property of concrete KnowledgeRecord onto model's property
             return new T
             {
                 Id = Guid.NewGuid().ToString(),

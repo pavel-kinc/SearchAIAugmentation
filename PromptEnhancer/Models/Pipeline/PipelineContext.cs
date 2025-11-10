@@ -7,12 +7,16 @@ namespace PromptEnhancer.Models.Pipeline
     {
         public string? QueryString { get; set; }
 
-        public IEnumerable<string> QueryStrings { get; private set; } = [];
+        public IEnumerable<string> QueryStrings { get; init; } = [];
 
-        public List<IKnowledgeRecord> RetrievedRecords { get; private set; } = [];
+        public List<IKnowledgeRecord> RetrievedRecords { get; init; } = [];
 
         public IEnumerable<PipelineEmbeddingsModel> PipelineEmbeddingsModels { get; set; } = [];
 
-        public IDictionary<string, object>? Metadata { get; private set; }
+        public IEnumerable<PipelineRankedRecord> PipelineRankedRecords { get; set; } = [];
+
+        public IEnumerable<IKnowledgeRecord> PickedRecords { get; init; } = [];
+
+        public IDictionary<string, object>? Metadata { get; init; }
     }
 }

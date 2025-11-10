@@ -20,9 +20,9 @@ namespace PromptEnhancer.Models.Pipeline
             }
 
             return sp.GetRequiredKeyedService<T>(key);
-
-
         }
+
+        public string? GeneratorKey { get; init; } = null;
     }
 
 }

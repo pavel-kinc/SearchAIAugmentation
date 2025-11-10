@@ -8,13 +8,11 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
     public class ProcessEmbeddingStep : PipelineStep
     {
         private readonly string? _embeddingServiceKey;
-        private readonly string? _generatorKey;
 
         public ProcessEmbeddingStep(string? embeddingServiceKey = null, bool isRequired = false, string? generatorKey = null)
         {
             _isRequired = isRequired;
             _embeddingServiceKey = embeddingServiceKey;
-            _generatorKey = generatorKey;
         }
 
         protected override async Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
@@ -25,14 +23,14 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             }
 
             var embService = settings.GetService<IEmbeddingService>(_embeddingServiceKey);
-            context.PipelineEmbeddingsModels = await embService!.GetEmbeddingsForRecordsWithoutEmbeddingDataAsync(settings.Kernel, context.RetrievedRecords, _generatorKey);
+            context.PipelineEmbeddingsModels = await embService!.GetEmbeddingsForRecordsWithoutEmbeddingDataAsync(settings.Kernel, context.RetrievedRecords, settings.GeneratorKey);
             return true;
         }
 
         protected override ErrorOr<bool> CheckExecuteConditions(PipelineContext context)
         {
             // Need retrieved records and no existing embeddings to avoid redundant processing
-            if (context.RetrievedRecords.Any() && !context.PipelineEmbeddingsModels.Any())
+            if (context.RetrievedRecords.Count != 0 && !context.PipelineEmbeddingsModels.Any())
             {
                 return true;
             }
