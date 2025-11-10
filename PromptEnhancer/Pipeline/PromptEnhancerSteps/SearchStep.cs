@@ -37,7 +37,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
                 //TODO make the search accept more queryStrings, probably inside Search, here if it is not expensive to create the connection each time
                 // aka now user can implement paralel async searches easily, so its prolly better to keep it this way
                 //TODO more query strings
-                var res = await kb!.SearchAsync(_request, [context.QueryString!], _filter, cancellationToken);
+                var res = await kb!.SearchAsync(_request, context.QueryStrings.Any() ? context.QueryStrings : [context.QueryString!], _filter, cancellationToken);
                 recordsToAdd.AddRange(res);
 
                 context.RetrievedRecords.AddRange(recordsToAdd);

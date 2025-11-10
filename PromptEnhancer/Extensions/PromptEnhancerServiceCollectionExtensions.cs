@@ -16,6 +16,7 @@ using PromptEnhancer.Pipeline.Interfaces;
 using PromptEnhancer.Plugins;
 using PromptEnhancer.Search;
 using PromptEnhancer.Search.Interfaces;
+using PromptEnhancer.Services.EmbeddingService;
 using PromptEnhancer.Services.EnhancerService;
 using PromptEnhancer.SK;
 using PromptEnhancer.SK.Interfaces;
@@ -66,6 +67,7 @@ namespace PromptEnhancer.Extensions
             services.TryAddSingleton<ISemanticKernelManager, SemanticKernelManager>();
             services.TryAddSingleton<DateTimePlugin, DateTimePlugin>();
             services.TryAddSingleton<IPipelineOrchestrator, PipelineOrchestrator>();
+            services.TryAddSingleton<IEmbeddingService, EmbeddingService>();
 
             //services.TryAddKeyedSingleton<IKnowledgeBase, TestKnowledgeBaseProcessor>("test");
             services.TryAddSingleton<IKnowledgeBase<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>, GoogleKnowledgeBase>();

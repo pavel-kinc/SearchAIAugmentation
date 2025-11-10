@@ -14,7 +14,7 @@ namespace PromptEnhancer.Pipeline
             {
                 return check;
             }
-
+            // here try catch?
             return check.Value ? await ExecuteStepAsync(settings, context, cancellationToken) : false;
         }
 

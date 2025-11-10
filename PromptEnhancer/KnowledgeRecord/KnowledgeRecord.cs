@@ -42,8 +42,8 @@ namespace PromptEnhancer.KnowledgeRecord
         public string UsedSearchQuery { get; set; }
 
         //public virtual (string property, int chunkSize)? ChunkableProperty => null;
-        public virtual string? LLMRepresentationString => JsonSerializer.Serialize(SourceObject);
-        public virtual string? EmbeddingRepresentationString => JsonSerializer.Serialize(SourceObject);
+        public virtual string LLMRepresentationString => JsonSerializer.Serialize(SourceObject);
+        public virtual string EmbeddingRepresentationString => JsonSerializer.Serialize(SourceObject);
         // optional property weights for embedding generation
         public virtual IDictionary<string, int>? PropertyWeights => null;
         object IKnowledgeRecord.SourceObject => SourceObject;

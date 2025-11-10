@@ -13,8 +13,9 @@
         public string UsedSearchQuery { get; set; }
 
         //static abstract (string property, int chunkSize)? ChunkableProperty { get; }
-        public string? LLMRepresentationString { get; }
-        public string? EmbeddingRepresentationString { get; }
+        public string LLMRepresentationString { get; }
+        public string EmbeddingRepresentationString { get; }
+        public bool HasEmbeddingData => GivenEmbeddings is not null || RankSimilarity is not null;
         // optional property weights for embedding generation
         public IDictionary<string, int>? PropertyWeights { get; }
         public object SourceObject { get; }
