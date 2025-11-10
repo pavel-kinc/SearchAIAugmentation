@@ -10,8 +10,11 @@
 
         public float? RankSimilarity { get; set; }
 
+        public string UsedSearchQuery { get; set; }
+
         //static abstract (string property, int chunkSize)? ChunkableProperty { get; }
-        public string? RepresentationString { get; }
+        public string? LLMRepresentationString { get; }
+        public string? EmbeddingRepresentationString { get; }
         // optional property weights for embedding generation
         public IDictionary<string, int>? PropertyWeights { get; }
         public object SourceObject { get; }

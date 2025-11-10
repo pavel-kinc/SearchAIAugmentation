@@ -11,6 +11,6 @@ namespace PromptEnhancer.KnowledgeBase.Interfaces
         where TModel : class
 
     {
-        Task<IEnumerable<T>> SearchAsync(IKnowledgeSearchRequest<SearchFilter, SearchSettings> request, IEnumerable<string> queryToSearch, TFilter? filter = null, CancellationToken ct = default);
+        Task<IEnumerable<T>> SearchAsync(IKnowledgeSearchRequest<SearchFilter, SearchSettings> request, IEnumerable<string> queriesToSearch, TFilter? filter = null, CancellationToken ct = default);
     }
 }

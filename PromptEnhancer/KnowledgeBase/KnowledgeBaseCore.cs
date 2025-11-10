@@ -21,9 +21,9 @@ namespace PromptEnhancer.KnowledgeBase
             _chunkGenerator = chunkGenerator;
         }
 
-        public abstract Task<IEnumerable<T>> SearchAsync(IKnowledgeSearchRequest<TSearchFilter, TSearchSettings> request, IEnumerable<string> queryToSearch, TFilter? filter = null, CancellationToken ct = default);
+        public abstract Task<IEnumerable<T>> SearchAsync(IKnowledgeSearchRequest<TSearchFilter, TSearchSettings> request, IEnumerable<string> queriesToSearch, TFilter? filter = null, CancellationToken ct = default);
 
-        protected virtual IEnumerable<T> GetKnowledgeRecords(IEnumerable<TModel> data, TFilter? filter, bool allowChunking, Func<TModel, string>? chunkSelector = null, Action<TModel, string>? assignChunkToProperty = null, int chunkSize = 300, int chunkLimit = 10, CancellationToken ct = default)
+        protected virtual IEnumerable<T> GetKnowledgeRecords(IEnumerable<TModel> data, TFilter? filter, string queryString, bool allowChunking, Func<TModel, string>? chunkSelector = null, Action<TModel, string>? assignChunkToProperty = null, int chunkSize = 300, int chunkLimit = 10, CancellationToken ct = default)
         {
             if (filter is not null)
             {
@@ -33,13 +33,13 @@ namespace PromptEnhancer.KnowledgeBase
             //TODO maybe move chunkgenerator check completely elsewhere? now it just skips chunking if not defined, if deleted it throws error in method below
             if (_chunkGenerator is not null && allowChunking && chunkSelector is not null && assignChunkToProperty is not null)
             {
-                return ChunkRecords(data, chunkSelector, assignChunkToProperty, chunkSize, chunkLimit);
+                return ChunkRecords(data, queryString, chunkSelector, assignChunkToProperty, chunkSize, chunkLimit);
             }
 
-            return data.Select(x => CreateRecord(x));
+            return data.Select(x => CreateRecord(x, queryString));
         }
 
-        protected virtual IEnumerable<T> ChunkRecords(IEnumerable<TModel> data, Func<TModel, string> chunkSelector, Action<TModel, string> assignChunkToProperty, int chunkSize, int chunkLimit)
+        protected virtual IEnumerable<T> ChunkRecords(IEnumerable<TModel> data, string queryString, Func<TModel, string> chunkSelector, Action<TModel, string> assignChunkToProperty, int chunkSize, int chunkLimit)
         {
             if (_chunkGenerator is null)
             {
@@ -55,7 +55,7 @@ namespace PromptEnhancer.KnowledgeBase
                 foreach (var chunk in chunks)
                 {
                     assignChunkToProperty(model, chunk);
-                    result.Add(CreateRecord(model));
+                    result.Add(CreateRecord(model, queryString));
                     i++;
                     if (i >= chunkLimit)
                     {
@@ -66,13 +66,14 @@ namespace PromptEnhancer.KnowledgeBase
             return result;
         }
 
-        protected virtual T CreateRecord(TModel o)
+        protected virtual T CreateRecord(TModel o, string queryString)
         {
             return new T
             {
                 Id = Guid.NewGuid().ToString(),
                 SourceObject = o,
                 Source = GetType().Name,
+                UsedSearchQuery = queryString,
             };
         }
     }

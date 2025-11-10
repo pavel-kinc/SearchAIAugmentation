@@ -1,4 +1,7 @@
-﻿using Microsoft.SemanticKernel.Data;
+﻿using AngleSharp.Css.Dom;
+using AngleSharp.Dom;
+using Microsoft.Extensions.Options;
+using Microsoft.SemanticKernel.Data;
 using PromptEnhancer.ChunkUtilities.Interfaces;
 using PromptEnhancer.KnowledgeRecord;
 using PromptEnhancer.KnowledgeSearchRequest.Examples;
@@ -6,6 +9,7 @@ using PromptEnhancer.KnowledgeSearchRequest.Interfaces;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Examples;
 using PromptEnhancer.Search.Interfaces;
+using System.Collections.Concurrent;
 
 namespace PromptEnhancer.KnowledgeBase.Examples
 {
@@ -19,22 +23,13 @@ namespace PromptEnhancer.KnowledgeBase.Examples
         }
 
         public async override Task<IEnumerable<KnowledgeUrlRecord>> SearchAsync(
-            IKnowledgeSearchRequest<GoogleSearchFilterModel, GoogleSettings> request, IEnumerable<string> queryToSearch, UrlRecordFilter? filter = null, CancellationToken ct = default)
+            IKnowledgeSearchRequest<GoogleSearchFilterModel, GoogleSettings> request, IEnumerable<string> queriesToSearch, UrlRecordFilter? filter = null, CancellationToken ct = default)
         {
             //TODO more queires
-            if (!queryToSearch.Any())
+            if (!queriesToSearch.Any())
             {
                 return [];
             }
-            var settings = request.Settings;
-            IEnumerable<UrlRecord> data = await GetDataFromGoogle(queryToSearch.First(), request);
-
-            var results = GetKnowledgeRecords(data, filter, settings.AllowChunking, KnowledgeUrlRecord.ChunkSelector, KnowledgeUrlRecord.AssignChunkToProperty, settings.ChunkSize ?? KnowledgeUrlRecord.DefaultChunkSize, settings.ChunkLimitPerUrl, ct);
-            return results;
-        }
-
-        private async Task<IEnumerable<UrlRecord>> GetDataFromGoogle(string queryString, IKnowledgeSearchRequest<GoogleSearchFilterModel, GoogleSettings> request)
-        {
             var settings = request.Settings;
             var textSearch = _searchProviderManager.CreateTextSearch(new SearchProviderData
             {
@@ -49,7 +44,29 @@ namespace PromptEnhancer.KnowledgeBase.Examples
             {
                 options = request.Filter.BuildParameters();
             }
+            if(textSearch is null)
+            {
+                //TODO maybe exception?
+                return [];
+            }
 
+            var cb = new ConcurrentBag<KnowledgeUrlRecord>();
+            await Parallel.ForEachAsync(queriesToSearch, async (queryString, _) => 
+            {
+                IEnumerable<UrlRecord> data = await GetDataFromGoogle(queryString, textSearch, options, settings);
+
+                var results = GetKnowledgeRecords(data, filter, queryString, settings.AllowChunking, KnowledgeUrlRecord.ChunkSelector, KnowledgeUrlRecord.AssignChunkToProperty, settings.ChunkSize ?? KnowledgeUrlRecord.DefaultChunkSize, settings.ChunkLimitPerUrl, ct);
+                foreach (var record in results)
+                {
+                    cb.Add(record);
+                }
+            });
+
+            return [..cb];
+        }
+
+        private async Task<IEnumerable<UrlRecord>> GetDataFromGoogle(string queryString, ITextSearch textSearch, TextSearchOptions? options, GoogleSettings settings)
+        {
             var res = await _searchProviderManager.GetSearchResults(textSearch!, queryString!, settings.TopN, options);
 
             var searchResults = await res.Results.ToListAsync();
