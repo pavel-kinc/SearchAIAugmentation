@@ -1,7 +1,4 @@
-﻿using PromptEnhancer.CustomAttributes;
-using PromptEnhancer.KnowledgeBase.Interfaces;
-using PromptEnhancer.Models;
-using System.ComponentModel.DataAnnotations;
+﻿using PromptEnhancer.KnowledgeBase.Interfaces;
 
 namespace PromptEnhancer.KnowledgeSearchRequest.Examples
 {

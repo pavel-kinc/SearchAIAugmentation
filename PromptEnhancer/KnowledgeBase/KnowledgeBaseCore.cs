@@ -1,18 +1,8 @@
-﻿using Azure.AI.OpenAI;
-using Microsoft.Extensions.Logging;
-using Microsoft.SemanticKernel.Services;
-using PromptEnhancer.ChunkUtilities.Interfaces;
+﻿using PromptEnhancer.ChunkUtilities.Interfaces;
 using PromptEnhancer.KnowledgeBase.Interfaces;
 using PromptEnhancer.KnowledgeRecord;
 using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.KnowledgeSearchRequest.Interfaces;
-using PromptEnhancer.Models.Pipeline;
-using PromptEnhancer.Search.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PromptEnhancer.KnowledgeBase
 {
@@ -35,7 +25,7 @@ namespace PromptEnhancer.KnowledgeBase
 
         protected virtual IEnumerable<T> GetKnowledgeRecords(IEnumerable<TModel> data, TFilter? filter, bool allowChunking, Func<TModel, string>? chunkSelector = null, Action<TModel, string>? assignChunkToProperty = null, int chunkSize = 300, int chunkLimit = 10, CancellationToken ct = default)
         {
-            if(filter is not null)
+            if (filter is not null)
             {
                 data = filter.FilterRecords(data);
             }
@@ -51,23 +41,23 @@ namespace PromptEnhancer.KnowledgeBase
 
         protected virtual IEnumerable<T> ChunkRecords(IEnumerable<TModel> data, Func<TModel, string> chunkSelector, Action<TModel, string> assignChunkToProperty, int chunkSize, int chunkLimit)
         {
-            if(_chunkGenerator is null)
+            if (_chunkGenerator is null)
             {
                 throw new NullReferenceException("ChunkGenerator was not defined in KnowledgeBase and user tried to use it");
             }
 
             var result = new List<T>();
-            foreach (var model in data) 
+            foreach (var model in data)
             {
                 string chunkProperty = chunkSelector(model);
                 var chunks = _chunkGenerator.GenerateChunksFromData(chunkProperty, chunkSize);
                 var i = 0;
-                foreach(var chunk in chunks)
+                foreach (var chunk in chunks)
                 {
                     assignChunkToProperty(model, chunk);
                     result.Add(CreateRecord(model));
                     i++;
-                    if(i >= chunkLimit)
+                    if (i >= chunkLimit)
                     {
                         break;
                     }

@@ -1,14 +1,8 @@
 ﻿using ErrorOr;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualBasic;
-using PromptEnhancer.KnowledgeBase;
 using PromptEnhancer.KnowledgeBase.Interfaces;
 using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.KnowledgeSearchRequest;
 using PromptEnhancer.Models.Pipeline;
-using PromptEnhancer.Plugins;
-using PromptEnhancer.Plugins.Interfaces;
-using System.Collections.Generic;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {

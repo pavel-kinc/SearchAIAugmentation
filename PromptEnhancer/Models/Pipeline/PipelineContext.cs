@@ -1,11 +1,4 @@
-﻿using Microsoft.SemanticKernel;
-using PromptEnhancer.KnowledgeBase.Interfaces;
-using PromptEnhancer.KnowledgeRecord.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using PromptEnhancer.KnowledgeRecord.Interfaces;
 
 namespace PromptEnhancer.Models.Pipeline
 {

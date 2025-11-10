@@ -1,9 +1,9 @@
 ﻿using Microsoft.SemanticKernel.Data;
 using PromptEnhancer.KnowledgeBase.Interfaces;
-using System.Globalization;
 
 namespace PromptEnhancer.KnowledgeBase
 {
+    // for info about properties look at https://developers.google.com/custom-search/v1/reference/rest/v1/cse/list
     public class GoogleSearchFilterModel : IKnowledgeBaseSearchFilter
     {
         public string? CountryCode { get; set; }
@@ -12,7 +12,7 @@ namespace PromptEnhancer.KnowledgeBase
 
         public string? ExactTerms { get; set; }
 
-        public List<string>? ExcludeTerms { get; set; }
+        public string? ExcludeTerms { get; set; }
 
         public string? InterfaceLanguage { get; set; }
         public string? LinkSite { get; set; }
@@ -51,7 +51,7 @@ namespace PromptEnhancer.KnowledgeBase
                 Top = Top,
                 Filter = filter
             };
-            
+
             return options;
         }
 #pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.

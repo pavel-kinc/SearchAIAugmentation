@@ -1,12 +1,10 @@
-﻿using HtmlAgilityPack;
-using Microsoft.SemanticKernel.Data;
+﻿using Microsoft.SemanticKernel.Data;
 using PromptEnhancer.ChunkUtilities.Interfaces;
 using PromptEnhancer.KnowledgeRecord;
 using PromptEnhancer.KnowledgeSearchRequest.Examples;
 using PromptEnhancer.KnowledgeSearchRequest.Interfaces;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Examples;
-using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Search.Interfaces;
 
 namespace PromptEnhancer.KnowledgeBase.Examples
@@ -14,7 +12,7 @@ namespace PromptEnhancer.KnowledgeBase.Examples
     public class GoogleKnowledgeBase : KnowledgeBaseUrlCore<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>
     {
         private readonly ISearchProviderManager _searchProviderManager;
-        public GoogleKnowledgeBase(ISearchWebScraper searchWebScraper, IChunkGeneratorService chunkGenerator, ISearchProviderManager searchProviderManager) 
+        public GoogleKnowledgeBase(ISearchWebScraper searchWebScraper, IChunkGeneratorService chunkGenerator, ISearchProviderManager searchProviderManager)
             : base(searchWebScraper, chunkGenerator)
         {
             _searchProviderManager = searchProviderManager;
@@ -47,7 +45,7 @@ namespace PromptEnhancer.KnowledgeBase.Examples
 
             TextSearchOptions? options = null;
 
-            if(request.Filter is not null)
+            if (request.Filter is not null)
             {
                 options = request.Filter.BuildParameters();
             }

@@ -132,7 +132,7 @@ namespace PromptEnhancer.Services.EnhancerService
                     SiteSearch = "microsoft.com",
                     DateRestrict = "y2",
                     ExactTerms = "release notes",
-                    ExcludeTerms = new() { "preview", "beta" },
+                    ExcludeTerms = "preview",
                     InterfaceLanguage = "en",
                     LanguageRestrict = "lang_en",
                     Top = 5
