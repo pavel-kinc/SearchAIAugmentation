@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-
-namespace PromptEnhancer.KnowledgeBase
+﻿namespace PromptEnhancer.KnowledgeRecord.Interfaces
 {
     public interface IKnowledgeRecord
     {
@@ -12,10 +10,10 @@ namespace PromptEnhancer.KnowledgeBase
 
         public float? RankSimilarity { get; set; }
 
-        public (string property, int chunkSize)? ChunkableProperty { get; }
-        public string? EmbeddingRepresentationString { get; }
+        //static abstract (string property, int chunkSize)? ChunkableProperty { get; }
+        public string? RepresentationString { get; }
         // optional property weights for embedding generation
         public IDictionary<string, int>? PropertyWeights { get; }
-        public object? SourceObject { get; }
+        public object SourceObject { get; }
     }
 }

@@ -1,11 +1,5 @@
-﻿using PromptEnhancer.KnowledgeBase.Interfaces;
-using PromptEnhancer.KnowledgeRecord.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using PromptEnhancer.KnowledgeRecord.Interfaces;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace PromptEnhancer.KnowledgeRecord
 {
@@ -15,10 +9,11 @@ namespace PromptEnhancer.KnowledgeRecord
         private float? _rankSimilarity = null;
 
         public string? Id { get; set; }
-        public required T SourceObject { get; set; }
+        //TODO required here makes the base knowledge to fail in T creation - then there is error in concrete implementations
+        public T SourceObject { get; set; }
         public IDictionary<string, string>? Metadata { get; set; }
 
-        public required string Source { get; set; }
+        public string Source { get; set; }
         // optional precomputed embeddings, use only with same model!
         public float[]? GivenEmbeddings { get; set; } = null;
 
@@ -36,11 +31,11 @@ namespace PromptEnhancer.KnowledgeRecord
             }
         }
 
-        public virtual (string property, int chunkSize)? ChunkableProperty => null;
-        public virtual string? EmbeddingRepresentationString => JsonSerializer.Serialize(SourceObject);
+        //public virtual (string property, int chunkSize)? ChunkableProperty => null;
+        public virtual string? RepresentationString => JsonSerializer.Serialize(SourceObject);
         // optional property weights for embedding generation
         public virtual IDictionary<string, int>? PropertyWeights => null;
 
-        object? IKnowledgeRecord.SourceObject => SourceObject;
+        object IKnowledgeRecord.SourceObject => SourceObject;
     }
 }

@@ -5,11 +5,11 @@ using System.ComponentModel;
 
 namespace PromptEnhancer.ChunkUtilities
 {
-    internal class SemanticSlicerChunkService : IChunkGeneratorService
+    public class SemanticSlicerChunkService : IChunkGeneratorService
     {
         private readonly SlicerOptions _slicerOptions;
 
-        public SemanticSlicerChunkService(SlicerOptions? options)
+        public SemanticSlicerChunkService(SlicerOptions? options = null)
         {
             _slicerOptions = options ?? new SlicerOptions
             {

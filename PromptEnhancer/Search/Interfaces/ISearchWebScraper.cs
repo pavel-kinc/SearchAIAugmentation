@@ -1,10 +1,9 @@
-﻿using PromptEnhancer.KnowledgeRecord;
-using PromptEnhancer.Models;
+﻿using PromptEnhancer.Models.Examples;
 
 namespace PromptEnhancer.Search.Interfaces
 {
     public interface ISearchWebScraper
     {
-        public Task<IEnumerable<UrlData>> ScrapeDataFromUrlsAsync(IEnumerable<string> usedUrls, string selectors = "body");
+        public Task<IEnumerable<UrlRecord>> ScrapeDataFromUrlsAsync(IEnumerable<string> usedUrls, string selectors = "body");
     }
 }

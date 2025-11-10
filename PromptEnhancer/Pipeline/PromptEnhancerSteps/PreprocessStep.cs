@@ -7,7 +7,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
     {
         protected override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
         {
-            if(context.QueryString is null)
+            if (context.QueryString is null)
             {
                 return Task.FromResult<ErrorOr<bool>>(false);
             }

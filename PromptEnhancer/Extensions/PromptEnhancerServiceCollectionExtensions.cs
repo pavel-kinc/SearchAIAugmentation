@@ -9,12 +9,11 @@ using PromptEnhancer.KnowledgeBase.Examples;
 using PromptEnhancer.KnowledgeBase.Interfaces;
 using PromptEnhancer.KnowledgeRecord;
 using PromptEnhancer.KnowledgeSearchRequest.Examples;
+using PromptEnhancer.Models.Examples;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Pipeline;
 using PromptEnhancer.Pipeline.Interfaces;
-using PromptEnhancer.PipelineProcessor;
 using PromptEnhancer.Plugins;
-using PromptEnhancer.Plugins.Interfaces;
 using PromptEnhancer.Search;
 using PromptEnhancer.Search.Interfaces;
 using PromptEnhancer.Services.EnhancerService;
@@ -26,7 +25,7 @@ namespace PromptEnhancer.Extensions
     public static class PromptEnhancerServiceCollectionExtensions
     {
         // needs to be atleast scoped based on current logic
-        public static IServiceCollection AddPromptEnhancer(this IServiceCollection services, ServiceLifetime lifetime = ServiceLifetime.Scoped, IEnumerable<IKernelServiceTemplate>? kernelServices = null, bool addKernelToDI = false)
+        public static IServiceCollection AddPromptEnhancer(this IServiceCollection services, ServiceLifetime lifetime = ServiceLifetime.Singleton, IEnumerable<IKernelServiceTemplate>? kernelServices = null, bool addKernelToDI = false)
         {
             var descriptor = new ServiceDescriptor(typeof(IEnhancerService), typeof(EnhancerService), lifetime);
 
@@ -69,7 +68,8 @@ namespace PromptEnhancer.Extensions
             services.TryAddSingleton<IPipelineOrchestrator, PipelineOrchestrator>();
 
             //services.TryAddKeyedSingleton<IKnowledgeBase, TestKnowledgeBaseProcessor>("test");
-            services.TryAddSingleton<IKnowledgeBase<KnowledgeRecord<UrlRecord>, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter>, GoogleKnowledgeBase>();
+            services.TryAddSingleton<IKnowledgeBase<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>, GoogleKnowledgeBase>();
+            //Delete prolly?
             services.TryAddSingleton<IPipelineContextService, PipelineContextService>();
         }
 

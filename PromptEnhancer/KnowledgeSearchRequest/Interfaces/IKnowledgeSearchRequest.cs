@@ -2,7 +2,7 @@
 
 namespace PromptEnhancer.KnowledgeSearchRequest.Interfaces
 {
-    public interface IKnowledgeSearchRequest<TFilter, TSettings> 
+    public interface IKnowledgeSearchRequest<TFilter, TSettings>
         where TFilter : IKnowledgeBaseSearchFilter
         where TSettings : IKnowledgeBaseSearchSettings
     {

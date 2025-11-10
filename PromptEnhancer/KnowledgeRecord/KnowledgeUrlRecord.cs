@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using PromptEnhancer.Models.Examples;
 
-namespace PromptEnhancer.KnowledgeBase
+namespace PromptEnhancer.KnowledgeRecord
 {
     public class KnowledgeUrlRecord : KnowledgeRecord<UrlRecord>
     {
-        public override (string, int)? ChunkableProperty => (SourceObject.Content, 300);
-
-        public override string 
+        //public static (string, int)? ChunkableProperty => (UrlRecord.Content, 300);
+        //TODO maybe put this in seperate interface, it is no longer in KnowledgeRecord base class
+        public static Func<UrlRecord, string>? ChunkSelector => x => x.Content;
+        public static Action<UrlRecord, string>? AssignChunkToProperty => (x, chunk) => x.Content = chunk;
+        public static int DefaultChunkSize => 300;
 
     }
 }

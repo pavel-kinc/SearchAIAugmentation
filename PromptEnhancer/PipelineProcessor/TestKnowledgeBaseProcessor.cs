@@ -1,15 +1,4 @@
-﻿using PromptEnhancer.KnowledgeBase;
-using PromptEnhancer.KnowledgeBase.Interfaces;
-using PromptEnhancer.Models.Pipeline;
-using PromptEnhancer.Pipeline.Interfaces;
-using PromptEnhancer.PipelineProcessor.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PromptEnhancer.PipelineProcessor
+﻿namespace PromptEnhancer.PipelineProcessor
 {
     //TODO delete?
     //public class TestKnowledgeBaseProcessor : IKnowledgeBaseProcessor

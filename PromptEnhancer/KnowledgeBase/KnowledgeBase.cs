@@ -1,12 +1,4 @@
-﻿using PromptEnhancer.KnowledgeBase.Interfaces;
-using PromptEnhancer.Models.Pipeline;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PromptEnhancer.KnowledgeBase
+﻿namespace PromptEnhancer.KnowledgeBase
 {
     //public abstract class KnowledgeBase<T, TFilter> : IKnowledgeBase
     //    where T : IKnowledgeRecord

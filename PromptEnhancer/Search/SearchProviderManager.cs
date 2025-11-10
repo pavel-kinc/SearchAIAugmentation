@@ -9,7 +9,7 @@ namespace PromptEnhancer.Search
 {
     public class SearchProviderManager : ISearchProviderManager
     {
-        public ITextSearch? CreateTextSearch(SearchProviderData searchProviderData)
+        public virtual ITextSearch? CreateTextSearch(SearchProviderData searchProviderData)
         {
             if (searchProviderData.Provider == SearchProviderEnum.Google)
             {
@@ -23,9 +23,11 @@ namespace PromptEnhancer.Search
             return null;
         }
 
-        public async Task<KernelSearchResults<TextSearchResult>> GetSearchResults(ITextSearch textSearch, string query, int topSearchCount = 3)
+#pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+        public virtual async Task<KernelSearchResults<TextSearchResult>> GetSearchResults(ITextSearch textSearch, string query, int topSearchCount = 3, TextSearchOptions? options = null)
+#pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
         {
-            return await textSearch.GetTextSearchResultsAsync(query, new() { Top = topSearchCount });
+            return await textSearch.GetTextSearchResultsAsync(query, options ?? new() { Top = topSearchCount });
         }
     }
 }

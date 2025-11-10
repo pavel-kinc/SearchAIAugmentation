@@ -1,8 +1,6 @@
 ﻿using AngleSharp;
-using AngleSharp.Css.Dom;
 using AngleSharp.Dom;
-using PromptEnhancer.KnowledgeRecord;
-using PromptEnhancer.Models;
+using PromptEnhancer.Models.Examples;
 using PromptEnhancer.Search.Interfaces;
 using System.Collections.Concurrent;
 using System.Text;
@@ -17,7 +15,7 @@ namespace PromptEnhancer.Search
         [GeneratedRegex(@"\s{2,}", RegexOptions.Compiled)]
         private static partial Regex NormalizeWhitespaceRegex();
 
-        public async Task<IEnumerable<UrlData>> ScrapeDataFromUrlsAsync(IEnumerable<string> usedUrls, string selectors = "body")
+        public async Task<IEnumerable<UrlRecord>> ScrapeDataFromUrlsAsync(IEnumerable<string> usedUrls, string selectors = "body")
         {
             if (!usedUrls.Any())
             {
@@ -25,7 +23,7 @@ namespace PromptEnhancer.Search
             }
             var config = Configuration.Default.WithDefaultLoader();
             var context = BrowsingContext.New(config);
-            var cb = new ConcurrentBag<UrlData>();
+            var cb = new ConcurrentBag<UrlRecord>();
 
             await Parallel.ForEachAsync(usedUrls, async (url, _) =>
             {
@@ -37,7 +35,7 @@ namespace PromptEnhancer.Search
             return result;
         }
 
-        private async Task<UrlData> ScrapeUrlContent(IBrowsingContext context, string url, string selectors)
+        private async Task<UrlRecord> ScrapeUrlContent(IBrowsingContext context, string url, string selectors)
         {
             var document = await context.OpenAsync(url);
             var sb = new StringBuilder();
@@ -58,7 +56,7 @@ namespace PromptEnhancer.Search
                     sb.AppendLine(text);
                 }
             }
-            return new UrlData { Content = sb.ToString(), Url = url };
+            return new UrlRecord { Content = sb.ToString(), Url = url };
         }
 
         private string? Normalize(string text)

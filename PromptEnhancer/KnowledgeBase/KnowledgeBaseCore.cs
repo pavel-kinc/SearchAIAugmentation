@@ -1,6 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Azure.AI.OpenAI;
+using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.Services;
 using PromptEnhancer.ChunkUtilities.Interfaces;
+using PromptEnhancer.KnowledgeBase.Interfaces;
+using PromptEnhancer.KnowledgeRecord;
+using PromptEnhancer.KnowledgeRecord.Interfaces;
+using PromptEnhancer.KnowledgeSearchRequest.Interfaces;
+using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Search.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -11,13 +17,73 @@ using System.Threading.Tasks;
 namespace PromptEnhancer.KnowledgeBase
 {
 
-    public abstract class KnowledgeBaseBase
+    public abstract class KnowledgeBaseCore<T, TSearchFilter, TSearchSettings, TFilter, TModel> : IKnowledgeBase<T, TSearchFilter, TSearchSettings, TFilter, TModel>
+        where T : KnowledgeRecord<TModel>, new()
+        where TSearchFilter : class, IKnowledgeBaseSearchFilter
+        where TSearchSettings : class, IKnowledgeBaseSearchSettings
+        where TFilter : class, IRecordFilter<TModel>
+        where TModel : class
     {
-        protected readonly IChunkGenerator _chunkGenerator;
+        protected readonly IChunkGeneratorService? _chunkGenerator;
 
-        protected KnowledgeBaseBase(IChunkGenerator chunkGenerator)
+        protected KnowledgeBaseCore(IChunkGeneratorService? chunkGenerator = null)
         {
             _chunkGenerator = chunkGenerator;
+        }
+
+        public abstract Task<IEnumerable<T>> SearchAsync(IKnowledgeSearchRequest<TSearchFilter, TSearchSettings> request, IEnumerable<string> queryToSearch, TFilter? filter = null, CancellationToken ct = default);
+
+        protected virtual IEnumerable<T> GetKnowledgeRecords(IEnumerable<TModel> data, TFilter? filter, bool allowChunking, Func<TModel, string>? chunkSelector = null, Action<TModel, string>? assignChunkToProperty = null, int chunkSize = 300, int chunkLimit = 10, CancellationToken ct = default)
+        {
+            if(filter is not null)
+            {
+                data = filter.FilterRecords(data);
+            }
+
+            //TODO maybe move chunkgenerator check completely elsewhere? now it just skips chunking if not defined, if deleted it throws error in method below
+            if (_chunkGenerator is not null && allowChunking && chunkSelector is not null && assignChunkToProperty is not null)
+            {
+                return ChunkRecords(data, chunkSelector, assignChunkToProperty, chunkSize, chunkLimit);
+            }
+
+            return data.Select(x => CreateRecord(x));
+        }
+
+        protected virtual IEnumerable<T> ChunkRecords(IEnumerable<TModel> data, Func<TModel, string> chunkSelector, Action<TModel, string> assignChunkToProperty, int chunkSize, int chunkLimit)
+        {
+            if(_chunkGenerator is null)
+            {
+                throw new NullReferenceException("ChunkGenerator was not defined in KnowledgeBase and user tried to use it");
+            }
+
+            var result = new List<T>();
+            foreach (var model in data) 
+            {
+                string chunkProperty = chunkSelector(model);
+                var chunks = _chunkGenerator.GenerateChunksFromData(chunkProperty, chunkSize);
+                var i = 0;
+                foreach(var chunk in chunks)
+                {
+                    assignChunkToProperty(model, chunk);
+                    result.Add(CreateRecord(model));
+                    i++;
+                    if(i >= chunkLimit)
+                    {
+                        break;
+                    }
+                }
+            }
+            return result;
+        }
+
+        protected virtual T CreateRecord(TModel o)
+        {
+            return new T
+            {
+                Id = Guid.NewGuid().ToString(),
+                SourceObject = o,
+                Source = GetType().Name,
+            };
         }
     }
 

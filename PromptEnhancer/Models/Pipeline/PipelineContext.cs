@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace PromptEnhancer.Models.Pipeline
 {
+    //TODO maybe implement locks for this class?
     public class PipelineContext
     {
         public string? QueryString { get; set; }

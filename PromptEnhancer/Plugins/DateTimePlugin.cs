@@ -8,9 +8,9 @@ namespace PromptEnhancer.Plugins
 {
     public class DateTimePlugin : ISemanticKernelPlugin
     {
-        private readonly IChunkService _kernelManager;
+        private readonly IChunkRankerService _kernelManager;
 
-        public DateTimePlugin(IChunkService kernelManager)
+        public DateTimePlugin(IChunkRankerService kernelManager)
         {
             _kernelManager = kernelManager;
         }

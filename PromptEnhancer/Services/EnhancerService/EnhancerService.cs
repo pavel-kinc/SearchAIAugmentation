@@ -5,15 +5,15 @@ using Newtonsoft.Json;
 using PromptEnhancer.ChunkUtilities.Interfaces;
 using PromptEnhancer.CustomJsonResolver;
 using PromptEnhancer.KnowledgeBase;
-using PromptEnhancer.KnowledgeBase.Interfaces;
+using PromptEnhancer.KnowledgeRecord;
+using PromptEnhancer.KnowledgeSearchRequest.Examples;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
+using PromptEnhancer.Models.Examples;
 using PromptEnhancer.Models.Pipeline;
-using PromptEnhancer.Pipeline;
 using PromptEnhancer.Pipeline.Interfaces;
 using PromptEnhancer.Pipeline.PromptEnhancerSteps;
-using PromptEnhancer.Plugins.Interfaces;
 using PromptEnhancer.Search.Interfaces;
 using PromptEnhancer.SK.Interfaces;
 using System.Collections.Concurrent;
@@ -26,14 +26,14 @@ namespace PromptEnhancer.Services.EnhancerService
         private readonly ISemanticKernelManager _semanticKernelManager;
         private readonly ISearchProviderManager _searchProviderManager;
         private readonly ISearchWebScraper _searchWebScraper;
-        private readonly IChunkGenerator _chunkGenerator;
+        private readonly IChunkGeneratorService _chunkGenerator;
         private readonly IPipelineOrchestrator _pipelineOrchestrator;
-        private readonly IChunkRanker _chunkRanker;
+        private readonly IChunkRankerService _chunkRanker;
         private readonly Kernel? _kernel;
         private readonly IPipelineContextService _pipelineContextService;
         private readonly IServiceProvider _serviceProvider;
 
-        public EnhancerService(IChunkRanker chunkRanker, ISemanticKernelManager semanticKernelManager, ISearchProviderManager searchProviderManager, ISearchWebScraper searchWebScraper, IChunkGenerator chunkGenerator, IPipelineOrchestrator pipelineOrchestrator, IServiceProvider serviceProvider, IPipelineContextService pipelineContextService, Kernel? kernel = null)
+        public EnhancerService(IChunkRankerService chunkRanker, ISemanticKernelManager semanticKernelManager, ISearchProviderManager searchProviderManager, ISearchWebScraper searchWebScraper, IChunkGeneratorService chunkGenerator, IPipelineOrchestrator pipelineOrchestrator, IServiceProvider serviceProvider, IPipelineContextService pipelineContextService, Kernel? kernel = null)
         {
             _chunkRanker = chunkRanker;
             _semanticKernelManager = semanticKernelManager;
@@ -119,6 +119,26 @@ namespace PromptEnhancer.Services.EnhancerService
             //    return Error.Unexpected("No pipeline steps defined in configuration.");
             //}
 
+            var request = new GoogleSearchRequest
+            {
+                Settings = new GoogleSettings
+                {
+                    SearchApiKey = searchData!.SearchApiKey!,
+                    Engine = searchData!.Engine!,
+                    ChunkSize = 300,
+                },
+                Filter = new GoogleSearchFilterModel
+                {
+                    SiteSearch = "microsoft.com",
+                    DateRestrict = "y2",
+                    ExactTerms = "release notes",
+                    ExcludeTerms = new() { "preview", "beta" },
+                    InterfaceLanguage = "en",
+                    LanguageRestrict = "lang_en",
+                    Top = 5
+                }
+            };
+
             var pipeline = new Models.Pipeline.Pipeline
             (
                 new PipelineSettings(sk, _serviceProvider),
@@ -127,18 +147,19 @@ namespace PromptEnhancer.Services.EnhancerService
                 new List<IPipelineStep>
                 {
                     new PreprocessStep(),
-                    new SearchStep<KnowledgeRecord<UrlRecord>, GoogleSearchFilterModel, UrlRecordFilter>(new GoogleSearchFilterModel())
+                    new SearchStep<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>(request)
                 }
             );
 
             var context = new PipelineContext
             {
-                QueryString = "kolik je 1+1?"
+                QueryString = "co dělá microsoft"
             };
 
-            _pipelineContextService.SetCurrentContext(context);
+            //delete
+            //_pipelineContextService.SetCurrentContext(context);
 
-            var res = _pipelineOrchestrator.RunPipelineAsync(pipeline, context);
+            var res = await _pipelineOrchestrator.RunPipelineAsync(pipeline, context);
 
 
             //change to list of results, deal with errors in result creation

@@ -12,11 +12,12 @@ using System.Collections.Generic;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
-    public class SearchStep<TRecord, TSearchFilter, TSearchSettings, TFilter> : PipelineStep
+    public class SearchStep<TRecord, TSearchFilter, TSearchSettings, TFilter, T> : PipelineStep
         where TRecord : class, IKnowledgeRecord
         where TSearchFilter : class, IKnowledgeBaseSearchFilter
         where TSearchSettings : class, IKnowledgeBaseSearchSettings
-        where TFilter : class, IRecordFilter?
+        where TFilter : class, IRecordFilter<T>
+        where T : class
     {
         private readonly string? _knowledgeBaseKey = null;
         private readonly KnowledgeSearchRequest<TSearchFilter, TSearchSettings> _request;
@@ -38,14 +39,11 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
                 List<IKnowledgeRecord> recordsToAdd = [];
                 var kernel = settings.Kernel;
                 //TODO plugins in each step? how to choose, how to setup needed ones
-                var kb = settings.GetService<IKnowledgeBase<TRecord, TSearchFilter, TSearchSettings, TFilter>>(_knowledgeBaseKey);
-                var searchReq = new KnowledgeSearchRequest<TSearchFilter, TSearchSettings>
-                {
-                    Filter = _request.Filter,
-                    Settings = _request.Settings,
-                    //QueryString = context.QueryString!,
-                };
-                var res = await kb!.SearchAsync(searchReq, context, _filter, cancellationToken);
+                var kb = settings.GetService<IKnowledgeBase<TRecord, TSearchFilter, TSearchSettings, TFilter, T>>(_knowledgeBaseKey);
+                //TODO make the search accept more queryStrings, probably inside Search, here if it is not expensive to create the connection each time
+                // aka now user can implement paralel async searches easily, so its prolly better to keep it this way
+                //TODO more query strings
+                var res = await kb!.SearchAsync(_request, [context.QueryString!], _filter, cancellationToken);
                 recordsToAdd.AddRange(res);
 
                 context.RetrievedRecords.AddRange(recordsToAdd);

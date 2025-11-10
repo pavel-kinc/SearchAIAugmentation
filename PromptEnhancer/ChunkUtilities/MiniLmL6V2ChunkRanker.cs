@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace PromptEnhancer.ChunkUtilities
 {
-    internal class MiniLmL6V2ChunkRanker : IChunkRanker
+    internal class MiniLmL6V2ChunkRanker : IChunkRankerService
     {
         private readonly AllMiniLmL6V2Embedder _embedder;
 

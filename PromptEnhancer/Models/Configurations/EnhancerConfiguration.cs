@@ -1,5 +1,4 @@
-﻿using PromptEnhancer.Models.Pipeline;
-using PromptEnhancer.Pipeline.Interfaces;
+﻿using PromptEnhancer.Pipeline.Interfaces;
 
 namespace PromptEnhancer.Models.Configurations
 {
