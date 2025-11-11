@@ -1,7 +1,4 @@
-﻿using AngleSharp.Css.Dom;
-using AngleSharp.Dom;
-using Microsoft.Extensions.Options;
-using Microsoft.SemanticKernel.Data;
+﻿using Microsoft.SemanticKernel.Data;
 using PromptEnhancer.ChunkUtilities.Interfaces;
 using PromptEnhancer.KnowledgeRecord;
 using PromptEnhancer.KnowledgeSearchRequest.Examples;
@@ -44,14 +41,14 @@ namespace PromptEnhancer.KnowledgeBase.Examples
             {
                 options = request.Filter.BuildParameters();
             }
-            if(textSearch is null)
+            if (textSearch is null)
             {
                 //TODO maybe exception?
                 return [];
             }
 
             var cb = new ConcurrentBag<KnowledgeUrlRecord>();
-            await Parallel.ForEachAsync(queriesToSearch, async (queryString, _) => 
+            await Parallel.ForEachAsync(queriesToSearch, async (queryString, _) =>
             {
                 IEnumerable<UrlRecord> data = await GetDataFromGoogle(queryString, textSearch, options, settings);
 
@@ -62,7 +59,7 @@ namespace PromptEnhancer.KnowledgeBase.Examples
                 }
             });
 
-            return [..cb];
+            return [.. cb];
         }
 
         private async Task<IEnumerable<UrlRecord>> GetDataFromGoogle(string queryString, ITextSearch textSearch, TextSearchOptions? options, GoogleSettings settings)

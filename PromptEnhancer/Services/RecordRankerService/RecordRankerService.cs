@@ -1,15 +1,8 @@
-﻿using AllMiniLmL6V2Sharp;
-using Microsoft.Extensions.AI;
-using Microsoft.ML.OnnxRuntimeGenAI;
+﻿using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
 using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Services.RankerService;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PromptEnhancer.Services.RecordRankerService
 {
@@ -18,7 +11,7 @@ namespace PromptEnhancer.Services.RecordRankerService
         private readonly IRankerService _rankerService;
 
         // maybe resolve here by key?
-        public RecordRankerService(IRankerService rankerService) 
+        public RecordRankerService(IRankerService rankerService)
         {
             _rankerService = rankerService;
         }
@@ -36,7 +29,7 @@ namespace PromptEnhancer.Services.RecordRankerService
 
             foreach (var record in context.RetrievedRecords.Where(x => x.HasEmbeddingData))
             {
-                if(record.RankSimilarity is not null)
+                if (record.RankSimilarity is not null)
                 {
                     res.Add(new PipelineRankedRecord
                     {
@@ -51,7 +44,7 @@ namespace PromptEnhancer.Services.RecordRankerService
                 }
             }
 
-            foreach(var embedRecord in context.PipelineEmbeddingsModels)
+            foreach (var embedRecord in context.PipelineEmbeddingsModels)
             {
                 var ranked = await CreateRankedRecord(embedRecord.AssociatedRecord, generator, dict, embedRecord.EmbeddingVector);
                 if (ranked is not null) res.Add(ranked);
@@ -62,7 +55,7 @@ namespace PromptEnhancer.Services.RecordRankerService
         private async Task<PipelineRankedRecord?> CreateRankedRecord(IKnowledgeRecord record, IEmbeddingGenerator<string, Embedding<float>> generator, Dictionary<string, ReadOnlyMemory<float>> dict, ReadOnlyMemory<float>? embed = null)
         {
             //TODO maybe just give it the basic query from context? but that could lead to some random data
-            if(record.UsedSearchQuery is null)
+            if (record.UsedSearchQuery is null)
             {
                 return null;
             }
@@ -75,7 +68,7 @@ namespace PromptEnhancer.Services.RecordRankerService
             var queryEmbed = dict[record.UsedSearchQuery];
             var recordEmbed = embed ?? record.GivenEmbeddings;
 
-            if(recordEmbed is null)
+            if (recordEmbed is null)
             {
                 return null;
             }

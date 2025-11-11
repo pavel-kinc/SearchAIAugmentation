@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics.Tensors;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Numerics.Tensors;
 
-namespace PromptEnhancer.Services.RecordRankerService
+namespace PromptEnhancer.Services.RankerService
 {
     public class CosineSimilarityRankerService : IRankerService
     {

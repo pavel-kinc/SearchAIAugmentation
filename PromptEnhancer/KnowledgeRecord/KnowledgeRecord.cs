@@ -1,13 +1,5 @@
-﻿using AngleSharp.Dom;
-using PromptEnhancer.KnowledgeBase.Interfaces;
-using PromptEnhancer.KnowledgeRecord.Interfaces;
-using PromptEnhancer.Models.Examples;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using PromptEnhancer.KnowledgeRecord.Interfaces;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace PromptEnhancer.KnowledgeRecord
 {
@@ -23,7 +15,7 @@ namespace PromptEnhancer.KnowledgeRecord
 
         public string Source { get; set; }
         // optional precomputed embeddings, use only with same model!
-        public float[]? GivenEmbeddings { get; set; } = null;
+        public ReadOnlyMemory<float>? GivenEmbeddings { get; set; } = null;
 
         public float? RankSimilarity
         {

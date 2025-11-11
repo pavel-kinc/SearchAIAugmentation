@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace PromptEnhancer.KnowledgeRecord.Interfaces
+﻿namespace PromptEnhancer.KnowledgeRecord.Interfaces
 {
     public interface IKnowledgeRecord
     {

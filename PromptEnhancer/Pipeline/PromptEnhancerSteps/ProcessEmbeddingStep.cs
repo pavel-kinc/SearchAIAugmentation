@@ -1,5 +1,4 @@
 ﻿using ErrorOr;
-using Microsoft.SemanticKernel.Embeddings;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Services.EmbeddingService;
 

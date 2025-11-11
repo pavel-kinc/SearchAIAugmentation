@@ -1,6 +1,5 @@
 ﻿using ErrorOr;
 using PromptEnhancer.Models.Pipeline;
-using PromptEnhancer.Services.EmbeddingService;
 using PromptEnhancer.Services.RecordRankerService;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps

@@ -5,15 +5,15 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
     public class PromptAugmentStep : PipelineStep
     {
-        protected override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
+        protected override async Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
         {
             if (context.QueryString is null)
             {
-                return Task.FromResult<ErrorOr<bool>>(false);
+                return false;
             }
 
             context.QueryString = context.QueryString.Trim();
-            return Task.FromResult<ErrorOr<bool>>(true);
+            return true;
         }
 
         protected override ErrorOr<bool> CheckExecuteConditions(PipelineContext context)
