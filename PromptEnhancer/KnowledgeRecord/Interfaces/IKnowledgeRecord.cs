@@ -9,14 +9,14 @@
         // maybe just getter to underlying object field?
         public ReadOnlyMemory<float>? GivenEmbeddings { get; set; }
 
-        public float? RankSimilarity { get; set; }
+        public float? SimilarityScore { get; set; }
 
         public string UsedSearchQuery { get; set; }
 
         //static abstract (string property, int chunkSize)? ChunkableProperty { get; }
         public string LLMRepresentationString { get; }
         public string EmbeddingRepresentationString { get; }
-        public bool HasEmbeddingData => GivenEmbeddings is not null || RankSimilarity is not null;
+        public bool HasEmbeddingData => GivenEmbeddings is not null || SimilarityScore is not null;
         // optional property weights for embedding generation
         public IDictionary<string, int>? PropertyWeights { get; }
         public object SourceObject { get; }

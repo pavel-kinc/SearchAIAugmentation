@@ -15,11 +15,6 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
         {
-            if (context.QueryString is null)
-            {
-                return false;
-            }
-
             var rankerService = settings.GetService<IRecordRankerService>(_recordRankerServiceKey);
             //TODO is it okay to send context? I would like to make it unmodifiable maybe?
             context.PipelineRankedRecords = await rankerService!.GetEmbeddingsForRecordsWithoutEmbeddingDataAsync(settings.Kernel, context, settings.GeneratorKey);

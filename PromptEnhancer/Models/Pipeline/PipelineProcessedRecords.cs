@@ -7,6 +7,6 @@ namespace PromptEnhancer.Models.Pipeline
     {
         public required IKnowledgeRecord AssociatedRecord { get; set; }
         [Range(0, 1)]
-        public float Score { get; init; }
+        public float SimilarityScore { get; init; }
     }
 }

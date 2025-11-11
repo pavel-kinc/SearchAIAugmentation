@@ -29,12 +29,12 @@ namespace PromptEnhancer.Services.RecordRankerService
 
             foreach (var record in context.RetrievedRecords.Where(x => x.HasEmbeddingData))
             {
-                if (record.RankSimilarity is not null)
+                if (record.SimilarityScore is not null)
                 {
                     res.Add(new PipelineRankedRecord
                     {
                         AssociatedRecord = record,
-                        Score = record.RankSimilarity.Value
+                        SimilarityScore = record.SimilarityScore.Value
                     });
                 }
                 else
@@ -77,7 +77,7 @@ namespace PromptEnhancer.Services.RecordRankerService
             return new PipelineRankedRecord
             {
                 AssociatedRecord = record,
-                Score = res
+                SimilarityScore = res
             };
         }
     }

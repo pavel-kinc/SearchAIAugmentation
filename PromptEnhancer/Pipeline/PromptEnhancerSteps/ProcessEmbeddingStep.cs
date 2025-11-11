@@ -16,11 +16,6 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 
         protected override async Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
         {
-            if (context.QueryString is null)
-            {
-                return false;
-            }
-
             var embService = settings.GetService<IEmbeddingService>(_embeddingServiceKey);
             context.PipelineEmbeddingsModels = await embService!.GetEmbeddingsForRecordsWithoutEmbeddingDataAsync(settings.Kernel, context.RetrievedRecords, settings.GeneratorKey);
             return true;

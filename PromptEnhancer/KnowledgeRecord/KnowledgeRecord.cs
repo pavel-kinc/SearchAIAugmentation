@@ -17,7 +17,7 @@ namespace PromptEnhancer.KnowledgeRecord
         // optional precomputed embeddings, use only with same model!
         public ReadOnlyMemory<float>? GivenEmbeddings { get; set; } = null;
 
-        public float? RankSimilarity
+        public float? SimilarityScore
         {
             get => _rankSimilarity;
             set

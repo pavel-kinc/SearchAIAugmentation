@@ -15,8 +15,10 @@ namespace PromptEnhancer.Models.Pipeline
 
         public IEnumerable<PipelineRankedRecord> PipelineRankedRecords { get; set; } = [];
 
-        public IEnumerable<IKnowledgeRecord> PickedRecords { get; init; } = [];
+        public IEnumerable<IKnowledgeRecord> PickedRecords { get; set; } = [];
 
-        public IDictionary<string, object>? Metadata { get; init; }
+        public IEnumerable<string> AdditionalContext { get; init; } = [];
+
+        public IDictionary<string, object> Metadata { get; init; } = new Dictionary<string, object>();
     }
 }

@@ -7,6 +7,10 @@ namespace PromptEnhancer.Pipeline
     public abstract class PipelineStep : IPipelineStep
     {
         protected bool _isRequired = false;
+        protected PipelineStep(bool isRequired = false) 
+        { 
+            _isRequired = isRequired;
+        }
         public async Task<ErrorOr<bool>> ExecuteAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
         {
             var check = CheckExecuteConditions(context);
@@ -14,7 +18,7 @@ namespace PromptEnhancer.Pipeline
             {
                 return check;
             }
-            //TODO here try catch?
+            //TODO here try catch? also maybe delete cancellation token, i dont use it in my methods/services
             return check.Value ? await ExecuteStepAsync(settings, context, cancellationToken) : false;
         }
 
