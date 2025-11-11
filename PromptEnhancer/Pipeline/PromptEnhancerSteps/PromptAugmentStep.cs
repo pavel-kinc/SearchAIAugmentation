@@ -5,14 +5,14 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
     public class PromptAugmentStep : PipelineStep
     {
-        protected override async Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
+        protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
         {
-            if (context.QueryString is null)
-            {
-                return false;
-            }
+            //"""
+            //SystemPrompt: You will receive a question that will be used as a search query, try to logically split the question so that
+            // search can find relevant data for it. Split the parts by ';' and order them by priority.
+            //"""
 
-            context.QueryString = context.QueryString.Trim();
+
             return true;
         }
 

@@ -70,6 +70,7 @@ namespace PromptEnhancer.KnowledgeBase
         {
             //TODO embedding data (Rank, embeddings) here somehow, maybe through concrete knowledgeBase (where there will be property picker)
             // or maybe let it in concrete knowledgeBase to assign the property of concrete KnowledgeRecord onto model's property
+            // this needs to be done in override, the embedding and score - mainly embedding can have some user inserted data - like source or model
             return new T
             {
                 Id = Guid.NewGuid().ToString(),

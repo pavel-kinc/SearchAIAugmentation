@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.AI;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 
 namespace PromptEnhancer.Models.Pipeline
@@ -10,6 +11,8 @@ namespace PromptEnhancer.Models.Pipeline
         public Kernel Kernel { get; } = kernel;
 
         public IServiceProvider ServiceProvider { get; set; } = sp;
+
+        public ChatOptions? ChatOptions { get; set; }
 
         public T GetService<T>(string? key = null)
             where T : class

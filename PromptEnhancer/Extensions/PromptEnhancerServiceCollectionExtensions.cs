@@ -13,6 +13,7 @@ using PromptEnhancer.Models.Examples;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Pipeline;
 using PromptEnhancer.Pipeline.Interfaces;
+using PromptEnhancer.Pipeline.PromptEnhancerSteps;
 using PromptEnhancer.Plugins;
 using PromptEnhancer.Search;
 using PromptEnhancer.Search.Interfaces;
@@ -72,6 +73,7 @@ namespace PromptEnhancer.Extensions
             services.TryAddSingleton<IEmbeddingService, EmbeddingService>();
             services.TryAddSingleton<IRecordRankerService, RecordRankerService>();
             services.TryAddSingleton<IRankerService, CosineSimilarityRankerService>();
+            services.TryAddSingleton<IRecordPickerService, RecordPickerService>();
 
 
             //services.TryAddKeyedSingleton<IKnowledgeBase, TestKnowledgeBaseProcessor>("test");

@@ -7,13 +7,9 @@ namespace PromptEnhancer.Models.Pipeline
     {
         public string? QueryString { get; set; }
 
-        public IEnumerable<string> QueryStrings { get; init; } = [];
+        public IEnumerable<string> QueryStrings { get; set; } = [];
 
         public List<IKnowledgeRecord> RetrievedRecords { get; init; } = [];
-
-        public IEnumerable<PipelineEmbeddingsModel> PipelineEmbeddingsModels { get; set; } = [];
-
-        public IEnumerable<PipelineRankedRecord> PipelineRankedRecords { get; set; } = [];
 
         public IEnumerable<IKnowledgeRecord> PickedRecords { get; set; } = [];
 

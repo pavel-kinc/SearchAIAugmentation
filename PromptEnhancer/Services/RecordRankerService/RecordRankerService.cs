@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
 using PromptEnhancer.KnowledgeRecord.Interfaces;
-using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Services.RankerService;
 
 namespace PromptEnhancer.Services.RecordRankerService
@@ -16,48 +15,30 @@ namespace PromptEnhancer.Services.RecordRankerService
             _rankerService = rankerService;
         }
 
-        public async Task<IEnumerable<PipelineRankedRecord>> GetEmbeddingsForRecordsWithoutEmbeddingDataAsync(Kernel kernel, PipelineContext context, string? generatorKey = null)
+        public async Task<bool> GetSimilarityScoreForRecordsAsync(Kernel kernel, IEnumerable<IKnowledgeRecord> records,string? queryString, string? generatorKey = null)
         {
             var dict = new Dictionary<string, ReadOnlyMemory<float>>();
             var generator = kernel.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>(generatorKey);
-            if (context.QueryString is not null)
+            if (queryString is not null)
             {
-                var query = await generator.GenerateVectorAsync(context.QueryString);
-                dict.Add(context.QueryString, query);
-            }
-            ICollection<PipelineRankedRecord> res = [];
-
-            foreach (var record in context.RetrievedRecords.Where(x => x.HasEmbeddingData))
-            {
-                if (record.SimilarityScore is not null)
-                {
-                    res.Add(new PipelineRankedRecord
-                    {
-                        AssociatedRecord = record,
-                        SimilarityScore = record.SimilarityScore.Value
-                    });
-                }
-                else
-                {
-                    var ranked = await CreateRankedRecord(record, generator, dict);
-                    if (ranked is not null) res.Add(ranked);
-                }
+                var query = await generator.GenerateVectorAsync(queryString);
+                dict.Add(queryString, query);
             }
 
-            foreach (var embedRecord in context.PipelineEmbeddingsModels)
+            foreach (var record in records.Where(x => x.SimilarityScore is null))
             {
-                var ranked = await CreateRankedRecord(embedRecord.AssociatedRecord, generator, dict, embedRecord.EmbeddingVector);
-                if (ranked is not null) res.Add(ranked);
+                //TODO what if 1 assignment fails? now i just ignore the result
+                await TryAssignScoreToRecord(record, generator, dict);
             }
-            return res;
+            return true;
         }
 
-        private async Task<PipelineRankedRecord?> CreateRankedRecord(IKnowledgeRecord record, IEmbeddingGenerator<string, Embedding<float>> generator, Dictionary<string, ReadOnlyMemory<float>> dict, ReadOnlyMemory<float>? embed = null)
+        private async Task<bool> TryAssignScoreToRecord(IKnowledgeRecord record, IEmbeddingGenerator<string, Embedding<float>> generator, Dictionary<string, ReadOnlyMemory<float>> dict, ReadOnlyMemory<float>? embed = null)
         {
             //TODO maybe just give it the basic query from context? but that could lead to some random data
             if (record.UsedSearchQuery is null)
             {
-                return null;
+                return false;
             }
 
             if (!dict.ContainsKey(record.UsedSearchQuery))
@@ -66,19 +47,15 @@ namespace PromptEnhancer.Services.RecordRankerService
             }
 
             var queryEmbed = dict[record.UsedSearchQuery];
-            var recordEmbed = embed ?? record.GivenEmbeddings;
+            var recordEmbed = embed ?? record.Embeddings?.EmbeddingVector;
 
             if (recordEmbed is null)
             {
-                return null;
+                return false;
             }
 
-            var res = _rankerService.GetSimilarityScore(queryEmbed, (ReadOnlyMemory<float>)recordEmbed);
-            return new PipelineRankedRecord
-            {
-                AssociatedRecord = record,
-                SimilarityScore = res
-            };
+            record.SimilarityScore = _rankerService.GetSimilarityScore(queryEmbed, (ReadOnlyMemory<float>)recordEmbed);
+            return true;
         }
     }
 }

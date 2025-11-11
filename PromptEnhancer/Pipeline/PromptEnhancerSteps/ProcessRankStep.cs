@@ -17,13 +17,12 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
         {
             var rankerService = settings.GetService<IRecordRankerService>(_recordRankerServiceKey);
             //TODO is it okay to send context? I would like to make it unmodifiable maybe?
-            context.PipelineRankedRecords = await rankerService!.GetEmbeddingsForRecordsWithoutEmbeddingDataAsync(settings.Kernel, context, settings.GeneratorKey);
-            return true;
+            return await rankerService!.GetSimilarityScoreForRecordsAsync(settings.Kernel, context.RetrievedRecords, context.QueryString, settings.GeneratorKey);
         }
 
         protected override ErrorOr<bool> CheckExecuteConditions(PipelineContext context)
         {
-            if ((context.RetrievedRecords.Any() || context.PipelineEmbeddingsModels.Any()) && !context.PipelineRankedRecords.Any())
+            if (context.RetrievedRecords.Any())
             {
                 return true;
             }

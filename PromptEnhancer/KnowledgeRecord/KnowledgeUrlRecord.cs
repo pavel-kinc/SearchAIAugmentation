@@ -1,4 +1,7 @@
-﻿using PromptEnhancer.Models.Examples;
+﻿using Microsoft.Extensions.AI;
+using Microsoft.ML.OnnxRuntimeGenAI;
+using PromptEnhancer.Models;
+using PromptEnhancer.Models.Examples;
 
 namespace PromptEnhancer.KnowledgeRecord
 {
@@ -9,6 +12,6 @@ namespace PromptEnhancer.KnowledgeRecord
         public static Func<UrlRecord, string>? ChunkSelector => x => x.Content;
         public static Action<UrlRecord, string>? AssignChunkToProperty => (x, chunk) => x.Content = chunk;
         public static int DefaultChunkSize => 300;
-
+        public override string EmbeddingRepresentationString => SourceObject!.Content;
     }
 }

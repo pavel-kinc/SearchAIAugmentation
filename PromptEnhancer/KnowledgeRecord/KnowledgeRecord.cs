@@ -1,4 +1,5 @@
 ﻿using PromptEnhancer.KnowledgeRecord.Interfaces;
+using PromptEnhancer.Models;
 using System.Text.Json;
 
 namespace PromptEnhancer.KnowledgeRecord
@@ -6,8 +7,6 @@ namespace PromptEnhancer.KnowledgeRecord
     public class KnowledgeRecord<T> : IKnowledgeRecord
         where T : class
     {
-        private float? _rankSimilarity = null;
-
         public string? Id { get; set; }
         //TODO required here makes the base knowledge to fail in T creation - then there is error in concrete implementations, same with other properties
         public T SourceObject { get; set; }
@@ -15,21 +14,8 @@ namespace PromptEnhancer.KnowledgeRecord
 
         public string Source { get; set; }
         // optional precomputed embeddings, use only with same model!
-        public ReadOnlyMemory<float>? GivenEmbeddings { get; set; } = null;
-
-        public float? SimilarityScore
-        {
-            get => _rankSimilarity;
-            set
-            {
-                var v = value;
-                if (v is not null && v > 1)
-                {
-                    v = 1;
-                }
-                _rankSimilarity = v;
-            }
-        }
+        public PipelineEmbeddingsModel? Embeddings { get; set; }
+        public float? SimilarityScore { get; set; }
 
         public string UsedSearchQuery { get; set; }
 
@@ -38,6 +24,7 @@ namespace PromptEnhancer.KnowledgeRecord
         public virtual string EmbeddingRepresentationString => JsonSerializer.Serialize(SourceObject);
         // optional property weights for embedding generation
         public virtual IDictionary<string, int>? PropertyWeights => null;
+
         object IKnowledgeRecord.SourceObject => SourceObject;
     }
 }

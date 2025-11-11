@@ -17,14 +17,13 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
         protected override async Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
         {
             var embService = settings.GetService<IEmbeddingService>(_embeddingServiceKey);
-            context.PipelineEmbeddingsModels = await embService!.GetEmbeddingsForRecordsWithoutEmbeddingDataAsync(settings.Kernel, context.RetrievedRecords, settings.GeneratorKey);
-            return true;
+            return await embService!.GetEmbeddingsForRecordsWithoutEmbeddingDataAsync(settings.Kernel, context.RetrievedRecords, settings.GeneratorKey);
         }
 
         protected override ErrorOr<bool> CheckExecuteConditions(PipelineContext context)
         {
             // Need retrieved records and no existing embeddings to avoid redundant processing
-            if (context.RetrievedRecords.Count != 0 && !context.PipelineEmbeddingsModels.Any())
+            if (context.RetrievedRecords.Any())
             {
                 return true;
             }
