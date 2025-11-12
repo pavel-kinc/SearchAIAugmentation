@@ -7,8 +7,8 @@ namespace PromptEnhancer.Pipeline
     public abstract class PipelineStep : IPipelineStep
     {
         protected bool _isRequired = false;
-        protected PipelineStep(bool isRequired = false) 
-        { 
+        protected PipelineStep(bool isRequired = false)
+        {
             _isRequired = isRequired;
         }
         public async Task<ErrorOr<bool>> ExecuteAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)

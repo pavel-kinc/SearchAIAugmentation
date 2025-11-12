@@ -1,8 +1,6 @@
 ﻿using ErrorOr;
 using Microsoft.Extensions.AI;
 using PromptEnhancer.Models.Pipeline;
-using System.Threading;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
@@ -33,7 +31,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             //TODO maybe more checks for the llm response?
             var chatClient = settings.Kernel.GetRequiredService<IChatClient>(_chatClientKey);
             var res = await chatClient.GetResponseAsync(string.Format(PromptTemplate, _maxSplit, FailResponseLLM), _options ?? settings.ChatOptions, cancellationToken: cancellationToken);
-            if(res.Text == FailResponseLLM || res.Text.Length > MaxResponseLength || res.Text.Count(c => c == ';') > _maxSplit)
+            if (res.Text == FailResponseLLM || res.Text.Length > MaxResponseLength || res.Text.Count(c => c == ';') > _maxSplit)
             {
                 return false;
             }

@@ -1,6 +1,5 @@
 ﻿using Microsoft.SemanticKernel;
 using PromptEnhancer.KnowledgeRecord.Interfaces;
-using PromptEnhancer.Models.Pipeline;
 
 namespace PromptEnhancer.Services.RecordRankerService
 {

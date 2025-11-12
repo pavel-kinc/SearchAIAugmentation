@@ -1,6 +1,4 @@
-﻿using PromptEnhancer.KnowledgeRecord.Interfaces;
-
-namespace PromptEnhancer.Models
+﻿namespace PromptEnhancer.Models
 {
     public class PipelineEmbeddingsModel
     {

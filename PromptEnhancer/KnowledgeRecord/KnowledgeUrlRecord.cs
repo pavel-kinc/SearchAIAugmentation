@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.AI;
-using Microsoft.ML.OnnxRuntimeGenAI;
-using PromptEnhancer.Models;
-using PromptEnhancer.Models.Examples;
+﻿using PromptEnhancer.Models.Examples;
 
 namespace PromptEnhancer.KnowledgeRecord
 {

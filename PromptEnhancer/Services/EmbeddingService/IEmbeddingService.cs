@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
 using PromptEnhancer.KnowledgeRecord.Interfaces;
-using PromptEnhancer.Models;
 
 namespace PromptEnhancer.Services.EmbeddingService
 {

@@ -2,7 +2,6 @@
 using Microsoft.SemanticKernel;
 using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.Models;
-using System.Collections.Concurrent;
 
 namespace PromptEnhancer.Services.EmbeddingService
 {

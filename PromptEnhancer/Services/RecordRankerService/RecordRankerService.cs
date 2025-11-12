@@ -15,7 +15,7 @@ namespace PromptEnhancer.Services.RecordRankerService
             _rankerService = rankerService;
         }
 
-        public async Task<bool> GetSimilarityScoreForRecordsAsync(Kernel kernel, IEnumerable<IKnowledgeRecord> records,string? queryString, string? generatorKey = null)
+        public async Task<bool> GetSimilarityScoreForRecordsAsync(Kernel kernel, IEnumerable<IKnowledgeRecord> records, string? queryString, string? generatorKey = null)
         {
             var dict = new Dictionary<string, ReadOnlyMemory<float>>();
             var generator = kernel.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>(generatorKey);

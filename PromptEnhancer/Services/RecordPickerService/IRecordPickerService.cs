@@ -1,6 +1,5 @@
 ﻿using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.Models;
-using PromptEnhancer.Models.Pipeline;
 
 namespace PromptEnhancer.Services.RecordPickerService
 {

@@ -1,11 +1,5 @@
 ﻿using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.Models;
-using PromptEnhancer.Models.Pipeline;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PromptEnhancer.Services.RecordPickerService
 {
@@ -20,7 +14,7 @@ namespace PromptEnhancer.Services.RecordPickerService
         {
             query = options.MinScoreSimilarity.HasValue ? query.Where(r => r.SimilarityScore.HasValue && r.SimilarityScore.Value >= options.MinScoreSimilarity.Value) : query;
 
-            query = !string.IsNullOrWhiteSpace(options.EmbeddingSourceEquals) ? 
+            query = !string.IsNullOrWhiteSpace(options.EmbeddingSourceEquals) ?
                 query.Where(r => r.Embeddings != null && r.Embeddings.EmbeddingSource == options.EmbeddingSourceEquals) : query;
 
             foreach (var predicate in options.Predicate)
