@@ -4,8 +4,9 @@ using PromptEnhancer.Models.Pipeline;
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
     //TODO FINISH
-    public class PostProcessStep : PipelineStep
+    public class GenerationStep : PipelineStep
     {
+
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
         {
             //"""

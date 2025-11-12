@@ -4,7 +4,7 @@ using System;
 using System.Globalization;
 using System.Linq.Expressions;
 
-namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
+namespace PromptEnhancer.Models
 {
     public class RecordPickerOptions
     {

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
+namespace PromptEnhancer.Services.RecordPickerService
 {
     public class RecordPickerService : IRecordPickerService
     {
@@ -35,7 +35,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
                     : query.OrderBy(keySelector);
             }
 
-            query = (options.OrderByScoreDescending.HasValue && options.OrderByScoreDescending.Value) ? query.OrderByDescending(x => x.SimilarityScore) : query;
+            query = options.OrderByScoreDescending.HasValue && options.OrderByScoreDescending.Value ? query.OrderByDescending(x => x.SimilarityScore) : query;
 
             // Paging
             if (options.Skip > 0)

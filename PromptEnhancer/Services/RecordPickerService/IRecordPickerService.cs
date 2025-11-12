@@ -1,7 +1,8 @@
 ﻿using PromptEnhancer.KnowledgeRecord.Interfaces;
+using PromptEnhancer.Models;
 using PromptEnhancer.Models.Pipeline;
 
-namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
+namespace PromptEnhancer.Services.RecordPickerService
 {
     internal interface IRecordPickerService
     {

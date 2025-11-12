@@ -91,6 +91,7 @@ namespace PromptEnhancer.Services.EnhancerService
             return JsonConvert.DeserializeObject<EnhancerConfiguration>(json);
         }
 
+        //TODO here i need pipeline
         public async Task<ErrorOr<IList<ResultModel>>> ProcessConfiguration(EnhancerConfiguration config, IEnumerable<Entry> entries, Kernel? kernel = null)
         {
             var kernelData = config.KernelConfiguration;
@@ -109,6 +110,9 @@ namespace PromptEnhancer.Services.EnhancerService
                 return Error.Failure("No kernel could be created or resolved.");
             }
 
+            //TODO should this be here? (maybe like sk.invoke and hope there are some plugins? - since there are 3 ways to kernel here, also i would need some plugins in my creation, but i could resolve plugins by injection (common interface))
+            //TODO it could also require check for openai, options and some uniform way to work with results, or just put it outside of this method and just work with it there, but it requires same arguments prolly
+            //TODO ye just put it outside of here, this is bad, just if else with this config i guess
             if (config.UseAutomaticFunctionCalling)
             {
                 return await HandleAutomaticFunctionCalling(sk, entries.FirstOrDefault());

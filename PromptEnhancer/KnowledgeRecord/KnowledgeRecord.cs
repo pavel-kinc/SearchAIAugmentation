@@ -1,5 +1,6 @@
 ﻿using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.Models;
+using PromptEnhancer.Models.Examples;
 using System.Text.Json;
 
 namespace PromptEnhancer.KnowledgeRecord
@@ -7,6 +8,8 @@ namespace PromptEnhancer.KnowledgeRecord
     public class KnowledgeRecord<T> : IKnowledgeRecord
         where T : class
     {
+        public static Func<T, string>? ChunkSelector => null;
+        public static Action<T, string>? AssignChunkToProperty => null;
         public string? Id { get; set; }
         //TODO required here makes the base knowledge to fail in T creation - then there is error in concrete implementations, same with other properties
         public T SourceObject { get; set; }

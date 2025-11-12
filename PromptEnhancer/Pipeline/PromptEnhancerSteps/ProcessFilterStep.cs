@@ -1,6 +1,8 @@
 ﻿using ErrorOr;
+using PromptEnhancer.Models;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Services.EmbeddingService;
+using PromptEnhancer.Services.RecordPickerService;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
