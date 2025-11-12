@@ -29,7 +29,6 @@ namespace PromptEnhancer.KnowledgeBase
             {
                 data = filter.FilterRecords(data);
             }
-
             //TODO maybe move chunkgenerator check completely elsewhere? now it just skips chunking if not defined, if deleted it throws error in method below
             if (_chunkGenerator is not null && allowChunking && chunkSelector is not null && assignChunkToProperty is not null)
             {
