@@ -5,11 +5,16 @@ namespace PromptEnhancer.Models.Configurations
     public class PromptConfiguration
     {
         [Display(Name = "System Instructions:")]
-        public string SystemInstructions { get; set; } = "Create SEO description of product with the help of Used Search Query and Augmented Data";
+        public string SystemInstructions { get; set; } = "React to the given prompt: ";//= "Create SEO description of product with the help of Used Search Query and Augmented Data";
         [Display(Name = "Macro definition (optional):")]
         public string? MacroDefinition { get; set; }
         [Display(Name = "Additional Instructions (optional):")]
         public string? AdditionalInstructions { get; set; }
+        [Display(Name = "Additional Context (optional):")]
+        public string? AdditionalContext { get; set; }
+        [Display(Name = "Additional Query Instruction (optional):")]
+        // when query is just Name, we could want to append this to it, like "Name product description"
+        public string? AdditionalQueryInstruction { get; set; }
         [Display(Name = "Approximate Output Length:")]
         public int TargetOutputLength { get; set; } = 200;
         [Display(Name = "Output Language:")]

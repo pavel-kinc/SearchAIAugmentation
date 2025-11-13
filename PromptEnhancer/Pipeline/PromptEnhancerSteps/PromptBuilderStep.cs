@@ -1,25 +1,21 @@
 ﻿using ErrorOr;
 using PromptEnhancer.Models.Pipeline;
+using PromptEnhancer.Prompt;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
     //TODO FINISH
     public class PromptBuilderStep : PipelineStep
     {
-        protected override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
+        protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
         {
-            if (context.QueryString is null)
-            {
-                return Task.FromResult<ErrorOr<bool>>(false);
-            }
-
-            context.QueryString = context.QueryString.Trim();
-            return Task.FromResult<ErrorOr<bool>>(true);
+            context.PromptToLLM = PromptUtility.BuildPrompt(settings.PromptConfiguration, context.Entry?.QueryString ?? context.QueryString, context.PickedRecords);
+            return true;
         }
 
         protected override ErrorOr<bool> CheckExecuteConditions(PipelineContext context)
         {
-            if (!string.IsNullOrEmpty(context.QueryString))
+            if (string.IsNullOrEmpty(context.PromptToLLM))
             {
                 return true;
             }

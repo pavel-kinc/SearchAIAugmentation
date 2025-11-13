@@ -3,7 +3,7 @@ using PromptEnhancer.Models;
 
 namespace PromptEnhancer.Services.RecordPickerService
 {
-    internal interface IRecordPickerService
+    public interface IRecordPickerService
     {
         Task<IEnumerable<IKnowledgeRecord>> GetPickedRecordsBasedOnFilter(RecordPickerOptions filter, IEnumerable<IKnowledgeRecord> records);
     }

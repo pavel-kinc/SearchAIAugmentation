@@ -1,4 +1,7 @@
-﻿namespace PromptEnhancer.Models
+﻿using ErrorOr;
+using PromptEnhancer.Models.Pipeline;
+
+namespace PromptEnhancer.Models
 {
     public class ResultModel
     {
@@ -9,5 +12,11 @@
         public string SearchResult { get; set; } = string.Empty;
 
         public ChatCompletionResult? AIResult { get; set; }
+
+        public PipelineContext? Result { get; init; }
+
+        public ErrorOr<bool>? PipelineSuccess { get; init; }
+
+        public Entry? EntryInput { get; init; }
     }
 }

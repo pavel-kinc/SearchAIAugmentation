@@ -91,6 +91,32 @@ namespace PromptEnhancer.Services.EnhancerService
             return JsonConvert.DeserializeObject<EnhancerConfiguration>(json);
         }
 
+        //TODO finish
+        public async Task<ErrorOr<IList<ResultModel>>> ProcessPipeline(PipelineModel pipeline, IEnumerable<PipelineContext> entries)
+        {
+            try
+            {
+                var cb = new ConcurrentBag<ResultModel>();
+                await Parallel.ForEachAsync(entries, async (entry, _) =>
+                {
+                    var pipelineRes = await _pipelineOrchestrator.RunPipelineAsync(pipeline, entry);
+                    var resultModel = new ResultModel
+                    {
+                        Result = entry,
+                        PipelineSuccess = pipelineRes,
+                        EntryInput = entry.Entry,
+                    };
+                    cb.Add(resultModel);
+                });
+                return cb.ToList();
+            }
+            catch (Exception ex) 
+            {
+                return Error.Failure($"{nameof(ProcessPipeline)} failed", ex.Message);
+            }
+
+        }
+
         //TODO here i need pipeline
         public async Task<ErrorOr<IList<ResultModel>>> ProcessConfiguration(EnhancerConfiguration config, IEnumerable<Entry> entries, Kernel? kernel = null)
         {
@@ -143,9 +169,12 @@ namespace PromptEnhancer.Services.EnhancerService
                 }
             };
 
-            var pipeline = new Models.Pipeline.Pipeline
+            var pipeline = new PipelineModel
             (
-                new PipelineSettings(sk, _serviceProvider),
+                new PipelineSettings(sk, _serviceProvider)
+                {
+                    PromptConfiguration = promptConf
+                },
                 // Define steps here based on configuration
                 //config.PipeLineSteps
                 new List<IPipelineStep>

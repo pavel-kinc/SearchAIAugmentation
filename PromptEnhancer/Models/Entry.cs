@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.Extensions.AI;
+using System.ComponentModel.DataAnnotations;
 
 namespace PromptEnhancer.Models
 {
@@ -12,5 +13,6 @@ namespace PromptEnhancer.Models
         public string? EntryOriginalText { get; set; }
         [Display(Name = "Entry Additional Data:")]
         public string? EntryAdditionalData { get; set; }
+        public IEnumerable<ChatMessage>? EntryChatHistory { get; set; }
     }
 }

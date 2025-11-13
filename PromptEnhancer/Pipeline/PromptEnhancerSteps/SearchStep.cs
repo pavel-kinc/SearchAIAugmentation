@@ -6,6 +6,7 @@ using PromptEnhancer.Models.Pipeline;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
+    //TODO maybe make convenience classes for less generics without required generics (like filters and settings)
     public class SearchStep<TRecord, TSearchFilter, TSearchSettings, TFilter, T> : PipelineStep
         where TRecord : class, IKnowledgeRecord
         where TSearchFilter : class, IKnowledgeBaseSearchFilter
@@ -66,4 +67,10 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
         //    return plugin;
         //}
     }
+
+    //TODO replace interfaces with "empty" base classes if needed
+    //public class SearchStep<TRecord, T> : SearchStep<TRecord, IKnowledgeBaseSearchFilter, IKnowledgeBaseSearchSettings, IRecordFilter<T>, T>
+    //where TRecord : class, IKnowledgeRecord
+    //where T : class
+    //{ }
 }

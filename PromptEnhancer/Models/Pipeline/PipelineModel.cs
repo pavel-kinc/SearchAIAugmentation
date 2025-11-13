@@ -2,7 +2,7 @@
 
 namespace PromptEnhancer.Models.Pipeline
 {
-    public class Pipeline(
+    public class PipelineModel(
         PipelineSettings settings,
         IEnumerable<IPipelineStep> steps)
     {

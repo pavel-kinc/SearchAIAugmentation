@@ -5,6 +5,6 @@ namespace PromptEnhancer.Pipeline.Interfaces
 {
     public interface IPipelineOrchestrator
     {
-        public Task<ErrorOr<bool>> RunPipelineAsync(Models.Pipeline.Pipeline pipeline, PipelineContext context);
+        public Task<ErrorOr<bool>> RunPipelineAsync(Models.Pipeline.PipelineModel pipeline, PipelineContext context);
     }
 }
