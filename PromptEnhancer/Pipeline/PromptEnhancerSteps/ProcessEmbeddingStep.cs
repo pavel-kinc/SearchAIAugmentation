@@ -8,9 +8,8 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
     {
         private readonly string? _embeddingServiceKey;
 
-        public ProcessEmbeddingStep(string? embeddingServiceKey = null, bool isRequired = false, string? generatorKey = null)
+        public ProcessEmbeddingStep(string? embeddingServiceKey = null, bool isRequired = false, string? generatorKey = null) : base(isRequired)
         {
-            _isRequired = isRequired;
             _embeddingServiceKey = embeddingServiceKey;
         }
 

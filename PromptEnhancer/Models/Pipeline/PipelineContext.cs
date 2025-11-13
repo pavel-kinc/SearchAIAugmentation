@@ -21,7 +21,9 @@ namespace PromptEnhancer.Models.Pipeline
 
         public List<string> AdditionalContext { get; init; } = [];
 
-        public string? PromptToLLM { get; set; }
+        public string? SystemPromptToLLM { get; set; }
+
+        public string? UserPromptToLLM { get; set; }
 
         public IDictionary<string, object> Metadata { get; init; } = new Dictionary<string, object>();
 

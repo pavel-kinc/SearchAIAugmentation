@@ -25,7 +25,9 @@ namespace PromptEnhancer.Services.RecordRankerService
                 dict.Add(queryString, query);
             }
 
-            foreach (var record in records.Where(x => x.SimilarityScore is null))
+            //TODO what if it needs rewrite for repetitive context? (now its like this for me to not rewrite sent data from base that returns them)
+            // if there are embeddings, it just recalculates
+            foreach (var record in records.Where(x => x.SimilarityScore is null || x.Embeddings is not null))
             {
                 //TODO what if 1 assignment fails? now i just ignore the result
                 await TryAssignScoreToRecord(record, generator, dict);

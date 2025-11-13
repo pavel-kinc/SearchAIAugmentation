@@ -14,6 +14,7 @@ using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Pipeline;
 using PromptEnhancer.Pipeline.Interfaces;
 using PromptEnhancer.Plugins;
+using PromptEnhancer.Plugins.Interfaces;
 using PromptEnhancer.Search;
 using PromptEnhancer.Search.Interfaces;
 using PromptEnhancer.Services.EmbeddingService;
@@ -68,12 +69,14 @@ namespace PromptEnhancer.Extensions
             services.TryAddSingleton<ISearchProviderManager, SearchProviderManager>();
             services.TryAddSingleton<ISearchWebScraper, SearchWebScraper>();
             services.TryAddSingleton<ISemanticKernelManager, SemanticKernelManager>();
-            services.TryAddSingleton<DateTimePlugin, DateTimePlugin>();
             services.TryAddSingleton<IPipelineOrchestrator, PipelineOrchestrator>();
             services.TryAddSingleton<IEmbeddingService, EmbeddingService>();
             services.TryAddSingleton<IRecordRankerService, RecordRankerService>();
             services.TryAddSingleton<IRankerService, CosineSimilarityRankerService>();
             services.TryAddSingleton<IRecordPickerService, RecordPickerService>();
+
+            services.AddSingleton<ISemanticKernelContextPlugin, DateTimePlugin>();
+            services.AddSingleton<ISemanticKernelContextPlugin, TemperaturePlugin>();
 
 
             //services.TryAddKeyedSingleton<IKnowledgeBase, TestKnowledgeBaseProcessor>("test");

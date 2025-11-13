@@ -18,11 +18,10 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
         private readonly KnowledgeSearchRequest<TSearchFilter, TSearchSettings> _request;
         private readonly TFilter? _filter;
 
-        public SearchStep(KnowledgeSearchRequest<TSearchFilter, TSearchSettings> request, TFilter? filter = null, string? knowledgeBaseKey = null, bool isRequired = false)
+        public SearchStep(KnowledgeSearchRequest<TSearchFilter, TSearchSettings> request, TFilter? filter = null, string? knowledgeBaseKey = null, bool isRequired = false) : base(isRequired)
         {
             // is key needed here? should i put knowledge base here directly?
             _knowledgeBaseKey = knowledgeBaseKey;
-            _isRequired = isRequired;
             _request = request;
             _filter = filter;
         }

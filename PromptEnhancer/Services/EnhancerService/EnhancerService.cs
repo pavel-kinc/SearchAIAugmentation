@@ -159,10 +159,9 @@ namespace PromptEnhancer.Services.EnhancerService
                 },
                 Filter = new GoogleSearchFilterModel
                 {
-                    SiteSearch = "microsoft.com",
-                    DateRestrict = "y2",
-                    ExactTerms = "release notes",
-                    ExcludeTerms = "preview",
+                    //SiteSearch = "microsoft.com",
+                    DateRestrict = "y5",
+                    //ExactTerms = "release notes",
                     InterfaceLanguage = "en",
                     LanguageRestrict = "lang_en",
                     Top = 5
@@ -180,13 +179,15 @@ namespace PromptEnhancer.Services.EnhancerService
                 new List<IPipelineStep>
                 {
                     new PreprocessStep(),
+                    new KernelContextPluginsStep(),
+                    //TODO automatic step picker calling? picking from list of steps(defined by user)/bases(from inject pick bases)/each has its own call to llm if it is viable for the given query(steps defined from user so kinda like 1.)
                     new SearchStep<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>(request)
                 }
             );
 
             var context = new PipelineContext
             {
-                QueryString = "co dělá microsoft"
+                QueryString = "jaká je teplota?"
             };
 
             //delete

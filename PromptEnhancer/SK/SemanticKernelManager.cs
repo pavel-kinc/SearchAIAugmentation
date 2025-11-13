@@ -37,7 +37,7 @@ namespace PromptEnhancer.SK
             kernelBuilder.Services.AddKernelServices(kernelServices);
             kernelBuilder.Services.AddInternalServices();
             var kernel = kernelBuilder.Build();
-            foreach (var plugin in kernel.Services.GetServices<ISemanticKernelPlugin>())
+            foreach (var plugin in kernel.Services.GetServices<ISemanticKernelContextPlugin>())
             {
                 kernel.Plugins.AddFromObject(plugin, plugin.GetType().Name);
             }

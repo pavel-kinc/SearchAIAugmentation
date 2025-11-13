@@ -7,6 +7,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
     //TODO FINISH
     public class GenerationStep : PipelineStep
     {
+        public GenerationStep(bool isRequired = false) : base(isRequired) { }
         //TODO for the streaming result, use other class completely i guess (aka dont use pipeline or give this step public method?)
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
         {
@@ -16,7 +17,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             //"""
             var history = context.Entry?.EntryChatHistory?.ToList() ?? new List<ChatMessage>();
             // if empty, add system role from prompt config, if not empty, add user role
-            history.Add(new ChatMessage(ChatRole.User, context.PromptToLLM));
+            history.Add(new ChatMessage(ChatRole.User, context.UserPromptToLLM));
 
             var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.ChatClientKey);
             var res = chatClient.GetResponseAsync(history, settings.ChatOptions, cancellationToken);
@@ -25,7 +26,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 
         protected override ErrorOr<bool> CheckExecuteConditions(PipelineContext context)
         {
-            if (!string.IsNullOrEmpty(context.QueryString) || !string.IsNullOrEmpty(context.PromptToLLM) || !string.IsNullOrEmpty(context.Entry?.QueryString))
+            if (!string.IsNullOrEmpty(context.QueryString) || !string.IsNullOrEmpty(context.UserPromptToLLM) || !string.IsNullOrEmpty(context.Entry?.QueryString))
             {
                 return true;
             }

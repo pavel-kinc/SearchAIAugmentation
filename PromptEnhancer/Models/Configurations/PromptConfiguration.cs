@@ -10,11 +10,6 @@ namespace PromptEnhancer.Models.Configurations
         public string? MacroDefinition { get; set; }
         [Display(Name = "Additional Instructions (optional):")]
         public string? AdditionalInstructions { get; set; }
-        [Display(Name = "Additional Context (optional):")]
-        public string? AdditionalContext { get; set; }
-        [Display(Name = "Additional Query Instruction (optional):")]
-        // when query is just Name, we could want to append this to it, like "Name product description"
-        public string? AdditionalQueryInstruction { get; set; }
         [Display(Name = "Approximate Output Length:")]
         public int TargetOutputLength { get; set; } = 200;
         [Display(Name = "Output Language:")]

@@ -13,7 +13,9 @@ namespace PromptEnhancer.Models.Pipeline
 
         public IServiceProvider ServiceProvider { get; } = sp;
 
-        public ChatOptions? ChatOptions { get; set; }
+        public ChatOptions? ChatOptions { get; init; }
+
+        public PromptExecutionSettings? KernelRequestSettings { get; init; }
 
         public PromptConfiguration? PromptConfiguration { get; init; }
 

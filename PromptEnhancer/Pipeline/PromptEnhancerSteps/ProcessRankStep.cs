@@ -8,7 +8,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
     {
         private readonly string? _recordRankerServiceKey;
 
-        public ProcessRankStep(string? recordRankerServiceKey)
+        public ProcessRankStep(string? recordRankerServiceKey, bool isRequired = false) : base(isRequired)
         {
             _recordRankerServiceKey = recordRankerServiceKey;
         }
