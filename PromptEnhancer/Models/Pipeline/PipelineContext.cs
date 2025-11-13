@@ -6,8 +6,8 @@ namespace PromptEnhancer.Models.Pipeline
     public class PipelineContext
     {
         //TODO not required (pipeline can be used from any point to do any step, when the needed data is there)
-        public PipelineContext(Entry? entry = null) 
-        { 
+        public PipelineContext(Entry? entry = null)
+        {
             Entry = entry;
             QueryString = entry?.QueryString;
         }

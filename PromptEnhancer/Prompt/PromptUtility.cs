@@ -15,7 +15,7 @@ namespace PromptEnhancer.Prompt
         {
             promptConf ??= new PromptConfiguration();
             //TODO build prompt better, this is temporary
-            var res =  @$"""
+            var res = @$"""
                     System: {promptConf.SystemInstructions}.
                     Generated output should concise of about {promptConf.TargetOutputLength} words.
                     {(!string.IsNullOrEmpty(promptConf.MacroDefinition) ? $" Any phrase wrapped in {promptConf.MacroDefinition} is a macro and must be kept exactly as-is." : string.Empty)}

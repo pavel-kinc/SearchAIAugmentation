@@ -16,20 +16,18 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 
         public const int MaxResponseLength = 200;
 
-        private readonly string? _chatClientKey;
         private readonly int _maxSplit;
         private readonly ChatOptions? _options;
 
-        public QueryParserStep(string? chatClientKey = null, int maxSplit = 3, ChatOptions? options = null, bool isRequired = false) : base(isRequired)
+        public QueryParserStep(int maxSplit = 3, ChatOptions? options = null, bool isRequired = false) : base(isRequired)
         {
-            _chatClientKey = chatClientKey;
             _maxSplit = maxSplit;
             _options = options;
         }
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
         {
             //TODO maybe more checks for the llm response?
-            var chatClient = settings.Kernel.GetRequiredService<IChatClient>(_chatClientKey);
+            var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.ChatClientKey);
             var res = await chatClient.GetResponseAsync(string.Format(PromptTemplate, _maxSplit, FailResponseLLM), _options ?? settings.ChatOptions, cancellationToken: cancellationToken);
             if (res.Text == FailResponseLLM || res.Text.Length > MaxResponseLength || res.Text.Count(c => c == ';') > _maxSplit)
             {

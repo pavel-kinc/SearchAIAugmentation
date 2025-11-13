@@ -110,7 +110,7 @@ namespace PromptEnhancer.Services.EnhancerService
                 });
                 return cb.ToList();
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 return Error.Failure($"{nameof(ProcessPipeline)} failed", ex.Message);
             }
