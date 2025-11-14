@@ -1,15 +1,14 @@
 ﻿using Microsoft.SemanticKernel.Data;
 using Microsoft.SemanticKernel.Plugins.Web.Google;
-
-using PromptEnhancer.Models;
 using PromptEnhancer.Models.Enums;
 using PromptEnhancer.Search.Interfaces;
 
 namespace PromptEnhancer.Search
 {
+    //TODO what to do with this? maybe just rename it to google?
     public class SearchProviderManager : ISearchProviderManager
     {
-        public virtual ITextSearch? CreateTextSearch(SearchProviderData searchProviderData)
+        public virtual ITextSearch? CreateTextSearch(SearchProviderSettings searchProviderData)
         {
             if (searchProviderData.Provider == SearchProviderEnum.Google)
             {

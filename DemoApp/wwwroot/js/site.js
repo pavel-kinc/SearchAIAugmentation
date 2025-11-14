@@ -11,3 +11,23 @@ $(document).ready(function () {
         $('.select2-search__field').attr('placeholder', 'Search...');
     });
 });
+
+function showFloatingAlert(message, duration = 3000) {
+    const container = document.getElementById('floating-alert-container');
+    if (!container) return;
+
+    const alert = document.createElement('div');
+    alert.className = 'floating-alert';
+    alert.textContent = message;
+
+    container.appendChild(alert);
+
+    // fade in
+    setTimeout(() => alert.classList.add('show'), 10);
+
+    // fade out after duration
+    setTimeout(() => {
+        alert.classList.remove('show');
+        setTimeout(() => alert.remove(), 500);
+    }, duration);
+}

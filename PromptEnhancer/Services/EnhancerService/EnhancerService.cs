@@ -1,19 +1,13 @@
 ﻿using ErrorOr;
-using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
 using Newtonsoft.Json;
 using PromptEnhancer.ChunkUtilities.Interfaces;
 using PromptEnhancer.CustomJsonResolver;
-using PromptEnhancer.KnowledgeBase;
-using PromptEnhancer.KnowledgeRecord;
-using PromptEnhancer.KnowledgeSearchRequest.Examples;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
-using PromptEnhancer.Models.Examples;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Pipeline.Interfaces;
-using PromptEnhancer.Pipeline.PromptEnhancerSteps;
 using PromptEnhancer.Search.Interfaces;
 using PromptEnhancer.SK.Interfaces;
 using System.Collections.Concurrent;
@@ -47,7 +41,7 @@ namespace PromptEnhancer.Services.EnhancerService
         }
 
         // supports single completion and embedding
-        public EnhancerConfiguration CreateDefaultConfiguration(string? aiApiKey = null, AIProviderEnum aiProvider = AIProviderEnum.OpenAI, string aiModel = "gpt-4o-mini", string embeddingModel = "text-embedding-3-small", string? searchApiKey = null, SearchProviderEnum searchProvider = SearchProviderEnum.Google, string? searchEngine = null)
+        public EnhancerConfiguration CreateDefaultConfiguration(string? aiApiKey = null, AIProviderEnum aiProvider = AIProviderEnum.OpenAI, string aiModel = "gpt-4o-mini", string? embeddingModel = "text-embedding-3-small")
         {
             var enhancerConfiguration = new EnhancerConfiguration();
             enhancerConfiguration.KernelConfiguration = new KernelConfiguration
@@ -56,13 +50,7 @@ namespace PromptEnhancer.Services.EnhancerService
                 Model = aiModel,
                 Provider = aiProvider,
                 EmbeddingModel = embeddingModel,
-            };
-
-            enhancerConfiguration.SearchConfiguration.SearchProviderData = new SearchProviderData
-            {
-                SearchApiKey = searchApiKey,
-                Engine = searchEngine,
-                Provider = searchProvider,
+                UseLLMConfigForEmbeddings = embeddingModel is not null
             };
             return enhancerConfiguration;
         }
@@ -91,11 +79,14 @@ namespace PromptEnhancer.Services.EnhancerService
             return JsonConvert.DeserializeObject<EnhancerConfiguration>(json);
         }
 
-        //TODO finish
         public async Task<ErrorOr<IList<ResultModel>>> ProcessPipeline(PipelineModel pipeline, IEnumerable<PipelineContext> entries)
         {
             try
             {
+                if (!entries.Any())
+                {
+                    return Error.Unexpected("No input specified, nothing to proccess");
+                }
                 var cb = new ConcurrentBag<ResultModel>();
                 await Parallel.ForEachAsync(entries, async (entry, _) =>
                 {
@@ -117,83 +108,52 @@ namespace PromptEnhancer.Services.EnhancerService
 
         }
 
-        //TODO here i need pipeline
+        //TODO here i need pipeline, figure out configs
         public async Task<ErrorOr<IList<ResultModel>>> ProcessConfiguration(EnhancerConfiguration config, IEnumerable<Entry> entries, Kernel? kernel = null)
         {
             var kernelData = config.KernelConfiguration;
-            var searchConf = config.SearchConfiguration;
-            var searchData = searchConf?.SearchProviderData;
             var promptConf = config.PromptConfiguration;
             var sk = kernel ?? _kernel;
             // TODO: maybe check kernelData as a whole?
             if (sk is null && kernelData is not null)
             {
-                sk = _semanticKernelManager.CreateKernel(kernelData);
+                var createdKernel = _semanticKernelManager.CreateKernel(_semanticKernelManager.ConvertConfig(kernelData));
+                if (!createdKernel.IsError)
+                {
+                    sk = createdKernel.Value;
+                }
+                else
+                {
+                    return createdKernel.Errors;
+                }
             }
+
             if (sk is null)
             {
                 // TODO: handle no kernel scenario better
                 return Error.Failure("No kernel could be created or resolved.");
             }
 
+            var pipeline = new PipelineModel(new PipelineSettings(sk, _serviceProvider, config.PipelineAdditionalSettings), config.Steps);
+
+            return await ProcessPipeline(pipeline, entries.Select(x => new PipelineContext(x)));
+
             //TODO should this be here? (maybe like sk.invoke and hope there are some plugins? - since there are 3 ways to kernel here, also i would need some plugins in my creation, but i could resolve plugins by injection (common interface))
             //TODO it could also require check for openai, options and some uniform way to work with results, or just put it outside of this method and just work with it there, but it requires same arguments prolly
             //TODO ye just put it outside of here, this is bad, just if else with this config i guess
-            if (config.UseAutomaticFunctionCalling)
-            {
-                return await HandleAutomaticFunctionCalling(sk, entries.FirstOrDefault());
-            }
+            //if (config.UseAutomaticFunctionCalling)
+            //{
+            //    return await HandleAutomaticFunctionCalling(sk, entries.FirstOrDefault());
+            //}
 
             //if(config.PipeLineSteps?.Any() != true)
             //{
             //    return Error.Unexpected("No pipeline steps defined in configuration.");
             //}
 
-            var request = new GoogleSearchRequest
-            {
-                Settings = new GoogleSettings
-                {
-                    SearchApiKey = searchData!.SearchApiKey!,
-                    Engine = searchData!.Engine!,
-                    ChunkSize = 300,
-                },
-                Filter = new GoogleSearchFilterModel
-                {
-                    //SiteSearch = "microsoft.com",
-                    DateRestrict = "y5",
-                    //ExactTerms = "release notes",
-                    InterfaceLanguage = "en",
-                    LanguageRestrict = "lang_en",
-                    Top = 5
-                }
-            };
-
-            var pipeline = new PipelineModel
-            (
-                new PipelineSettings(sk, _serviceProvider)
-                {
-                    PromptConfiguration = promptConf
-                },
-                // Define steps here based on configuration
-                //config.PipeLineSteps
-                new List<IPipelineStep>
-                {
-                    new PreprocessStep(),
-                    new KernelContextPluginsStep(),
-                    //TODO automatic step picker calling? picking from list of steps(defined by user)/bases(from inject pick bases)/each has its own call to llm if it is viable for the given query(steps defined from user so kinda like 1.)
-                    new SearchStep<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>(request)
-                }
-            );
-
-            var context = new PipelineContext
-            {
-                QueryString = "jaká je teplota?"
-            };
-
             //delete
             //_pipelineContextService.SetCurrentContext(context);
 
-            var res = await _pipelineOrchestrator.RunPipelineAsync(pipeline, context);
 
 
             //change to list of results, deal with errors in result creation
@@ -225,7 +185,6 @@ namespace PromptEnhancer.Services.EnhancerService
             //var val = result2.GetValue<string>();
             //var val = res.GetValue<string>();
             //var textSearch = _searchProviderManager.CreateTextSearch(searchData!)!;
-            var cb = new ConcurrentBag<ResultModel>();
 
             //var strings = new List<string> { "Pes šel do lesa.", "Kočka spí v koši.", "Auto jede rychle." };
             //var embeddingGenerator = sk.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>();
@@ -256,12 +215,10 @@ namespace PromptEnhancer.Services.EnhancerService
             await Parallel.ForEachAsync(entries, async (entry, _) =>
             {
                 //var query = entry.QueryString!;
-                var resultView = new ResultModel();
                 //var res = await _searchProviderManager.GetSearchResults(textSearch, query);
                 //var searchResults = await res.Results.ToListAsync();
                 //var usedUrls = searchResults.Where(x => !string.IsNullOrEmpty(x.Link)).Select(x => x.Link!);
                 //temporary
-                var useScraper = true;
                 //if (useScraper)
                 //{
                 //    //will be needed some specifications from config what to search for maybe?
@@ -277,29 +234,7 @@ namespace PromptEnhancer.Services.EnhancerService
                 //resultView.Prompt = PromptUtility.BuildPrompt(promptConf, query, resultView.SearchResult);
                 ////resultView.AIResult = await _semanticKernelManager.GetAICompletionResult(sk!, resultView.Prompt);
                 //resultView.AIResult.UsedURLs = usedUrls;
-                PromptExecutionSettings settings = new()
-                {
-                    FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
-                };
-                var kernelSettings = new KernelArguments(settings);
-                //var gemini = sk.GetRequiredService<IChatCompletionService>();
-                //var res = await gemini.GetChatMessageContentAsync("What date and time is it? Then add 7 days to the time and give me that date.", settings);
-                var res = await sk.InvokePromptAsync<ChatResponse>("What date and time is it? Then add 7 days to the time and give me that date. (in iso format)", kernelSettings);
-                var text = res.Text;
-                resultView.AIResult = new ChatCompletionResult
-                {
-                    AIOutput = text,
-                    TokensUsed = (int)(res?.Usage?.TotalTokenCount ?? 0),
-                };
-                cb.Add(resultView);
             });
-
-            return cb.ToList();
-        }
-
-        private async Task<ErrorOr<IList<ResultModel>>> HandleAutomaticFunctionCalling(Kernel sk, Entry? entry)
-        {
-            throw new NotImplementedException();
         }
 
         private string GetConfigurationJson(EnhancerConfiguration configuration, bool hideSecrets = true)

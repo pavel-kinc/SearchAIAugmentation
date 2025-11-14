@@ -33,6 +33,7 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
+            <div id="floating-alert-container" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1050; pointer-events: none;"></div>
             @RenderBody()
         </main>
     </div>
@@ -52,5 +53,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const message = '@(Model.FloatingAlertMessage ?? "")';
+            if (message) showFloatingAlert(message, 3000);
+        });
+    </script>
 </body>
 </html>

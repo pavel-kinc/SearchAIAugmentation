@@ -1,12 +1,17 @@
 using DemoApp.Models;
 using DemoApp.Services.Interfaces;
 using Mapster;
-
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using PromptEnhancer.KnowledgeBase;
+using PromptEnhancer.KnowledgeRecord;
+using PromptEnhancer.KnowledgeSearchRequest.Examples;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
+using PromptEnhancer.Models.Examples;
+using PromptEnhancer.Pipeline.Interfaces;
+using PromptEnhancer.Pipeline.PromptEnhancerSteps;
 using PromptEnhancer.Services.EnhancerService;
 
 namespace DemoApp.Pages
@@ -23,6 +28,9 @@ namespace DemoApp.Pages
         public EnhancerViewModel ViewModel { get; set; } = new();
         [BindProperty]
         public List<Entry> Entries { get; set; } = [];
+
+        [TempData]
+        public string? FloatingAlertMessage { get; set; }
 
         public IndexModel(ILogger<IndexModel> logger, IConfiguration configuration, IConfigurationSetupService configurationService, IEnhancerService enhancerService, IEntrySetupService entrySetupService)
         {
@@ -44,24 +52,28 @@ namespace DemoApp.Pages
         public IActionResult OnPostUpdateKernelConf()
         {
             _configurationService.UpdateKernelConfig(ViewModel.ConfigurationSetup.KernelConfiguration);
+            FloatingAlertMessage = "Kernel Configuration Saved";
             return Page();
         }
 
         public IActionResult OnPostUpdateSearchConf()
         {
             _configurationService.UpdateSearchConfig(ViewModel.ConfigurationSetup.SearchConfiguration);
+            FloatingAlertMessage = "Search Configuration Saved";
             return Page();
         }
 
         public IActionResult OnPostUpdatePromptConf()
         {
             _configurationService.UpdatePromptConfig(ViewModel.ConfigurationSetup.PromptConfiguration);
+            FloatingAlertMessage = "Prompt Configuration Saved";
             return Page();
         }
 
         public IActionResult OnPostUpdateEntries()
         {
             _entrySetupService.UpdateEntries(Entries);
+            FloatingAlertMessage = "Entries Updated";
             return Page();
         }
 
@@ -94,17 +106,61 @@ namespace DemoApp.Pages
 
         public async Task<IActionResult> OnPostProcessResultModel()
         {
+            //TODO figure out the config
             //_configurationService.ClearSession();
-            var config = _configurationService.GetConfiguration(true).Adapt<EnhancerConfiguration>();
+            var appConfig = _configurationService.GetConfiguration(true);
             var entries = _entrySetupService.GetEntries();
-            var res = await _enhancerService.ProcessConfiguration(config, entries);
+            if (entries.Any(x => string.IsNullOrWhiteSpace(x.QueryString)))
+            {
+                for (int i = 0; i < entries.Count(); i++)
+                {
+                    if (string.IsNullOrWhiteSpace(entries.ElementAt(i).QueryString))
+                    {
+                        ViewModel.Errors.Add($"{i + 1}. entry has empty query.");
+                    }
+                }
+                return Page();
+            }
+
+            EnhancerConfiguration enhancerConfig = GetEnhancerConfiguration(appConfig);
+            var res = await _enhancerService.ProcessConfiguration(enhancerConfig, entries);
             if (!res.IsError)
             {
                 //TODO if it is error, show message
                 ViewModel.ResultModelList = res.Value;
             }
-            //ViewModel.ResultModelList = [new(), new(), new(), new(), new(), new(), new(), new(), new(), new()];
+            else
+            {
+                ViewModel.Errors = res.Errors.Select(x => x.Code).ToList();
+                return Page();
+            }
             return Page();
+        }
+
+        private static EnhancerConfiguration GetEnhancerConfiguration(ConfigurationSetup appConfig)
+        {
+            var enhancerConfig = appConfig.Adapt<EnhancerConfiguration>();
+
+            var request = new GoogleSearchRequest
+            {
+                Settings = new GoogleSettings
+                {
+                    SearchApiKey = appConfig.SearchConfiguration.SearchProviderSettings.SearchApiKey!,
+                    Engine = appConfig.SearchConfiguration.SearchProviderSettings.Engine!,
+                },
+                Filter = appConfig.SearchConfiguration.SearchFilter
+            };
+
+            //TODO defensive copy in lib? (and also of settings and such)
+            enhancerConfig.Steps = new List<IPipelineStep>
+                {
+                    new PreprocessStep(),
+                    new KernelContextPluginsStep(),
+                    new QueryParserStep(),
+                    //TODO automatic step picker calling? picking from list of steps(defined by user)/bases(from inject pick bases)/each has its own call to llm if it is viable for the given query(steps defined from user so kinda like 1.)
+                    new SearchStep<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>(request)
+                };
+            return enhancerConfig;
         }
 
         public IActionResult OnPostClearSession()
@@ -117,7 +173,6 @@ namespace DemoApp.Pages
         public override void OnPageHandlerExecuted(PageHandlerExecutedContext context)
         {
             base.OnPageHandlerExecuted(context);
-
             ViewModel.ConfigurationSetup = _configurationService.GetConfiguration();
             Entries = _entrySetupService.GetEntries().ToList();
         }

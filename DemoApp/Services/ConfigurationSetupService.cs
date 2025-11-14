@@ -5,6 +5,7 @@ using Mapster;
 using Newtonsoft.Json;
 using PromptEnhancer.CustomJsonResolver;
 using PromptEnhancer.Models.Configurations;
+using PromptEnhancer.Models.Enums;
 using PromptEnhancer.Services.EnhancerService;
 
 namespace DemoApp.Services
@@ -72,11 +73,11 @@ namespace DemoApp.Services
             var searchConfig = _session.GetObjectFromJson<SearchConfiguration>(SessionPrefix + nameof(SearchConfiguration));
             var demoAppConfig = _session.GetObjectFromJson<DemoAppConfigSetup>(SessionPrefix + nameof(DemoAppConfigSetup));
 
-            demoAppConfig!.SearchApiKeyFromInput = searchConfiguration.SearchProviderData.SearchApiKey is not null ? GetLoadedFromString(true, searchConfig?.SearchProviderData.Provider.ToString()) : demoAppConfig.SearchApiKeyFromInput;
-            demoAppConfig!.SearchEngineFromInput = searchConfiguration.SearchProviderData.Engine is not null ? GetLoadedFromString(true, searchConfig?.SearchProviderData.Provider.ToString()) : demoAppConfig.SearchEngineFromInput;
+            demoAppConfig!.SearchApiKeyFromInput = searchConfiguration.SearchProviderSettings.SearchApiKey is not null ? GetLoadedFromString(true, searchConfig?.SearchProviderSettings.Provider.ToString()) : demoAppConfig.SearchApiKeyFromInput;
+            demoAppConfig!.SearchEngineFromInput = searchConfiguration.SearchProviderSettings.Engine is not null ? GetLoadedFromString(true, searchConfig?.SearchProviderSettings.Provider.ToString()) : demoAppConfig.SearchEngineFromInput;
 
-            searchConfiguration.SearchProviderData.SearchApiKey ??= searchConfig!.SearchProviderData.SearchApiKey;
-            searchConfiguration.SearchProviderData.Engine ??= searchConfig!.SearchProviderData.Engine;
+            searchConfiguration.SearchProviderSettings.SearchApiKey ??= searchConfig!.SearchProviderSettings.SearchApiKey;
+            searchConfiguration.SearchProviderSettings.Engine ??= searchConfig!.SearchProviderSettings.Engine;
             SetSessionPartialConfigAndDemoAppConfig(nameof(SearchConfiguration), searchConfiguration, demoAppConfig);
         }
 
@@ -116,8 +117,14 @@ namespace DemoApp.Services
 
         private ConfigurationSetup GetDefaultConfiguration()
         {
-            var enhancerConfig = _enhancerService.CreateDefaultConfiguration(aiApiKey: _configuration["AIServices:OpenAI:ApiKey"], searchApiKey: _configuration["SearchConfigurations:Google:ApiKey"], searchEngine: _configuration["SearchConfigurations:Google:SearchEngineId"]);
+            var enhancerConfig = _enhancerService.CreateDefaultConfiguration(aiApiKey: _configuration["AIServices:OpenAI:ApiKey"]);
             var configSetup = enhancerConfig.Adapt<ConfigurationSetup>();
+            configSetup.SearchConfiguration.SearchProviderSettings = new SearchProviderSettings
+            {
+                SearchApiKey = _configuration["SearchConfigurations:Google:ApiKey"],
+                Engine = _configuration["SearchConfigurations:Google:SearchEngineId"],
+                Provider = SearchProviderEnum.Google,
+            };
 
             SetDefaultDemoAppConfig(configSetup);
             return configSetup;
@@ -125,10 +132,10 @@ namespace DemoApp.Services
 
         private void SetDefaultDemoAppConfig(ConfigurationSetup configSetup)
         {
-            var searchProvider = configSetup.SearchConfiguration.SearchProviderData.Provider.ToString();
+            var searchProvider = configSetup.SearchConfiguration.SearchProviderSettings.Provider.ToString();
             configSetup.DemoAppConfigSetup.AIApiKeyFromInput = GetLoadedFromString(configSetup.KernelConfiguration.AIApiKey is not null ? false : null, configSetup.KernelConfiguration.Provider.ToString());
-            configSetup.DemoAppConfigSetup.SearchApiKeyFromInput = GetLoadedFromString(configSetup.SearchConfiguration.SearchProviderData.SearchApiKey is not null ? false : null, searchProvider);
-            configSetup.DemoAppConfigSetup.SearchEngineFromInput = GetLoadedFromString(configSetup.SearchConfiguration.SearchProviderData.Engine is not null ? false : null, searchProvider);
+            configSetup.DemoAppConfigSetup.SearchApiKeyFromInput = GetLoadedFromString(configSetup.SearchConfiguration.SearchProviderSettings.SearchApiKey is not null ? false : null, searchProvider);
+            configSetup.DemoAppConfigSetup.SearchEngineFromInput = GetLoadedFromString(configSetup.SearchConfiguration.SearchProviderSettings.Engine is not null ? false : null, searchProvider);
         }
 
         private void SetConfigurationSetup(ConfigurationSetup configSetup)

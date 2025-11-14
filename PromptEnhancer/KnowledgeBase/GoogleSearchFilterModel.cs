@@ -6,24 +6,24 @@ namespace PromptEnhancer.KnowledgeBase
     // for info about properties look at https://developers.google.com/custom-search/v1/reference/rest/v1/cse/list
     public class GoogleSearchFilterModel : IKnowledgeBaseSearchFilter
     {
-        public string? CountryCode { get; set; }
+        public string? CountryCode { get; init; }
 
-        public string? DateRestrict { get; set; }
+        public string? DateRestrict { get; init; }
 
-        public string? ExactTerms { get; set; }
+        public string? ExactTerms { get; init; }
 
-        public string? ExcludeTerms { get; set; }
+        public string? ExcludeTerms { get; init; }
 
-        public string? InterfaceLanguage { get; set; }
-        public string? LinkSite { get; set; }
+        public string? InterfaceLanguage { get; init; }
+        public string? LinkSite { get; init; }
 
-        public string? LanguageRestrict { get; set; }
+        public string? LanguageRestrict { get; init; }
 
-        public string? Rights { get; set; }
+        public string? Rights { get; init; }
 
-        public string? SiteSearch { get; set; }
+        public string? SiteSearch { get; init; }
 
-        public int Top { get; set; } = 3;
+        public int Top { get; init; } = 3;
 
 #pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
         public TextSearchOptions BuildParameters()

@@ -7,11 +7,11 @@
     {
         <div class="result-item" style="display:@(i == 0 ? "block" : "none")">
             <h3>Result @(i + 1) of @results.Count</h3>
-            @if (!string.IsNullOrEmpty(results[i].SearchResult))
+            @if (!string.IsNullOrEmpty(results[i].Result?.FinalResponse?.Text))
             {
-                <div><strong>Search Result:</strong> @results[i].SearchResult</div>
+                <div><strong>LLM response:</strong> @results[i].Result!.FinalResponse!.Text</div>
             }
-            @if (!string.IsNullOrEmpty(results[i].Prompt))
+            @* @if (!string.IsNullOrEmpty(results[i].Prompt))
             {
                 <div><strong>Prompt:</strong> @results[i].Prompt</div>
             }
@@ -34,7 +34,7 @@
             @if (results[i].AIResult?.TokensUsed is not null)
             {
                 <div><strong>Total tokens used:</strong> @results[i].AIResult!.TokensUsed</div>
-            }
+            } *@
         </div>
     }
 </div>

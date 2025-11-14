@@ -22,11 +22,11 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
         public KernelContextPluginsStep(bool isRequired = false) : base(isRequired) { }
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
         {
-            if (settings.KernelRequestSettings is null || settings.KernelRequestSettings.FunctionChoiceBehavior != FunctionChoiceBehavior.Auto())
+            if (settings.Settings.KernelRequestSettings is null || settings.Settings.KernelRequestSettings.FunctionChoiceBehavior != FunctionChoiceBehavior.Auto())
             {
                 return FailCondition();
             }
-            var res = await settings.Kernel.InvokePromptAsync<ChatResponse>(GetPrompt(context.QueryString), new(settings.KernelRequestSettings), cancellationToken: cancellationToken);
+            var res = await settings.Kernel.InvokePromptAsync<ChatResponse>(GetPrompt(context.QueryString), new(settings.Settings.KernelRequestSettings), cancellationToken: cancellationToken);
             var tokenUsage = res?.Usage?.TotalTokenCount;
             var stringResult = res?.Text;
             if (stringResult != null && stringResult != LLMResponseNoResult)

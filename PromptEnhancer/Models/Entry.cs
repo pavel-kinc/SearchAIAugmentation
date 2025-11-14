@@ -6,13 +6,13 @@ namespace PromptEnhancer.Models
     public class Entry
     {
         [Display(Name = "Query for Search:")]
-        public string? QueryString { get; set; }
+        public string? QueryString { get; init; }
         [Display(Name = "Entry Name:")]
-        public string? EntryName { get; set; }
+        public string? EntryName { get; init; }
         [Display(Name = "Entry Original Text:")]
-        public string? EntryOriginalText { get; set; }
+        public string? EntryOriginalText { get; init; }
         [Display(Name = "Entry Additional Data:")]
-        public string? EntryAdditionalData { get; set; }
+        public string? EntryAdditionalData { get; init; }
         public IEnumerable<ChatMessage>? EntryChatHistory { get; set; }
     }
 }

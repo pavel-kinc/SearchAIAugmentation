@@ -4,11 +4,10 @@
 @{
     ViewData["Title"] = "Home page";
     var prefixedViewData = new ViewDataDictionary(ViewData)
-            {
-                TemplateInfo = { HtmlFieldPrefix = "ViewModel.ConfigurationSetup" }
-            };
+    {
+        TemplateInfo = { HtmlFieldPrefix = "ViewModel.ConfigurationSetup" }
+    };
 }
-
 <h2 class="mb-3">Enhancer Setup</h2>
 
 <ul class="nav nav-tabs mb-2" id="configTabs">
@@ -41,7 +40,7 @@
     <div class="tab-pane fade" id="prompt">
         <form method="post" asp-page-handler="UpdatePromptConf">
             @await Html.PartialAsync("_PromptConfigFormValuesView", Model.ViewModel.ConfigurationSetup, prefixedViewData)
-            <button type="submit" class="btn btn-primary">Save Prompt configuration</button>
+            <button type="submit" data-alert="Saved successfully!" class="btn btn-primary">Save Prompt configuration</button>
         </form>
     </div>
 
@@ -55,9 +54,30 @@
 </div>
 
 <hr />
+@if (Model.ViewModel.Errors != null && Model.ViewModel.Errors.Any())
+{
+    <div id="error-alert"
+         class="alert alert-danger custom-alert d-flex justify-content-between align-items-start"
+         role="alert"
+         aria-live="polite"
+         tabindex="-1">
+        <div>
+            <strong>Errors:</strong>
+            <ul class="mb-0 mt-1">
+                @foreach (var e in Model.ViewModel.Errors)
+                {
+                    <li>@e</li>
+                }
+            </ul>
+        </div>
+
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 <div class="d-flex gap-3">
+
     <form method="post" asp-page-handler="ProcessResultModel">
-        <button class="btn btn-success">Finish and Show Results</button>
+        <button type ="submit" class="btn btn-success">Finish and Show Results</button>
     </form>
     <form method="post" asp-page-handler="ClearSession">
         <button class="btn btn-danger">Reset Setup</button>
@@ -93,17 +113,11 @@
                 window.history.replaceState(null, null, href);
             });
         });
-    });
 
-    document.querySelectorAll('form').forEach(form => {
-        form.addEventListener('submit', function () {
-            const activeTab = document.querySelector('#configTabs .nav-link.active');
-            if (activeTab) {
-                const hash = activeTab.getAttribute('href');
-                if (hash) {
-                    form.setAttribute('action', form.getAttribute('action') + hash);
-                }
-            }
-        });
+        var alertEl = document.getElementById('error-alert');
+        if (alertEl) {
+            alertEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            alertEl.focus();
+        }
     });
 </script>

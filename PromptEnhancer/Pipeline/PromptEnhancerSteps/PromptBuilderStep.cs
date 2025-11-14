@@ -21,7 +21,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             }
 
             var promptBuildingService = settings.GetService<IPromptBuildingService>(_promptBuildingServiceKey);
-            context.SystemPromptToLLM ??= promptBuildingService.BuildSystemPrompt(settings.PromptConfiguration);
+            context.SystemPromptToLLM ??= promptBuildingService.BuildSystemPrompt(settings.Settings.PromptConfiguration);
             context.UserPromptToLLM = promptBuildingService.BuildUserPrompt(context.QueryString, context.PickedRecords, context.AdditionalContext, context.Entry);
 
             return true;

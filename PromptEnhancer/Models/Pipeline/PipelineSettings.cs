@@ -1,23 +1,19 @@
 ﻿using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
-using PromptEnhancer.Models.Configurations;
 
 namespace PromptEnhancer.Models.Pipeline
 {
     public class PipelineSettings(
     Kernel kernel,
-    IServiceProvider sp)
+    IServiceProvider sp,
+    PipelineAdditionalSettings settings)
     {
         public Kernel Kernel { get; } = kernel;
 
         public IServiceProvider ServiceProvider { get; } = sp;
 
-        public ChatOptions? ChatOptions { get; init; }
-
-        public PromptExecutionSettings? KernelRequestSettings { get; init; }
-
-        public PromptConfiguration? PromptConfiguration { get; init; }
+        public PipelineAdditionalSettings Settings { get; } = settings;
 
         public T GetService<T>(string? key = null)
             where T : class
@@ -29,9 +25,6 @@ namespace PromptEnhancer.Models.Pipeline
 
             return ServiceProvider.GetRequiredKeyedService<T>(key);
         }
-
-        public string? GeneratorKey { get; init; } = null;
-        public string? ChatClientKey { get; init; } = null;
     }
 
 }

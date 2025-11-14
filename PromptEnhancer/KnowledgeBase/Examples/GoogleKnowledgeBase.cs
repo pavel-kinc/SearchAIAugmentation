@@ -3,8 +3,8 @@ using PromptEnhancer.ChunkUtilities.Interfaces;
 using PromptEnhancer.KnowledgeRecord;
 using PromptEnhancer.KnowledgeSearchRequest.Examples;
 using PromptEnhancer.KnowledgeSearchRequest.Interfaces;
-using PromptEnhancer.Models;
 using PromptEnhancer.Models.Examples;
+using PromptEnhancer.Search;
 using PromptEnhancer.Search.Interfaces;
 using System.Collections.Concurrent;
 
@@ -28,7 +28,7 @@ namespace PromptEnhancer.KnowledgeBase.Examples
                 return [];
             }
             var settings = request.Settings;
-            var textSearch = _searchProviderManager.CreateTextSearch(new SearchProviderData
+            var textSearch = _searchProviderManager.CreateTextSearch(new SearchProviderSettings
             {
                 SearchApiKey = settings.SearchApiKey,
                 Engine = settings.Engine,

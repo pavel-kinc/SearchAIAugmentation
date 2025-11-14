@@ -6,7 +6,7 @@
         <h3>Entry @(i + 1)</h3>
         <div class="mb-3">
             @Html.LabelFor(m => m[i].QueryString, new { @class = "form-label", title = "Search query used for augmentation." })
-            @Html.TextBoxFor(m => m[i].QueryString, new { @class = "form-control", placeholder = "Query for Search" })
+            @Html.TextBoxFor(m => m[i].QueryString, new { @class = "form-control", placeholder = "Query for Search", required = "required" })
             @Html.ValidationMessageFor(m => m[i].QueryString, "", new { @class = "text-danger" })
         </div>
 

@@ -17,7 +17,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
         {
             var rankerService = settings.GetService<IRecordRankerService>(_recordRankerServiceKey);
             //TODO is it okay to send context? I would like to make it unmodifiable maybe?
-            return await rankerService!.GetSimilarityScoreForRecordsAsync(settings.Kernel, context.RetrievedRecords, context.QueryString, settings.GeneratorKey);
+            return await rankerService!.GetSimilarityScoreForRecordsAsync(settings.Kernel, context.RetrievedRecords, context.QueryString, settings.Settings.GeneratorKey);
         }
 
         protected override ErrorOr<bool> CheckExecuteConditions(PipelineContext context)

@@ -28,16 +28,16 @@
             <dt class="col-sm-4">@Html.LabelFor(m => m.KernelConfiguration.AIApiKey, new { @class = "mb-0 fw-semibold" })</dt>
             <dd class="col-sm-8">@Model.DemoAppConfigSetup.AIApiKeyFromInput</dd>
 
-            <dt class="col-sm-4">@Html.LabelFor(m => m.SearchConfiguration.SearchProviderData.SearchApiKey, new { @class = "mb-0 fw-semibold" })</dt>
+            <dt class="col-sm-4">@Html.LabelFor(m => m.SearchConfiguration.SearchProviderSettings.SearchApiKey, new { @class = "mb-0 fw-semibold" })</dt>
             <dd class="col-sm-8">@Model.DemoAppConfigSetup.SearchApiKeyFromInput</dd>
 
-            <dt class="col-sm-4">@Html.LabelFor(m => m.SearchConfiguration.SearchProviderData.Engine, new { @class = "mb-0 fw-semibold" })</dt>
+            <dt class="col-sm-4">@Html.LabelFor(m => m.SearchConfiguration.SearchProviderSettings.Engine, new { @class = "mb-0 fw-semibold" })</dt>
             <dd class="col-sm-8">@Model.DemoAppConfigSetup.SearchEngineFromInput</dd>
 
-            @if (!string.IsNullOrWhiteSpace(Model.SearchConfiguration?.SearchProviderData?.Provider.ToString()))
+            @if (!string.IsNullOrWhiteSpace(Model.SearchConfiguration?.SearchProviderSettings?.Provider.ToString()))
             {
-                <dt class="col-sm-4">@Html.LabelFor(m => m.SearchConfiguration.SearchProviderData.Provider, new { @class = "mb-0 fw-semibold" })</dt>
-                <dd class="col-sm-8">@Model.SearchConfiguration.SearchProviderData.Provider</dd>
+                <dt class="col-sm-4">@Html.LabelFor(m => m.SearchConfiguration.SearchProviderSettings.Provider, new { @class = "mb-0 fw-semibold" })</dt>
+                <dd class="col-sm-8">@Model.SearchConfiguration.SearchProviderSettings.Provider</dd>
             }
         </dl>
     </div>

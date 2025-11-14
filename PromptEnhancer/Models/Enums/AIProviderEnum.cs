@@ -7,6 +7,5 @@
         AzureOpenAI,
         Ollama,
         Onnx,
-        Other
     }
 }

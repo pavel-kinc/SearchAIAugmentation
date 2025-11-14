@@ -9,18 +9,18 @@
 }
 
 <div class="mb-3">
-    @Html.LabelFor(m => m.SearchConfiguration.SearchProviderData.SearchApiKey, new { @class = "form-label", title = "The API key used to authenticate with the search provider." })
-    @Html.TextBoxFor(m => m.SearchConfiguration.SearchProviderData.SearchApiKey, new { @class = "form-control", placeholder = "Enter new API key" })
-    @Html.ValidationMessageFor(m => m.SearchConfiguration.SearchProviderData.SearchApiKey, "", new { @class = "text-danger" })
+    @Html.LabelFor(m => m.SearchConfiguration.SearchProviderSettings.SearchApiKey, new { @class = "form-label", title = "The API key used to authenticate with the search provider." })
+    @Html.TextBoxFor(m => m.SearchConfiguration.SearchProviderSettings.SearchApiKey, new { @class = "form-control", placeholder = "Enter new API key" })
+    @Html.ValidationMessageFor(m => m.SearchConfiguration.SearchProviderSettings.SearchApiKey, "", new { @class = "text-danger" })
     <div class="form-text text-muted">
         @Model.DemoAppConfigSetup.SearchApiKeyFromInput
     </div>
 </div>
 
 <div class="mb-3">
-    @Html.LabelFor(m => m.SearchConfiguration.SearchProviderData.Engine, new { @class = "form-label", title = "The name or ID of the search engine (e.g., Google)." })
-    @Html.TextBoxFor(m => m.SearchConfiguration.SearchProviderData.Engine, new { @class = "form-control", placeholder = "Enter new Search Engine" })
-    @Html.ValidationMessageFor(m => m.SearchConfiguration.SearchProviderData.Engine, "", new { @class = "text-danger" })
+    @Html.LabelFor(m => m.SearchConfiguration.SearchProviderSettings.Engine, new { @class = "form-label", title = "The name or ID of the search engine (e.g., Google)." })
+    @Html.TextBoxFor(m => m.SearchConfiguration.SearchProviderSettings.Engine, new { @class = "form-control", placeholder = "Enter new Search Engine" })
+    @Html.ValidationMessageFor(m => m.SearchConfiguration.SearchProviderSettings.Engine, "", new { @class = "text-danger" })
     <div class="form-text text-muted">
         @Model.DemoAppConfigSetup.SearchEngineFromInput
     </div>
@@ -28,10 +28,10 @@
 
 <div class="input-container">
     <div class="mb-3">
-        @Html.LabelFor(m => m.SearchConfiguration.SearchProviderData.Provider, new { @class = "form-label", title = "The search provider name (e.g., Google, Bing)." })
-        @Html.DropDownListFor(m => m.SearchConfiguration.SearchProviderData.Provider,
-                 new SelectList(searchProviders, Model.SearchConfiguration.SearchProviderData.Provider),
+        @Html.LabelFor(m => m.SearchConfiguration.SearchProviderSettings.Provider, new { @class = "form-label", title = "The search provider name (e.g., Google, Bing)." })
+        @Html.DropDownListFor(m => m.SearchConfiguration.SearchProviderSettings.Provider,
+                 new SelectList(searchProviders, Model.SearchConfiguration.SearchProviderSettings.Provider),
                  "Select AI provider", new { @class = "form-control js-example-basic-single" })
-        @Html.ValidationMessageFor(m => m.SearchConfiguration.SearchProviderData.Provider, "", new { @class = "text-danger" })
+        @Html.ValidationMessageFor(m => m.SearchConfiguration.SearchProviderSettings.Provider, "", new { @class = "text-danger" })
     </div>
 </div>

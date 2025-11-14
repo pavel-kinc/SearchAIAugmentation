@@ -1,4 +1,5 @@
-﻿using PromptEnhancer.KnowledgeRecord.Interfaces;
+﻿using Microsoft.Extensions.AI;
+using PromptEnhancer.KnowledgeRecord.Interfaces;
 
 namespace PromptEnhancer.Models.Pipeline
 {
@@ -27,7 +28,15 @@ namespace PromptEnhancer.Models.Pipeline
 
         public IDictionary<string, object> Metadata { get; init; } = new Dictionary<string, object>();
 
+        public ChatResponse? FinalResponse { get; set; }
+
         // TODO maybe make this required and take its ID/Name as the main identifier? (since pipeline can parallelly process multiple contexts/entries)
         public Entry? Entry { get; init; }
+
+        public long InputTokenUsage { get; set; } = 0;
+
+        public long OutputTokenUSage { get; set; } = 0;
+
+        public long TokenUsage => InputTokenUsage + OutputTokenUSage;
     }
 }

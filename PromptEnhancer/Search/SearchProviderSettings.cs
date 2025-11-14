@@ -2,9 +2,9 @@
 using PromptEnhancer.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace PromptEnhancer.Models
+namespace PromptEnhancer.Search
 {
-    public class SearchProviderData
+    public class SearchProviderSettings
     {
         [Display(Name = "Search Api Key:")]
         [Sensitive]

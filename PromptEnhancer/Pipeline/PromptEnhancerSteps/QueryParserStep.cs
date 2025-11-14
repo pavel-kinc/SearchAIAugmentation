@@ -27,8 +27,8 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
         {
             //TODO maybe more checks for the llm response?
-            var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.ChatClientKey);
-            var res = await chatClient.GetResponseAsync(string.Format(PromptTemplate, _maxSplit, FailResponseLLM), _options ?? settings.ChatOptions, cancellationToken: cancellationToken);
+            var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.Settings.ChatClientKey);
+            var res = await chatClient.GetResponseAsync(string.Format(PromptTemplate, _maxSplit, FailResponseLLM), _options ?? settings.Settings.ChatOptions, cancellationToken: cancellationToken);
             if (res.Text == FailResponseLLM || res.Text.Length > MaxResponseLength || res.Text.Count(c => c == ';') > _maxSplit)
             {
                 return false;
