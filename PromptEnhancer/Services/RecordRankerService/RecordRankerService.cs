@@ -17,11 +17,11 @@ namespace PromptEnhancer.Services.RecordRankerService
 
         public async Task<bool> GetSimilarityScoreForRecordsAsync(Kernel kernel, IEnumerable<IKnowledgeRecord> records, string? queryString, string? generatorKey = null)
         {
-            var dict = new Dictionary<string, ReadOnlyMemory<float>>();
+            var dict = new Dictionary<string, Embedding<float>>();
             var generator = kernel.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>(generatorKey);
             if (queryString is not null)
             {
-                var query = await generator.GenerateVectorAsync(queryString);
+                var query = await generator.GenerateAsync(queryString);
                 dict.Add(queryString, query);
             }
 
@@ -35,7 +35,7 @@ namespace PromptEnhancer.Services.RecordRankerService
             return true;
         }
 
-        private async Task<bool> TryAssignScoreToRecord(IKnowledgeRecord record, IEmbeddingGenerator<string, Embedding<float>> generator, Dictionary<string, ReadOnlyMemory<float>> dict, ReadOnlyMemory<float>? embed = null)
+        private async Task<bool> TryAssignScoreToRecord(IKnowledgeRecord record, IEmbeddingGenerator<string, Embedding<float>> generator, Dictionary<string, Embedding<float>> dict, Embedding<float>? embed = null)
         {
             //TODO maybe just give it the basic query from context? but that could lead to some random data
             if (record.UsedSearchQuery is null)
@@ -45,18 +45,21 @@ namespace PromptEnhancer.Services.RecordRankerService
 
             if (!dict.ContainsKey(record.UsedSearchQuery))
             {
-                dict.Add(record.UsedSearchQuery, await generator.GenerateVectorAsync(record.UsedSearchQuery));
+                dict.Add(record.UsedSearchQuery, await generator.GenerateAsync(record.UsedSearchQuery));
             }
 
             var queryEmbed = dict[record.UsedSearchQuery];
-            var recordEmbed = embed ?? record.Embeddings?.EmbeddingVector;
+            var recordEmbed = embed ?? new Embedding<float>(record.Embeddings!.EmbeddingVector)
+            {
+                ModelId = record.Embeddings.EmbeddingModel,
+            };
 
             if (recordEmbed is null)
             {
                 return false;
             }
 
-            record.SimilarityScore = _rankerService.GetSimilarityScore(queryEmbed, (ReadOnlyMemory<float>)recordEmbed);
+            record.SimilarityScore = _rankerService.GetSimilarityScore(queryEmbed, recordEmbed);
             return true;
         }
     }

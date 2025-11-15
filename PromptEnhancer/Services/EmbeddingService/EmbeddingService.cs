@@ -32,6 +32,7 @@ namespace PromptEnhancer.Services.EmbeddingService
                         EmbeddingSource = generator.GetType().Name ?? "unknown",
                         EmbeddingModel = embedding.ModelId ?? "unknown",
                         EmbeddingVector = embedding.Vector,
+                        VectorDimension = embedding.Dimensions
                     };
                 }
             });

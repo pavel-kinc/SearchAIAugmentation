@@ -4,6 +4,6 @@
     public interface IRankerService
     {
         //TODO this expects same length vectors!
-        float GetSimilarityScore(ReadOnlyMemory<float> queryEmbed, ReadOnlyMemory<float> recordEmbed);
+        float? GetSimilarityScore(ReadOnlyMemory<float> queryEmbed, ReadOnlyMemory<float> recordEmbed);
     }
 }
