@@ -11,6 +11,10 @@
             {
                 <div><strong>LLM response:</strong> @results[i].Result!.FinalResponse!.Text</div>
             }
+            @if (results[i].PipelineSuccess is not null)
+            {
+                <div><strong>success:</strong> @(results[i].PipelineSuccess?.Value == true ? "yes" : "no")</div>
+            }
             @* @if (!string.IsNullOrEmpty(results[i].Prompt))
             {
                 <div><strong>Prompt:</strong> @results[i].Prompt</div>

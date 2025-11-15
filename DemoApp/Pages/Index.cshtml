@@ -8,6 +8,11 @@
         TemplateInfo = { HtmlFieldPrefix = "ViewModel.ConfigurationSetup" }
     };
 }
+@if (Model.ViewModel.ResultModelList.Count > 0)
+{
+    @await Html.PartialAsync("_ResultView", Model.ViewModel.ResultModelList)
+}
+else{
 <h2 class="mb-3">Enhancer Setup</h2>
 
 <ul class="nav nav-tabs mb-2" id="configTabs">
@@ -15,6 +20,7 @@
     <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#kernel">Kernel Config</a></li>
     <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#search">Search Config</a></li>
     <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#prompt">Prompt Config</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#generation">Generation Config</a></li>
     <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#entry">Entries</a></li>
 </ul>
 
@@ -40,7 +46,14 @@
     <div class="tab-pane fade" id="prompt">
         <form method="post" asp-page-handler="UpdatePromptConf">
             @await Html.PartialAsync("_PromptConfigFormValuesView", Model.ViewModel.ConfigurationSetup, prefixedViewData)
-            <button type="submit" data-alert="Saved successfully!" class="btn btn-primary">Save Prompt configuration</button>
+            <button type="submit" class="btn btn-primary">Save Prompt configuration</button>
+        </form>
+    </div>
+
+    <div class="tab-pane fade" id="generation">
+        <form method="post" asp-page-handler="UpdateGenerationConf">
+            @await Html.PartialAsync("_GenerationConfigFormValuesView", Model.ViewModel.ConfigurationSetup, prefixedViewData)
+            <button type="submit" class="btn btn-primary mt-3">Save Generation configuration</button>
         </form>
     </div>
 
@@ -77,18 +90,13 @@
 <div class="d-flex gap-3">
 
     <form method="post" asp-page-handler="ProcessResultModel">
-        <button type ="submit" class="btn btn-success">Finish and Show Results</button>
+        <button type="submit" class="btn btn-success">Finish and Show Results</button>
     </form>
     <form method="post" asp-page-handler="ClearSession">
-        <button class="btn btn-danger">Reset Setup</button>
+        <button type="submit" class="btn btn-danger">Reset Setup</button>
     </form>
 </div>
-
-@if (Model.ViewModel.ResultModelList.Count > 0)
-{
-    @await Html.PartialAsync("_ResultView", Model.ViewModel.ResultModelList)
 }
-
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const tabLinks = document.querySelectorAll('#configTabs a[data-bs-toggle="tab"]');
@@ -106,13 +114,21 @@
             }
         }
 
+        window.addEventListener("load", function () {
+            if (window.location.search.includes("handler=")) {
+            history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+
         tabLinks.forEach(tab => {
             tab.addEventListener('shown.bs.tab', e => {
                 const href = e.target.getAttribute('href');
                 localStorage.setItem('activeTab', href);
-                window.history.replaceState(null, null, href);
             });
         });
+
+        const message = '@(Model.ViewModel.FloatingAlertMessage ?? "")';
+        if (message) showFloatingAlert(message, 3000);
 
         var alertEl = document.getElementById('error-alert');
         if (alertEl) {

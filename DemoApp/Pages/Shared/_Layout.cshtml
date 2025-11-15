@@ -53,11 +53,5 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const message = '@(Model.FloatingAlertMessage ?? "")';
-            if (message) showFloatingAlert(message, 3000);
-        });
-    </script>
 </body>
 </html>

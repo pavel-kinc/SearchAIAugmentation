@@ -134,7 +134,7 @@ namespace PromptEnhancer.Services.EnhancerService
                 return Error.Failure("No kernel could be created or resolved.");
             }
 
-            var pipeline = new PipelineModel(new PipelineSettings(sk, _serviceProvider, config.PipelineAdditionalSettings), config.Steps);
+            var pipeline = new PipelineModel(new PipelineSettings(sk, _serviceProvider, config.PipelineAdditionalSettings, config.PromptConfiguration), config.Steps);
 
             return await ProcessPipeline(pipeline, entries.Select(x => new PipelineContext(x)));
 

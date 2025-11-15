@@ -28,6 +28,8 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             }
             var res = await settings.Kernel.InvokePromptAsync<ChatResponse>(GetPrompt(context.QueryString), new(settings.Settings.KernelRequestSettings), cancellationToken: cancellationToken);
             var tokenUsage = res?.Usage?.TotalTokenCount;
+            context.InputTokenUsage += res?.Usage?.InputTokenCount ?? 0;
+            context.OutputTokenUsage += res?.Usage?.InputTokenCount ?? 0;
             var stringResult = res?.Text;
             if (stringResult != null && stringResult != LLMResponseNoResult)
             {

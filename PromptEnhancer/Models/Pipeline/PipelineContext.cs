@@ -35,8 +35,8 @@ namespace PromptEnhancer.Models.Pipeline
 
         public long InputTokenUsage { get; set; } = 0;
 
-        public long OutputTokenUSage { get; set; } = 0;
+        public long OutputTokenUsage { get; set; } = 0;
 
-        public long TokenUsage => InputTokenUsage + OutputTokenUSage;
+        public long TokenUsage => InputTokenUsage + OutputTokenUsage;
     }
 }

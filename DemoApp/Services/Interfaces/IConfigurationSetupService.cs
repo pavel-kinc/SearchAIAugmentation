@@ -9,7 +9,9 @@ namespace DemoApp.Services.Interfaces
         void UpdateKernelConfig(KernelConfiguration kernelConfiguration);
         void UpdateSearchConfig(SearchConfiguration searchConfiguration);
         void UpdatePromptConfig(PromptConfiguration promptConfiguration);
+        void UpdateGenerationConfig(GenerationConfiguration generationConfiguration);
         void UploadConfiguration(ConfigurationSetup configuration);
         void ClearSession();
+
     }
 }

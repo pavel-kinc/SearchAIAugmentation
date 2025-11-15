@@ -41,6 +41,7 @@ namespace DemoApp.Services
                 KernelConfiguration = _session.GetObjectFromJson<KernelConfiguration>(SessionPrefix + nameof(KernelConfiguration))!,
                 SearchConfiguration = _session.GetObjectFromJson<SearchConfiguration>(SessionPrefix + nameof(SearchConfiguration))!,
                 PromptConfiguration = _session.GetObjectFromJson<PromptConfiguration>(SessionPrefix + nameof(PromptConfiguration))!,
+                GenerationConfiguration = _session.GetObjectFromJson<GenerationConfiguration>(SessionPrefix + nameof(GenerationConfiguration))!,
                 DemoAppConfigSetup = _session.GetObjectFromJson<DemoAppConfigSetup>(SessionPrefix + nameof(DemoAppConfigSetup))!,
             };
 
@@ -83,13 +84,19 @@ namespace DemoApp.Services
 
         public void UpdatePromptConfig(PromptConfiguration promptConfiguration)
         {
-            var promptConfig = _session.GetObjectFromJson<PromptConfiguration>(SessionPrefix + nameof(PromptConfiguration));
+            //var promptConfig = _session.GetObjectFromJson<PromptConfiguration>(SessionPrefix + nameof(PromptConfiguration));
             _session.SetObjectAsJson(SessionPrefix + nameof(PromptConfiguration), promptConfiguration);
+        }
+
+        public void UpdateGenerationConfig(GenerationConfiguration generationConfiguration)
+        {
+            //var generationConfig = _session.GetObjectFromJson<GenerationConfiguration>(SessionPrefix + nameof(GenerationConfiguration));
+            _session.SetObjectAsJson(SessionPrefix + nameof(GenerationConfiguration), generationConfiguration);
         }
 
         public void UpdateDemoAppConfig(DemoAppConfigSetup demoAppConfigSetup)
         {
-            var demoAppConfig = _session.GetObjectFromJson<DemoAppConfigSetup>(SessionPrefix + nameof(DemoAppConfigSetup));
+            //var demoAppConfig = _session.GetObjectFromJson<DemoAppConfigSetup>(SessionPrefix + nameof(DemoAppConfigSetup));
             _session.SetObjectAsJson(SessionPrefix + nameof(SearchConfiguration), demoAppConfigSetup);
         }
 
@@ -143,6 +150,7 @@ namespace DemoApp.Services
             _session.SetObjectAsJson(SessionPrefix + nameof(KernelConfiguration), configSetup.KernelConfiguration);
             _session.SetObjectAsJson(SessionPrefix + nameof(SearchConfiguration), configSetup.SearchConfiguration);
             _session.SetObjectAsJson(SessionPrefix + nameof(PromptConfiguration), configSetup.PromptConfiguration);
+            _session.SetObjectAsJson(SessionPrefix + nameof(GenerationConfiguration), configSetup.GenerationConfiguration);
             _session.SetObjectAsJson(SessionPrefix + nameof(DemoAppConfigSetup), configSetup.DemoAppConfigSetup);
         }
 

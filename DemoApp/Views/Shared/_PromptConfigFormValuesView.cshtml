@@ -1,5 +1,8 @@
 ﻿@model DemoApp.Models.ConfigurationSetup
 
+
+<div class="mb-3 mt-3"><h3>Prompt configuration setup</h3></div>
+
 <div class="mb-3">
     @Html.LabelFor(m => m.PromptConfiguration.SystemInstructions,
             new { @class = "form-label", title = "Required system-level instructions." })
@@ -38,7 +41,7 @@
                  new { @class = "form-label", title = "Culture code of the output translation" })
 
         @Html.DropDownListFor(m => m.PromptConfiguration.TargetLanguageCultureCode,
-                 new SelectList(Model.DemoAppConfigSetup.AvailableCultureCodes, Model.PromptConfiguration.TargetLanguageCultureCode),
+                 new SelectList(Model.DemoAppConfigSetup.AvailableCultureCodes.Distinct(), Model.PromptConfiguration.TargetLanguageCultureCode),
                  "Select a culture code", new { @class = "form-control js-example-basic-single" })
 
         @Html.ValidationMessageFor(m => m.PromptConfiguration.TargetLanguageCultureCode, "", new { @class = "text-danger" })
