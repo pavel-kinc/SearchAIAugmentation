@@ -8,7 +8,7 @@ namespace PromptEnhancer.Pipeline
     {
         //TODO maybe add strategy for when step fails? also params - this is in the step itself now
         //TODO Pipeline for every query or reusable - also class for only pipeline?
-        public virtual async Task<ErrorOr<bool>> RunPipelineAsync(PipelineModel pipeline, PipelineContext context)
+        public virtual async Task<ErrorOr<bool>> RunPipelineAsync(PipelineModel pipeline, PipelineContext context, CancellationToken ct = default)
         {
             var steps = pipeline.Steps;
             if (steps is null || !steps.Any())
@@ -19,7 +19,7 @@ namespace PromptEnhancer.Pipeline
 
             foreach (var step in steps)
             {
-                var result = await step.ExecuteAsync(pipeline.Settings, context);
+                var result = await step.ExecuteAsync(pipeline.Settings, context, ct);
                 if (result.IsError)
                 {
                     //TODO logging

@@ -1,6 +1,8 @@
 ﻿using ErrorOr;
+using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
 using Newtonsoft.Json;
+using PromptEnhancer.AIUtility.ChatHistory;
 using PromptEnhancer.ChunkUtilities.Interfaces;
 using PromptEnhancer.CustomJsonResolver;
 using PromptEnhancer.Models;
@@ -79,7 +81,15 @@ namespace PromptEnhancer.Services.EnhancerService
             return JsonConvert.DeserializeObject<EnhancerConfiguration>(json);
         }
 
-        public async Task<ErrorOr<IList<ResultModel>>> ProcessPipeline(PipelineModel pipeline, IEnumerable<PipelineContext> entries)
+        public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponse(PipelineSettings settings, PipelineContext context, CancellationToken ct = default)
+        {
+            var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.Settings.ChatClientKey);
+            List<ChatMessage> history = ChatHistoryUtility.AddToChatHistoryPipeline(context);
+
+            return chatClient.GetStreamingResponseAsync(history, settings.Settings.ChatOptions, ct);
+        }
+
+        public async Task<ErrorOr<IList<ResultModel>>> ProcessPipeline(PipelineModel pipeline, IEnumerable<PipelineContext> entries, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -90,7 +100,7 @@ namespace PromptEnhancer.Services.EnhancerService
                 var cb = new ConcurrentBag<ResultModel>();
                 await Parallel.ForEachAsync(entries, async (context, _) =>
                 {
-                    var pipelineRes = await _pipelineOrchestrator.RunPipelineAsync(pipeline, context);
+                    var pipelineRes = await _pipelineOrchestrator.RunPipelineAsync(pipeline, context, cancellationToken);
                     var resultModel = new ResultModel
                     {
                         Result = context,
@@ -108,7 +118,7 @@ namespace PromptEnhancer.Services.EnhancerService
         }
 
         //TODO here i need pipeline, figure out configs
-        public async Task<ErrorOr<IList<ResultModel>>> ProcessConfiguration(EnhancerConfiguration config, IEnumerable<Entry> entries, Kernel? kernel = null)
+        public async Task<ErrorOr<IList<ResultModel>>> ProcessConfiguration(EnhancerConfiguration config, IEnumerable<Entry> entries, Kernel? kernel = null, CancellationToken cancellationToken = default)
         {
             var kernelData = config.KernelConfiguration;
             var promptConf = config.PromptConfiguration;
@@ -135,7 +145,7 @@ namespace PromptEnhancer.Services.EnhancerService
 
             var pipeline = new PipelineModel(new PipelineSettings(sk, _serviceProvider, config.PipelineAdditionalSettings, config.PromptConfiguration), config.Steps);
 
-            return await ProcessPipeline(pipeline, entries.Select(x => new PipelineContext(x)));
+            return await ProcessPipeline(pipeline, entries.Select(x => new PipelineContext(x)), cancellationToken);
 
             //TODO should this be here? (maybe like sk.invoke and hope there are some plugins? - since there are 3 ways to kernel here, also i would need some plugins in my creation, but i could resolve plugins by injection (common interface))
             //TODO it could also require check for openai, options and some uniform way to work with results, or just put it outside of this method and just work with it there, but it requires same arguments prolly

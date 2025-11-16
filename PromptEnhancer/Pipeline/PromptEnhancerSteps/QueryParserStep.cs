@@ -13,8 +13,8 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             Keep only what is useful for search. Context for each part must be clear (you can repeat some words from query).
             Remove filler or irrelevant parts. If the query can’t be improved or split, return "{2}".
             Example:
-            “What is the average size of a beehive, and I also wanted to ask what time it is?” -> “average size of a beehive;what time is it?”
-            
+            "What is the average size of a beehive, and I also wanted to ask what time it is?"
+            average size of a beehive;what time is it?
             """;
 
         public const string FailResponseLLM = "NaN";

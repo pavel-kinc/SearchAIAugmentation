@@ -1,13 +1,13 @@
 ﻿using PromptEnhancer.ChunkUtilities.Interfaces;
-using PromptEnhancer.KnowledgeBase.Interfaces;
+using PromptEnhancer.KnowledgeBaseCore.Interfaces;
 using PromptEnhancer.KnowledgeRecord;
 using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.KnowledgeSearchRequest.Interfaces;
 
-namespace PromptEnhancer.KnowledgeBase
+namespace PromptEnhancer.KnowledgeBaseCore
 {
 
-    public abstract class KnowledgeBaseCore<T, TSearchFilter, TSearchSettings, TFilter, TModel> : IKnowledgeBase<T, TSearchFilter, TSearchSettings, TFilter, TModel>
+    public abstract class KnowledgeBase<T, TSearchFilter, TSearchSettings, TFilter, TModel> : IKnowledgeBase<T, TSearchFilter, TSearchSettings, TFilter, TModel>
         where T : KnowledgeRecord<TModel>, new()
         where TSearchFilter : class, IKnowledgeBaseSearchFilter
         where TSearchSettings : class, IKnowledgeBaseSearchSettings
@@ -16,10 +16,12 @@ namespace PromptEnhancer.KnowledgeBase
     {
         protected readonly IChunkGeneratorService? _chunkGenerator;
 
-        protected KnowledgeBaseCore(IChunkGeneratorService? chunkGenerator = null)
+        protected KnowledgeBase(IChunkGeneratorService? chunkGenerator = null)
         {
             _chunkGenerator = chunkGenerator;
         }
+
+        public virtual string Description => $"Knowledge base with name {GetType().Name}";
 
         public abstract Task<IEnumerable<T>> SearchAsync(IKnowledgeSearchRequest<TSearchFilter, TSearchSettings> request, IEnumerable<string> queriesToSearch, TFilter? filter = null, CancellationToken ct = default);
 

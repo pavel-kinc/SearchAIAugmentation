@@ -1,7 +1,7 @@
 ﻿using Microsoft.SemanticKernel.Data;
-using PromptEnhancer.KnowledgeBase.Interfaces;
+using PromptEnhancer.KnowledgeBaseCore.Interfaces;
 
-namespace PromptEnhancer.KnowledgeBase
+namespace PromptEnhancer.KnowledgeBaseCore
 {
     // for info about properties look at https://developers.google.com/custom-search/v1/reference/rest/v1/cse/list
     public class GoogleSearchFilterModel : IKnowledgeBaseSearchFilter

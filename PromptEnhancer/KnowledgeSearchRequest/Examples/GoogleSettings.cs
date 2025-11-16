@@ -1,4 +1,4 @@
-﻿using PromptEnhancer.KnowledgeBase.Interfaces;
+﻿using PromptEnhancer.KnowledgeBaseCore.Interfaces;
 
 namespace PromptEnhancer.KnowledgeSearchRequest.Examples
 {

@@ -1,7 +1,7 @@
 ﻿using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.KnowledgeSearchRequest.Interfaces;
 
-namespace PromptEnhancer.KnowledgeBase.Interfaces
+namespace PromptEnhancer.KnowledgeBaseCore.Interfaces
 {
     public interface IKnowledgeBase<T, SearchFilter, SearchSettings, TFilter, TModel> : IKnowledgeBaseCore
         where T : class, IKnowledgeRecord

@@ -4,9 +4,9 @@ using Microsoft.SemanticKernel;
 using PromptEnhancer.ChunkUtilities;
 using PromptEnhancer.ChunkUtilities.Interfaces;
 using PromptEnhancer.KernelServiceTemplates;
-using PromptEnhancer.KnowledgeBase;
-using PromptEnhancer.KnowledgeBase.Examples;
-using PromptEnhancer.KnowledgeBase.Interfaces;
+using PromptEnhancer.KnowledgeBaseCore;
+using PromptEnhancer.KnowledgeBaseCore.Examples;
+using PromptEnhancer.KnowledgeBaseCore.Interfaces;
 using PromptEnhancer.KnowledgeRecord;
 using PromptEnhancer.KnowledgeSearchRequest.Examples;
 using PromptEnhancer.Models.Examples;
@@ -81,6 +81,7 @@ namespace PromptEnhancer.Extensions
 
             //services.TryAddKeyedSingleton<IKnowledgeBase, TestKnowledgeBaseProcessor>("test");
             services.TryAddSingleton<IKnowledgeBase<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>, GoogleKnowledgeBase>();
+            services.TryAddSingleton<GoogleKnowledgeBase, GoogleKnowledgeBase>();
             //Delete prolly?
             services.TryAddSingleton<IPipelineContextService, PipelineContextService>();
         }

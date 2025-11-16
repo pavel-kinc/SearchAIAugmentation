@@ -8,9 +8,9 @@ using PromptEnhancer.Search;
 using PromptEnhancer.Search.Interfaces;
 using System.Collections.Concurrent;
 
-namespace PromptEnhancer.KnowledgeBase.Examples
+namespace PromptEnhancer.KnowledgeBaseCore.Examples
 {
-    public class GoogleKnowledgeBase : KnowledgeBaseUrlCore<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>
+    public class GoogleKnowledgeBase : KnowledgeBaseUrl<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>
     {
         private readonly ISearchProviderManager _searchProviderManager;
         public GoogleKnowledgeBase(ISearchWebScraper searchWebScraper, IChunkGeneratorService chunkGenerator, ISearchProviderManager searchProviderManager)
@@ -18,6 +18,8 @@ namespace PromptEnhancer.KnowledgeBase.Examples
         {
             _searchProviderManager = searchProviderManager;
         }
+
+        public override string Description => $"This knowledge base uses Google Search to retrieve up-to-date data. Can be used for various queries.";
 
         public async override Task<IEnumerable<KnowledgeUrlRecord>> SearchAsync(
             IKnowledgeSearchRequest<GoogleSearchFilterModel, GoogleSettings> request, IEnumerable<string> queriesToSearch, UrlRecordFilter? filter = null, CancellationToken ct = default)

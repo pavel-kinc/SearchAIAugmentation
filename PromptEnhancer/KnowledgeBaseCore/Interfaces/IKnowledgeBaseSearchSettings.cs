@@ -1,4 +1,4 @@
-﻿namespace PromptEnhancer.KnowledgeBase.Interfaces
+﻿namespace PromptEnhancer.KnowledgeBaseCore.Interfaces
 {
     public interface IKnowledgeBaseSearchSettings
     {

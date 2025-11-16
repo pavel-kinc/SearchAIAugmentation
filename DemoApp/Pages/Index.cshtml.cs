@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
-using PromptEnhancer.KnowledgeBase;
+using PromptEnhancer.KnowledgeBaseCore;
+using PromptEnhancer.KnowledgeBaseCore.Examples;
 using PromptEnhancer.KnowledgeRecord;
 using PromptEnhancer.KnowledgeSearchRequest.Examples;
 using PromptEnhancer.Models;
@@ -25,6 +26,7 @@ namespace DemoApp.Pages
 
         private readonly IConfigurationSetupService _configurationService;
         private readonly IEntrySetupService _entrySetupService;
+        private readonly GoogleKnowledgeBase _googleKB;
         private readonly IEnhancerService _enhancerService;
 
         [BindProperty]
@@ -33,12 +35,13 @@ namespace DemoApp.Pages
         public List<Entry> Entries { get; set; } = [];
 
 
-        public IndexModel(ILogger<IndexModel> logger, IConfiguration configuration, IConfigurationSetupService configurationService, IEnhancerService enhancerService, IEntrySetupService entrySetupService)
+        public IndexModel(ILogger<IndexModel> logger, IConfiguration configuration, IConfigurationSetupService configurationService, IEnhancerService enhancerService, IEntrySetupService entrySetupService, GoogleKnowledgeBase googleKB)
         {
             _logger = logger;
             _configurationService = configurationService;
             _enhancerService = enhancerService;
             _entrySetupService = entrySetupService;
+            _googleKB = googleKB;
         }
 
         public void OnGet()
@@ -162,7 +165,7 @@ namespace DemoApp.Pages
             return Page();
         }
 
-        private static EnhancerConfiguration GetEnhancerConfiguration(ConfigurationSetup appConfig)
+        private EnhancerConfiguration GetEnhancerConfiguration(ConfigurationSetup appConfig)
         {
             var enhancerConfig = appConfig.Adapt<EnhancerConfiguration>();
 
@@ -176,6 +179,7 @@ namespace DemoApp.Pages
                 Filter = appConfig.SearchConfiguration.SearchFilter
             };
 
+            var container = new KnowledgeBaseContainer<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>(_googleKB, request, null);
             enhancerConfig.PipelineAdditionalSettings = AssignExecutionSettingsAndOptions(enhancerConfig.PipelineAdditionalSettings, appConfig.GenerationConfiguration);
 
             //TODO defensive copy in lib? (and also of settings and such)
@@ -185,7 +189,8 @@ namespace DemoApp.Pages
                     new KernelContextPluginsStep(),
                     new QueryParserStep(),
                     //TODO automatic step picker calling? picking from list of steps(defined by user)/bases(from inject pick bases)/each has its own call to llm if it is viable for the given query(steps defined from user so kinda like 1.)
-                    new SearchStep<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>(request)
+                    //new SearchStep<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>(request)
+                    new MultipleSearchStep([container]),
                 };
             return enhancerConfig;
         }

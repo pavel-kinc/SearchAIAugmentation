@@ -1,5 +1,5 @@
 ﻿using ErrorOr;
-using PromptEnhancer.KnowledgeBase.Interfaces;
+using PromptEnhancer.KnowledgeBaseCore.Interfaces;
 using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.KnowledgeSearchRequest;
 using PromptEnhancer.Models.Pipeline;
