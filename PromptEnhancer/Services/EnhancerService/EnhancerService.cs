@@ -88,14 +88,13 @@ namespace PromptEnhancer.Services.EnhancerService
                     return Error.Unexpected("No input specified, nothing to proccess");
                 }
                 var cb = new ConcurrentBag<ResultModel>();
-                await Parallel.ForEachAsync(entries, async (entry, _) =>
+                await Parallel.ForEachAsync(entries, async (context, _) =>
                 {
-                    var pipelineRes = await _pipelineOrchestrator.RunPipelineAsync(pipeline, entry);
+                    var pipelineRes = await _pipelineOrchestrator.RunPipelineAsync(pipeline, context);
                     var resultModel = new ResultModel
                     {
-                        Result = entry,
+                        Result = context,
                         PipelineSuccess = pipelineRes,
-                        EntryInput = entry.Entry,
                     };
                     cb.Add(resultModel);
                 });

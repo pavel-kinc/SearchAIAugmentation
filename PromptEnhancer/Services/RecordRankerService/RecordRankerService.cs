@@ -59,7 +59,14 @@ namespace PromptEnhancer.Services.RecordRankerService
                 return false;
             }
 
-            record.SimilarityScore = _rankerService.GetSimilarityScore(queryEmbed, recordEmbed);
+            var score = _rankerService.GetSimilarityScore(queryEmbed, recordEmbed);
+
+            if (score is null)
+            {
+                return false;
+            }
+
+            record.SimilarityScore = score;
             return true;
         }
     }

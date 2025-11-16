@@ -13,7 +13,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
         {
             var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.Settings.ChatClientKey);
-            List<ChatMessage> history = ChatHistoryUtility.AddToChatHistory(context);
+            List<ChatMessage> history = ChatHistoryUtility.AddToChatHistoryPipeline(context);
 
             var res = await chatClient.GetResponseAsync(history, settings.Settings.ChatOptions, cancellationToken);
             context.InputTokenUsage += res.Usage?.InputTokenCount ?? 0; //TODO do some custom counter, if the method ends in success but still 0?

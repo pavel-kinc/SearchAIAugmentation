@@ -8,7 +8,5 @@ namespace PromptEnhancer.Models
         public PipelineContext? Result { get; init; }
 
         public ErrorOr<bool>? PipelineSuccess { get; init; }
-
-        public Entry? EntryInput { get; init; }
     }
 }

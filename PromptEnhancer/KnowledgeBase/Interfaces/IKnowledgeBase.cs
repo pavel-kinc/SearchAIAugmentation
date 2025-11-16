@@ -3,7 +3,7 @@ using PromptEnhancer.KnowledgeSearchRequest.Interfaces;
 
 namespace PromptEnhancer.KnowledgeBase.Interfaces
 {
-    public interface IKnowledgeBase<T, SearchFilter, SearchSettings, TFilter, TModel>
+    public interface IKnowledgeBase<T, SearchFilter, SearchSettings, TFilter, TModel> : IKnowledgeBaseCore
         where T : class, IKnowledgeRecord
         where SearchFilter : class, IKnowledgeBaseSearchFilter
         where SearchSettings : class, IKnowledgeBaseSearchSettings
