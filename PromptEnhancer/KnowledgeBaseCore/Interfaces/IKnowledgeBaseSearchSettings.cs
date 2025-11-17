@@ -3,4 +3,9 @@
     public interface IKnowledgeBaseSearchSettings
     {
     }
+
+    public class EmptySearchSettings : IKnowledgeBaseSearchSettings
+    {
+
+    }
 }

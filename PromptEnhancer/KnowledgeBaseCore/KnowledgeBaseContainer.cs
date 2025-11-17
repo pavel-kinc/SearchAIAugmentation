@@ -8,7 +8,7 @@ namespace PromptEnhancer.KnowledgeBaseCore
         where TRecord : class, IKnowledgeRecord
         where TSearchFilter : class, IKnowledgeBaseSearchFilter
         where TSearchSettings : class, IKnowledgeBaseSearchSettings
-        where TFilter : class, IRecordFilter<T>
+        where TFilter : class, IModelFilter<T>
         where T : class
     {
         private readonly IKnowledgeBase<TRecord, TSearchFilter, TSearchSettings, TFilter, T> _knowledgeBase;

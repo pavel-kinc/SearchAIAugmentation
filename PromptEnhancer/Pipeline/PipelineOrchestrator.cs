@@ -6,8 +6,6 @@ namespace PromptEnhancer.Pipeline
 {
     public class PipelineOrchestrator : IPipelineOrchestrator
     {
-        //TODO maybe add strategy for when step fails? also params - this is in the step itself now
-        //TODO Pipeline for every query or reusable - also class for only pipeline?
         public virtual async Task<ErrorOr<bool>> RunPipelineAsync(PipelineModel pipeline, PipelineContext context, CancellationToken ct = default)
         {
             var steps = pipeline.Steps;
@@ -19,11 +17,19 @@ namespace PromptEnhancer.Pipeline
 
             foreach (var step in steps)
             {
-                var result = await step.ExecuteAsync(pipeline.Settings, context, ct);
-                if (result.IsError)
+                //true means step executed correctly, false means step did not execute/start (for unrequired steps), otherwise error
+                try
                 {
-                    //TODO logging
-                    return result;
+                    var result = await step.ExecuteAsync(pipeline.Settings, context, ct);
+                    if (result.IsError)
+                    {
+                        //TODO logging
+                        return result;
+                    }
+                }
+                catch(Exception ex)
+                {
+                    return Error.Failure($"Error: {nameof(step)} has thrown Exception in step execution", ex.Message);
                 }
             }
             return true;

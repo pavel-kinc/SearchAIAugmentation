@@ -24,7 +24,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
         {
             if (settings.Settings.KernelRequestSettings is null || settings.Settings.KernelRequestSettings.FunctionChoiceBehavior != FunctionChoiceBehavior.Auto())
             {
-                return FailCondition();
+                return false;
             }
             var res = await settings.Kernel.InvokePromptAsync<ChatResponse>(GetPrompt(context.QueryString), new(settings.Settings.KernelRequestSettings), cancellationToken: cancellationToken);
             var tokenUsage = res?.Usage?.TotalTokenCount;

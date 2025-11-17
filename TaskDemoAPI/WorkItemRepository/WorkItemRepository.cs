@@ -18,8 +18,11 @@ namespace TaskDemoAPI.WorkItemRepository
                     x.Title.Contains(filter.Title, StringComparison.OrdinalIgnoreCase));
             }
 
-            if (filter.Type.HasValue)
-                query = query.Where(x => x.Type == filter.Type.Value);
+            if (!string.IsNullOrWhiteSpace(filter.Type))
+            {
+                query = query.Where(x =>
+                    x.Type.Contains(filter.Type, StringComparison.OrdinalIgnoreCase));
+            }
 
             if (!string.IsNullOrWhiteSpace(filter.Description))
                 query = query.Where(x => x.Description?.Contains(filter.Description) == true);

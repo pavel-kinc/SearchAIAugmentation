@@ -19,7 +19,12 @@ namespace PromptEnhancer.Pipeline
                 return check;
             }
             //TODO here try catch? also maybe delete cancellation token, i dont use it in my methods/services
-            return check.Value ? await ExecuteStepAsync(settings, context, cancellationToken) : false;
+            if (check.Value)
+            {
+                var res = await ExecuteStepAsync(settings, context, cancellationToken);
+                return res.IsError ? res : (res.Value ? true : (_isRequired ? FailExecution() : false));
+            }
+            return _isRequired ? FailExecution() : false;
         }
 
         protected abstract Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default);
@@ -33,6 +38,11 @@ namespace PromptEnhancer.Pipeline
         protected virtual ErrorOr<bool> FailCondition()
         {
             return _isRequired ? Error.Failure($"{GetType()}: Conditions check for this required step failed.") : false;
+        }
+
+        protected virtual ErrorOr<bool> FailExecution()
+        {
+            return _isRequired ? Error.Failure($"{GetType()}: Execution for this required step failed.") : false;
         }
     }
 }

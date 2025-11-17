@@ -11,7 +11,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
         where TRecord : class, IKnowledgeRecord
         where TSearchFilter : class, IKnowledgeBaseSearchFilter
         where TSearchSettings : class, IKnowledgeBaseSearchSettings
-        where TFilter : class, IRecordFilter<T>
+        where TFilter : class, IModelFilter<T>
         where T : class
     {
         private readonly string? _knowledgeBaseKey = null;

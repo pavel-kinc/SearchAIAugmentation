@@ -6,6 +6,6 @@ namespace PromptEnhancer.Services.EmbeddingService
 {
     public interface IEmbeddingService
     {
-        Task<bool> GetEmbeddingsForRecordsWithoutEmbeddingDataAsync(Kernel kernel, IReadOnlyList<IKnowledgeRecord> retrievedRecords, string? generatorKey = null, EmbeddingGenerationOptions? options = null);
+        Task<bool> GenerateEmbeddingsForRecordsAsync(Kernel kernel, IReadOnlyList<IKnowledgeRecord> retrievedRecords, string? generatorKey = null, EmbeddingGenerationOptions? options = null, bool skipGenerationForEmbData = false);
     }
 }

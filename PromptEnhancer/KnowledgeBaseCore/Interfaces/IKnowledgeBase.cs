@@ -3,14 +3,14 @@ using PromptEnhancer.KnowledgeSearchRequest.Interfaces;
 
 namespace PromptEnhancer.KnowledgeBaseCore.Interfaces
 {
-    public interface IKnowledgeBase<T, SearchFilter, SearchSettings, TFilter, TModel> : IKnowledgeBaseCore
-        where T : class, IKnowledgeRecord
+    public interface IKnowledgeBase<TRecord, SearchFilter, SearchSettings, TFilter, TModel> : IKnowledgeBaseCore
+        where TRecord : class, IKnowledgeRecord
         where SearchFilter : class, IKnowledgeBaseSearchFilter
         where SearchSettings : class, IKnowledgeBaseSearchSettings
-        where TFilter : class, IRecordFilter<TModel>
+        where TFilter : class, IModelFilter<TModel>
         where TModel : class
 
     {
-        Task<IEnumerable<T>> SearchAsync(IKnowledgeSearchRequest<SearchFilter, SearchSettings> request, IEnumerable<string> queriesToSearch, TFilter? filter = null, CancellationToken ct = default);
+        Task<IEnumerable<TRecord>> SearchAsync(IKnowledgeSearchRequest<SearchFilter, SearchSettings> request, IEnumerable<string> queriesToSearch, TFilter? filter = null, CancellationToken ct = default);
     }
 }

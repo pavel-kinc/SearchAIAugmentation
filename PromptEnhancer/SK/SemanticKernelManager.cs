@@ -82,17 +82,29 @@ namespace PromptEnhancer.SK
         //    };
         //}
 
-        public IEnumerable<KernelServiceBaseConfig> ConvertConfig(KernelConfiguration kernelData)
+        public ErrorOr<IEnumerable<KernelServiceBaseConfig>> ConvertConfig(KernelConfiguration kernelData)
         {
-            var configs = new List<KernelServiceBaseConfig>
+            try
             {
-                new(kernelData.Provider, kernelData.Model!, kernelData.AIApiKey!)
-            };
-            if (!string.IsNullOrWhiteSpace(kernelData.EmbeddingModel) && kernelData.UseLLMConfigForEmbeddings)
-            {
-                configs.Add(new KernelServiceBaseConfig(kernelData.Provider, kernelData.Model!, kernelData.AIApiKey!, serviceType: KernelServiceEnum.EmbeddingGenerator));
+                var configs = new List<KernelServiceBaseConfig>
+                    {
+                    new(kernelData.Provider, kernelData.Model!, kernelData.AIApiKey!, kernelData.DeploymentName)
+                    };
+                if (!string.IsNullOrWhiteSpace(kernelData.EmbeddingModel) && kernelData.UseLLMConfigForEmbeddings)
+                {
+                    configs.Add(new KernelServiceBaseConfig(kernelData.Provider, kernelData.EmbeddingModel!, kernelData.AIApiKey!, serviceType: KernelServiceEnum.EmbeddingGenerator));
+                }
+                if (!string.IsNullOrWhiteSpace(kernelData.EmbeddingModel) && !kernelData.UseLLMConfigForEmbeddings && kernelData.EmbeddingProvider is not null)
+                {
+                    configs.Add(new KernelServiceBaseConfig((AIProviderEnum)kernelData.EmbeddingProvider, kernelData.EmbeddingModel!, kernelData.EmbeddingKey!, serviceType: KernelServiceEnum.EmbeddingGenerator));
+                }
+                return configs;
             }
-            return configs;
+            catch (Exception ex)
+            {
+                return Error.Failure($"{nameof(ConvertConfig)} failed", ex.Message);
+            }
+
         }
     }
 }

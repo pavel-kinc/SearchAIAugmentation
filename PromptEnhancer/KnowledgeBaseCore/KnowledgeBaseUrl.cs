@@ -10,7 +10,7 @@ namespace PromptEnhancer.KnowledgeBaseCore
         where T : KnowledgeRecord<TModel>, new()
         where TSearchFilter : class, IKnowledgeBaseSearchFilter
         where TSearchSettings : class, IKnowledgeBaseSearchSettings
-        where TFilter : class, IRecordFilter<TModel>
+        where TFilter : class, IModelFilter<TModel>
         where TModel : class
     {
         protected readonly ISearchWebScraper _searchWebScraper;

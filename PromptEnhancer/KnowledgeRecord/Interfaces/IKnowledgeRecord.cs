@@ -13,7 +13,7 @@ namespace PromptEnhancer.KnowledgeRecord.Interfaces
         public PipelineEmbeddingsModel? Embeddings { get; set; }
 
         [Range(0, 1)]
-        public float? SimilarityScore { get; set; }
+        public double? SimilarityScore { get; set; }
 
         public string UsedSearchQuery { get; set; }
 
@@ -21,8 +21,6 @@ namespace PromptEnhancer.KnowledgeRecord.Interfaces
         public string LLMRepresentationString { get; }
         public string EmbeddingRepresentationString { get; }
         public bool HasEmbeddingData => Embeddings is not null || SimilarityScore is not null;
-        // optional property weights for embedding generation
-        public IDictionary<string, int>? PropertyWeights { get; }
         public object SourceObject { get; }
     }
 }

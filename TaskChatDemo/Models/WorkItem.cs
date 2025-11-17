@@ -1,4 +1,4 @@
-﻿namespace TaskDemoAPI.Models
+﻿namespace TaskChatDemo.Models
 {
     public class WorkItem
     {

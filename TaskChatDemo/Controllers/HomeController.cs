@@ -1,7 +1,11 @@
+using AllMiniLmL6V2Sharp;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.VectorData;
 using Microsoft.ML.OnnxRuntimeGenAI;
+using Microsoft.SemanticKernel;
+using OpenTelemetry.Trace;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Services.EnhancerService;
 using PromptEnhancer.SK;
@@ -9,6 +13,10 @@ using PromptEnhancer.SK.Interfaces;
 using System.Diagnostics;
 using System.Text;
 using TaskChatDemo.Models;
+using TaskChatDemo.Models.SearchFilterModels;
+using TaskChatDemo.Models.Settings;
+using TaskChatDemo.Models.TaskItem;
+using TaskChatDemo.Services.ApiConsumer;
 
 namespace TaskChatDemo.Controllers;
 
@@ -19,14 +27,18 @@ public class HomeController : Controller
     private readonly IConfiguration _configuration;
     private readonly ISemanticKernelManager _semanticKernelManager;
     private readonly IServiceProvider _serviceProvider;
+    private readonly VectorStoreCollection<Guid, TaskItemModel> _taskCollection;
+    private readonly IWorkItemApiService _workItemApiService;
 
-    public HomeController(IEnhancerService enhancerService, ILogger<HomeController> logger, IConfiguration configuration, ISemanticKernelManager skManager, IServiceProvider serviceProvider)
+    public HomeController(IEnhancerService enhancerService, ILogger<HomeController> logger, IConfiguration configuration, ISemanticKernelManager skManager, IServiceProvider serviceProvider, VectorStoreCollection<Guid, TaskItemModel> taskCollection, IWorkItemApiService workItemApiService)
     {
         _enhancerService = enhancerService;
         _logger = logger;
         _configuration = configuration;
         _semanticKernelManager = skManager;
         _serviceProvider = serviceProvider;
+        _taskCollection = taskCollection;
+        _workItemApiService = workItemApiService;
     }
 
     public IActionResult Index()
@@ -43,12 +55,15 @@ public class HomeController : Controller
     public async Task<IActionResult> StreamTest(string q, CancellationToken ct = default)
     {
         var enhancerConfig = _enhancerService.CreateDefaultConfiguration(aiApiKey: _configuration["AIServices:OpenAI:ApiKey"]);
-        var createdKernel = _semanticKernelManager.CreateKernel(_semanticKernelManager.ConvertConfig(enhancerConfig.KernelConfiguration));
-        var settings = new PipelineSettings(createdKernel.Value, _serviceProvider, enhancerConfig.PipelineAdditionalSettings, enhancerConfig.PromptConfiguration);
+        var settings = _enhancerService.CreatePipelineSettingsFromConfig(enhancerConfig.PromptConfiguration, enhancerConfig.PipelineAdditionalSettings, enhancerConfig.KernelConfiguration).Value;
         var context = new PipelineContext()
         {
             UserPromptToLLM = q,
         };
+        var smth1 = await _workItemApiService.GetWorkItemsAsync(new SearchWorkItemFilterModel(), new WorkItemSearchSettings().ApiUrl);
+        var generator = settings.Kernel.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>();
+        var queryVec = await generator.GenerateAsync(q);
+        var results = await _taskCollection.SearchAsync(queryVec.Vector, top: 7).ToListAsync();
         var res = _enhancerService.GetStreamingResponse(settings, context);
         List<ChatResponseUpdate> updates = [];
         Response.ContentType = "text/event-stream";

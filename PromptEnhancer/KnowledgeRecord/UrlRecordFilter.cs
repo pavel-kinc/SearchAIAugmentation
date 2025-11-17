@@ -3,7 +3,7 @@ using PromptEnhancer.Models.Examples;
 
 namespace PromptEnhancer.KnowledgeRecord
 {
-    public class UrlRecordFilter : IRecordFilter<UrlRecord>
+    public class UrlRecordFilter : IModelFilter<UrlRecord>
     {
         public string UrlMustContain { get; set; } = "";
 

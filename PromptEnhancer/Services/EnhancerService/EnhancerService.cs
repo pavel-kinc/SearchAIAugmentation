@@ -52,7 +52,7 @@ namespace PromptEnhancer.Services.EnhancerService
                 Model = aiModel,
                 Provider = aiProvider,
                 EmbeddingModel = embeddingModel,
-                UseLLMConfigForEmbeddings = embeddingModel is not null
+                UseLLMConfigForEmbeddings = embeddingModel is not null && aiProvider == AIProviderEnum.OpenAI,
             };
             return enhancerConfiguration;
         }
@@ -117,33 +117,42 @@ namespace PromptEnhancer.Services.EnhancerService
 
         }
 
-        //TODO here i need pipeline, figure out configs
-        public async Task<ErrorOr<IList<ResultModel>>> ProcessConfiguration(EnhancerConfiguration config, IEnumerable<Entry> entries, Kernel? kernel = null, CancellationToken cancellationToken = default)
+        public ErrorOr<PipelineSettings> CreatePipelineSettingsFromConfig(PromptConfiguration promptConf, PipelineAdditionalSettings pipelineSettings, KernelConfiguration? kernelData = null, Kernel? kernel = null)
         {
-            var kernelData = config.KernelConfiguration;
-            var promptConf = config.PromptConfiguration;
             var sk = kernel ?? _kernel;
-            // TODO: maybe check kernelData as a whole?
             if (sk is null && kernelData is not null)
             {
-                var createdKernel = _semanticKernelManager.CreateKernel(_semanticKernelManager.ConvertConfig(kernelData));
-                if (!createdKernel.IsError)
+                var configs = _semanticKernelManager.ConvertConfig(kernelData);
+                if (configs.IsError)
                 {
-                    sk = createdKernel.Value;
+                    return configs.Errors;
                 }
-                else
+                var createdKernel = _semanticKernelManager.CreateKernel(configs.Value);
+                if (createdKernel.IsError)
                 {
                     return createdKernel.Errors;
                 }
+                sk = createdKernel.Value;
             }
 
             if (sk is null)
             {
-                // TODO: handle no kernel scenario better
                 return Error.Failure("No kernel could be created or resolved.");
             }
+            return new PipelineSettings(sk, _serviceProvider, pipelineSettings, promptConf);
+        }
 
-            var pipeline = new PipelineModel(new PipelineSettings(sk, _serviceProvider, config.PipelineAdditionalSettings, config.PromptConfiguration), config.Steps);
+        //TODO here i need pipeline, figure out configs
+        public async Task<ErrorOr<IList<ResultModel>>> ProcessConfiguration(EnhancerConfiguration config, IEnumerable<Entry> entries, Kernel? kernel = null, CancellationToken cancellationToken = default)
+        {
+            var settings = CreatePipelineSettingsFromConfig(config.PromptConfiguration, config.PipelineAdditionalSettings, config.KernelConfiguration, kernel);
+
+            if (settings.IsError)
+            {
+                return settings.Errors;
+            }
+
+            var pipeline = new PipelineModel(settings.Value, config.Steps);
 
             return await ProcessPipeline(pipeline, entries.Select(x => new PipelineContext(x)), cancellationToken);
 

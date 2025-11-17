@@ -1,10 +1,16 @@
+using Microsoft.Extensions.VectorData;
+using Microsoft.SemanticKernel;
 using PromptEnhancer.Extensions;
+using System.Threading.Tasks;
+using TaskChatDemo.Models.TaskItem;
+using TaskChatDemo.Services.ApiConsumer;
+using TaskChatDemo.Services.VectorStore;
 
 namespace TaskChatDemo;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public async static Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.AddServiceDefaults();
@@ -13,10 +19,31 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddControllersWithViews();
+        builder.Services.AddInMemoryVectorStore();
+
+        builder.Services.AddSingleton(sp =>
+        {
+            var vectorStore = sp.GetRequiredService<VectorStore>();
+            var collection = vectorStore.GetCollection<Guid, TaskItemModel>("tasks");
+            // Ensure at registration time that collection exists
+            collection.EnsureCollectionExistsAsync().GetAwaiter().GetResult();
+            return collection;
+        });
+
+        builder.Services.AddSingleton<IVectorStoreService, VectorStoreService>();
+        builder.Services.AddSingleton<IWorkItemApiService, WorkItemApiService>();
 
         builder.Services.AddPromptEnhancer();
 
         var app = builder.Build();
+
+        var path = Path.Combine(builder.Environment.ContentRootPath, "Data", "task_models.json");
+        var taskModels = TaskItemModelUtility.LoadFromJson(path);
+
+        var vectorStore = app.Services.GetRequiredService<VectorStore>();
+        var taskCollection = vectorStore.GetCollection<Guid, TaskItemModel>("tasks");
+        await taskCollection.EnsureCollectionExistsAsync();
+        await taskCollection.UpsertAsync(taskModels);
 
         app.MapDefaultEndpoints();
 
