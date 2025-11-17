@@ -1,0 +1,71 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div id="chatComponent">
+    <div id="chat"></div>
+
+    <form id="chatForm">
+        <input id="prompt" type="text" placeholder="Type a message..." autocomplete="off" required maxlength="200"/>
+        <button id="sendBtn" type="submit">Send</button>
+    </form>
+</div>
+
+<script>
+    const chat = document.getElementById('chat');
+    const form = document.getElementById('chatForm');
+    const promptInput = document.getElementById('prompt');
+    let es = null;
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (es) return;
+      const text = promptInput.value.trim();
+      if (!text) return;
+
+      // 1) Add user bubble
+      addMessage('user', text);
+
+      // 2) Prepare assistant bubble to stream into
+      const assistantEl = addMessage('app', '');
+
+      // 3) Disable UI
+      setDisabled(true);
+
+      // 4) Start SSE, passing the prompt (adjust param name as your server expects)
+      es = new EventSource('/chat/stream?q=' + encodeURIComponent(text));
+
+      // Append chunks to the same assistant bubble
+      es.onmessage = (ev) => {
+        assistantEl.innerHTML += ev.data;
+      };
+
+      // Server signals completion with event: done
+      es.addEventListener('done', () => {
+        console.log('Stream complete');
+        cleanup();
+      });
+      es.onerror = cleanup;
+    });
+
+    function addMessage(role, text) {
+      const el = document.createElement('div');
+      el.className = `msg ${role}`;
+      el.textContent = text || '';
+      chat.appendChild(el);
+      return el;
+    }
+
+    function setDisabled(disabled) {
+      promptInput.value = '';
+      sendBtn.disabled = disabled;
+      if (!disabled) {
+        promptInput.focus();
+      }
+    }
+
+    function cleanup() {
+      if (es) { es.close(); es = null; }
+      setDisabled(false);
+    }
+</script>

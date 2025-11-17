@@ -5,19 +5,28 @@ using PromptEnhancer.Models.Configurations;
 
 namespace PromptEnhancer.Models.Pipeline
 {
-    public class PipelineSettings(
-    Kernel kernel,
-    IServiceProvider sp,
-    PipelineAdditionalSettings settings,
-    PromptConfiguration promptConfiguration)
+    public class PipelineSettings
     {
-        public Kernel Kernel { get; } = kernel;
+        public Kernel Kernel { get; }
 
-        public IServiceProvider ServiceProvider { get; } = sp;
+        public IServiceProvider ServiceProvider { get; }
 
-        public PipelineAdditionalSettings Settings { get; } = settings;
+        public PipelineAdditionalSettings Settings { get; }
 
-        public PromptConfiguration PromptConfiguration { get; } = promptConfiguration;
+        public PromptConfiguration PromptConfiguration { get; }
+
+        public PipelineSettings(
+        Kernel kernel,
+        IServiceProvider sp,
+        PipelineAdditionalSettings settings,
+        PromptConfiguration promptConfiguration)
+        {
+            Kernel = kernel;
+            ServiceProvider = sp;
+            Settings = settings;
+            PromptConfiguration = promptConfiguration;
+        }
+
         public T GetService<T>(string? key = null)
             where T : class
         {

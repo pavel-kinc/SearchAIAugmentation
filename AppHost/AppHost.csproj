@@ -16,6 +16,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DemoApp\ConfigurableGoogleSearchDemo.csproj" />
+    <ProjectReference Include="..\TaskChatDemo\TaskChatDemo.csproj" />
+    <ProjectReference Include="..\TaskDemoAPI\TaskDemoAPI.csproj" />
   </ItemGroup>
 
 </Project>
