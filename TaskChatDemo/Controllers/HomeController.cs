@@ -1,17 +1,10 @@
-using AllMiniLmL6V2Sharp;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
-using Microsoft.ML.OnnxRuntimeGenAI;
-using Microsoft.SemanticKernel;
-using OpenTelemetry.Trace;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Services.EnhancerService;
-using PromptEnhancer.SK;
 using PromptEnhancer.SK.Interfaces;
 using System.Diagnostics;
-using System.Text;
 using TaskChatDemo.Models;
 using TaskChatDemo.Models.SearchFilterModels;
 using TaskChatDemo.Models.Settings;

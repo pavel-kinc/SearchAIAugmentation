@@ -1,6 +1,4 @@
-﻿using AngleSharp.Browser;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.Extensions.VectorData;
+﻿using Microsoft.Extensions.VectorData;
 
 namespace TaskChatDemo.Models.TaskItem
 {

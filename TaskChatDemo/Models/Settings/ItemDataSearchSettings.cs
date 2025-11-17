@@ -5,6 +5,6 @@ namespace TaskChatDemo.Models.Settings
 {
     public class ItemDataSearchSettings : IKnowledgeBaseSearchSettings
     {
-        public required IEmbeddingGenerator<string,Embedding<float>> Generator { get; init; }
+        public required IEmbeddingGenerator<string, Embedding<float>> Generator { get; init; }
     }
 }

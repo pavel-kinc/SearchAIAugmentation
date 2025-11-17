@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.VectorData;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace TaskChatDemo.Models.TaskItem
 {

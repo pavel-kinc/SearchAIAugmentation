@@ -1,12 +1,10 @@
-﻿using Microsoft.Extensions.AI;
-using PromptEnhancer.KnowledgeBaseCore;
+﻿using PromptEnhancer.KnowledgeBaseCore;
 using PromptEnhancer.KnowledgeRecord;
 using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.KnowledgeSearchRequest.Interfaces;
 using TaskChatDemo.Models;
 using TaskChatDemo.Models.SearchFilterModels;
 using TaskChatDemo.Models.Settings;
-using TaskChatDemo.Models.TaskItem;
 using TaskChatDemo.Services.ApiConsumer;
 
 namespace TaskChatDemo.KnowledgeBases

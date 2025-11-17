@@ -1,6 +1,5 @@
 ﻿using ErrorOr;
 using Microsoft.Extensions.AI;
-using Newtonsoft.Json;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Services.EmbeddingService;
 

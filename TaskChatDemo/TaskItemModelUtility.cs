@@ -1,13 +1,9 @@
-﻿using AllMiniLmL6V2Sharp;
-using Microsoft.Extensions.AI;
+﻿using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
-using OpenTelemetry.Trace;
 using System.Collections.Immutable;
-using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using TaskChatDemo.Models.TaskItem;
 
 namespace TaskChatDemo

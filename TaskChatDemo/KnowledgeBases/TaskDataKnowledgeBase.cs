@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.AI;
 using PromptEnhancer.KnowledgeBaseCore;
-using PromptEnhancer.KnowledgeBaseCore.Interfaces;
 using PromptEnhancer.KnowledgeRecord;
 using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.KnowledgeSearchRequest.Interfaces;

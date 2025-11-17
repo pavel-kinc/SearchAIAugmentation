@@ -1,7 +1,6 @@
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel;
 using PromptEnhancer.Extensions;
-using System.Threading.Tasks;
 using TaskChatDemo.Models.TaskItem;
 using TaskChatDemo.Services.ApiConsumer;
 using TaskChatDemo.Services.VectorStore;
