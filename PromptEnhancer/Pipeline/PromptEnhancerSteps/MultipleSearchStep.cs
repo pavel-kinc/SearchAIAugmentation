@@ -26,13 +26,15 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
         private readonly int _atleastToPick;
         private readonly bool _allowAutoChoice;
         private readonly string? _additionalInstructions;
+        private readonly int _maxRecords;
 
-        public MultipleSearchStep(IEnumerable<IKnowledgeBaseContainer> knowledgeBases, int atleastToPick = 0, bool allowAutoChoice = true, string? additionalChoiceInstructions = null, bool isRequired = false) : base(isRequired)
+        public MultipleSearchStep(IEnumerable<IKnowledgeBaseContainer> knowledgeBases, int atleastToPick = 0, bool allowAutoChoice = true, string? additionalChoiceInstructions = null, int maxRecordsPerKB = 50, bool isRequired = false) : base(isRequired)
         {
             _knowledgeBases = knowledgeBases;
             _atleastToPick = atleastToPick;
             _allowAutoChoice = allowAutoChoice;
             _additionalInstructions = additionalChoiceInstructions;
+            _maxRecords = maxRecordsPerKB;
         }
 
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
@@ -48,7 +50,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 
                 await Parallel.ForEachAsync(pickedBases, async (kb, _) =>
                 {
-                    var results = await kb.SearchAsync(context.QueryStrings.Any() ? context.QueryStrings : [context.QueryString!], cancellationToken);
+                    var results = (await kb.SearchAsync(context.QueryStrings.Any() ? context.QueryStrings : [context.QueryString!], cancellationToken)).Take(_maxRecords);
                     foreach (var item in results)
                         cb.Add(item);
                 });

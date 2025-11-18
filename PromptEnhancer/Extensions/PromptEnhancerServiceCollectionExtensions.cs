@@ -44,7 +44,7 @@ namespace PromptEnhancer.Extensions
 
             if (addKernelToDI && !services.Any(sd => sd.ServiceType == typeof(Kernel)))
             {
-                services.AddKernelToDI();
+                services.AddKernelToDI(kernelServices);
             }
 
             return services;
@@ -86,9 +86,13 @@ namespace PromptEnhancer.Extensions
             services.TryAddSingleton<IPipelineContextService, PipelineContextService>();
         }
 
-        private static void AddKernelToDI(this IServiceCollection services)
+        private static void AddKernelToDI(this IServiceCollection services, IEnumerable<IKernelServiceTemplate>? kernelServices = null)
         {
-            services.AddKernel();
+            var builder = services.AddKernel();
+            if (kernelServices is not null && kernelServices.Any())
+            {
+                builder.Services.AddKernelServices(kernelServices);
+            }
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using ErrorOr;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using PromptEnhancer.Extensions;
 using PromptEnhancer.Models.Configurations;
@@ -11,13 +10,14 @@ namespace PromptEnhancer.SK
 {
     public class SemanticKernelManager : ISemanticKernelManager
     {
-        private readonly int MaxPromptLength = 3000;
+        private readonly IEnumerable<ISemanticKernelContextPlugin> _contextPlugins;
 
         public IKernelServiceFactory KernelServiceFactory { get; }
 
-        public SemanticKernelManager(IKernelServiceFactory kernelServiceFactory)
+        public SemanticKernelManager(IKernelServiceFactory kernelServiceFactory, IEnumerable<ISemanticKernelContextPlugin> contextPlugins)
         {
             KernelServiceFactory = kernelServiceFactory;
+            _contextPlugins = contextPlugins;
         }
 
         public void AddPluginToSemanticKernel<Plugin>(Kernel kernel) where Plugin : class
@@ -25,15 +25,12 @@ namespace PromptEnhancer.SK
             kernel.Plugins.AddFromType<Plugin>(typeof(Plugin).Name);
         }
 
-        public ErrorOr<Kernel> CreateKernel(IEnumerable<KernelServiceBaseConfig> kernelServiceConfigs, bool addInternalServices = false, bool addContextPlugins = false)
+        public ErrorOr<Kernel> CreateKernel(IEnumerable<KernelServiceBaseConfig> kernelServiceConfigs, bool addInternalServices = false, bool addContextPlugins = true)
         {
             try
             {
                 var factory = KernelServiceFactory ?? new KernelServiceFactory();
                 IKernelBuilder kernelBuilder = Kernel.CreateBuilder();
-                // TODO, maybe just send in the service templates instead of this factory (getting rid of the dictionary)
-                // maybe the config is uniform way for template creation? but then again, wouldnt it be easier just to create the templates directly?
-                // think of advantages of this "factory"
                 var kernelServices = factory.CreateKernelServicesConfig(kernelServiceConfigs);
                 kernelBuilder.Services.AddKernelServices(kernelServices);
                 if (addInternalServices)
@@ -43,7 +40,7 @@ namespace PromptEnhancer.SK
                 var kernel = kernelBuilder.Build();
                 if (addContextPlugins)
                 {
-                    foreach (var plugin in kernel.Services.GetServices<ISemanticKernelContextPlugin>())
+                    foreach (var plugin in _contextPlugins)
                     {
                         kernel.Plugins.AddFromObject(plugin, plugin.GetType().Name);
                     }

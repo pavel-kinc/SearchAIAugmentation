@@ -8,6 +8,12 @@
     <form id="chatForm">
         <input id="prompt" type="text" placeholder="Type a message..." autocomplete="off" required maxlength="250"/>
         <button id="sendBtn" type="submit">Send</button>
+        <div class="checkbox-container">
+            <input type="checkbox" style="margin-right: 0.5rem;"
+                   id="skipPipeline"
+                   name="skipPipeline" />
+            <label for="skipPipeline">Skip pipeline</label>
+        </div>
     </form>
 </div>
 
@@ -15,6 +21,7 @@
     const chat = document.getElementById('chat');
     const form = document.getElementById('chatForm');
     const promptInput = document.getElementById('prompt');
+    const skipPipelineCheckbox = document.getElementById('skipPipeline');
     let es = null;
 
     form.addEventListener('submit', (e) => {
@@ -33,7 +40,7 @@
       setDisabled(true);
 
       // 4) Start SSE, passing the prompt (adjust param name as your server expects)
-      es = new EventSource('/chat/stream?q=' + encodeURIComponent(text));
+      es = new EventSource('/chat/stream?q=' + encodeURIComponent(text) + '&skipPipeline=' + encodeURIComponent(skipPipelineCheckbox.checked ? 'true' : 'false'));
 
       // Append chunks to the same assistant bubble
       es.onmessage = (ev) => {

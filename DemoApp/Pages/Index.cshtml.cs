@@ -188,7 +188,6 @@ namespace DemoApp.Pages
                     new PreprocessStep(),
                     new KernelContextPluginsStep(),
                     new QueryParserStep(),
-                    //TODO automatic step picker calling? picking from list of steps(defined by user)/bases(from inject pick bases)/each has its own call to llm if it is viable for the given query(steps defined from user so kinda like 1.)
                     //new SearchStep<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>(request)
                     new MultipleSearchStep([container]),
                 };
