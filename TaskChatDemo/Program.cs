@@ -1,6 +1,13 @@
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel;
 using PromptEnhancer.Extensions;
+using PromptEnhancer.KnowledgeBaseCore;
+using PromptEnhancer.KnowledgeBaseCore.Examples;
+using PromptEnhancer.KnowledgeBaseCore.Interfaces;
+using PromptEnhancer.KnowledgeRecord;
+using PromptEnhancer.KnowledgeSearchRequest.Examples;
+using PromptEnhancer.Models.Examples;
+using TaskChatDemo.KnowledgeBases;
 using TaskChatDemo.Models.TaskItem;
 using TaskChatDemo.Services.ApiConsumer;
 using TaskChatDemo.Services.VectorStore;
@@ -29,15 +36,22 @@ public class Program
             return collection;
         });
 
+        builder.Services.AddDataProtection();
+
         builder.Services.AddSession(options =>
         {
             options.IdleTimeout = TimeSpan.FromMinutes(10);
+            options.Cookie.Name = ".Chat.Session";
+            options.Cookie.IsEssential = true;
         });
+
 
         builder.Services.AddSingleton<IVectorStoreService, VectorStoreService>();
         builder.Services.AddSingleton<IWorkItemApiService, WorkItemApiService>();
 
         builder.Services.AddPromptEnhancer();
+        builder.Services.AddSingleton<TaskDataKnowledgeBase, TaskDataKnowledgeBase>();
+        builder.Services.AddSingleton<WorkItemKnowledgeBase, WorkItemKnowledgeBase>();
 
         var app = builder.Build();
 

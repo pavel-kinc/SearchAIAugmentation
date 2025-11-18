@@ -4,7 +4,7 @@ namespace PromptEnhancer.Models
 {
     public class RecordPickerOptions
     {
-        public float? MinScoreSimilarity { get; init; }
+        public double? MinScoreSimilarity { get; init; }
 
         public int? Take { get; init; }
         public int Skip { get; init; } = 0;

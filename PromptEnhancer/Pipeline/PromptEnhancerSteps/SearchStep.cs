@@ -17,13 +17,15 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
         private readonly string? _knowledgeBaseKey = null;
         private readonly KnowledgeSearchRequest<TSearchFilter, TSearchSettings> _request;
         private readonly TFilter? _filter;
+        private readonly int _maxRecords;
 
-        public SearchStep(KnowledgeSearchRequest<TSearchFilter, TSearchSettings> request, TFilter? filter = null, string? knowledgeBaseKey = null, bool isRequired = false) : base(isRequired)
+        public SearchStep(KnowledgeSearchRequest<TSearchFilter, TSearchSettings> request, TFilter? filter = null, int maxRecords = 50, string? knowledgeBaseKey = null, bool isRequired = false) : base(isRequired)
         {
             // is key needed here? should i put knowledge base here directly?
             _knowledgeBaseKey = knowledgeBaseKey;
             _request = request;
             _filter = filter;
+            _maxRecords = maxRecords;
         }
 
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
@@ -38,7 +40,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
                 // aka now user can implement paralel async searches easily, so its prolly better to keep it this way
                 //TODO more query strings
                 var res = await kb!.SearchAsync(_request, context.QueryStrings.Any() ? context.QueryStrings : [context.QueryString!], _filter, cancellationToken);
-                recordsToAdd.AddRange(res);
+                recordsToAdd.AddRange(res.Take(_maxRecords));
 
                 context.RetrievedRecords.AddRange(recordsToAdd);
                 //TODO work with knowledge bases and processor

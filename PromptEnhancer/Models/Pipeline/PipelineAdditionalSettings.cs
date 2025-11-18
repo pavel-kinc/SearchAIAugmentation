@@ -9,7 +9,7 @@ namespace PromptEnhancer.Models.Pipeline
 
         public PromptExecutionSettings? KernelRequestSettings { get; init; }
 
-        public string? GeneratorKey { get; init; } = null;
-        public string? ChatClientKey { get; init; } = null;
+        public string? GeneratorKey { get; init; }
+        public string? ChatClientKey { get; init; }
     }
 }

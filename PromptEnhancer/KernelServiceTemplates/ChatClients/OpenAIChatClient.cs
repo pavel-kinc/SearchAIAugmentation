@@ -17,7 +17,7 @@ namespace PromptEnhancer.KernelServiceTemplates.ChatClients
 
         public override IServiceCollection AddToServices(IServiceCollection services)
         {
-            return services.AddOpenAIChatClient(ModelId, ApiKey, ServiceId);
+            return services.AddOpenAIChatClient(ModelId, ApiKey, serviceId: ServiceId);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace PromptEnhancer.KernelServiceTemplates.EmbeddingGenerators
 
         public override IServiceCollection AddToServices(IServiceCollection services)
         {
-            return services.AddOllamaEmbeddingGenerator(new OllamaApiClient(Uri, Model), ServiceId);
+            return services.AddOllamaEmbeddingGenerator(new OllamaApiClient(Uri, Model), serviceId: ServiceId);
         }
     }
 }

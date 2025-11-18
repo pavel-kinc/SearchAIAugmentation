@@ -50,9 +50,13 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 
                 await Parallel.ForEachAsync(pickedBases, async (kb, _) =>
                 {
+                    //TODO if search fails for 1, catch exception and continue?
                     var results = (await kb.SearchAsync(context.QueryStrings.Any() ? context.QueryStrings : [context.QueryString!], cancellationToken)).Take(_maxRecords);
                     foreach (var item in results)
+                    {
                         cb.Add(item);
+                    }
+                        
                 });
                 context.RetrievedRecords.AddRange(cb);
 
@@ -60,7 +64,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             }
             catch (Exception ex)
             {
-                return Error.Failure($"{GetType()}: Exception during search execution - {ex.Message}");
+                return Error.Failure($"{GetType()}: Exception during search execution - {ex.Message}", ex.Message);
             }
         }
 

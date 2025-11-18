@@ -188,8 +188,14 @@ namespace DemoApp.Pages
                     new PreprocessStep(),
                     new KernelContextPluginsStep(),
                     new QueryParserStep(),
-                    //new SearchStep<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>(request)
-                    new MultipleSearchStep([container]),
+                    //new SearchStep<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>(request),
+                    new MultipleSearchStep([container], allowAutoChoice: false, isRequired: true),
+                    new ProcessEmbeddingStep(skipGenerationForEmbData: true, isRequired: true),
+                    new ProcessRankStep(isRequired: true),
+                    new ProcessFilterStep(new RecordPickerOptions(){MinScoreSimilarity = 0.3d, Take = 15, OrderByScoreDescending = true}, isRequired: true),
+                    new PostProcessCheckStep(),
+                    new PromptBuilderStep(isRequired: true),
+                    new GenerationStep(isRequired: true),
                 };
             return enhancerConfig;
         }

@@ -4,9 +4,9 @@ using PromptEnhancer.Models.Pipeline;
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
     //TODO FINISH
-    public class PostProcessStep : PipelineStep
+    public class PostProcessCheckStep : PipelineStep
     {
-        public PostProcessStep(bool isRequired = false) : base(isRequired) { }
+        public PostProcessCheckStep(bool isRequired = false) : base(isRequired) { }
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
         {
             return CheckContextState(context);

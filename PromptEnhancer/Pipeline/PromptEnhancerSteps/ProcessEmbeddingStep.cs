@@ -11,7 +11,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
         private readonly bool _skipGenerationForEmbData;
         private readonly EmbeddingGenerationOptions? _options;
 
-        public ProcessEmbeddingStep(string? embeddingServiceKey = null, bool skipGenerationForEmbData = false, EmbeddingGenerationOptions? options = null, string? generatorKey = null, bool isRequired = false) : base(isRequired)
+        public ProcessEmbeddingStep(string? embeddingServiceKey = null, bool skipGenerationForEmbData = false, EmbeddingGenerationOptions? options = null, bool isRequired = false) : base(isRequired)
         {
             _embeddingServiceKey = embeddingServiceKey;
             _skipGenerationForEmbData = skipGenerationForEmbData;

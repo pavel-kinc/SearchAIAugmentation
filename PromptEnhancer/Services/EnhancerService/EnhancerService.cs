@@ -85,11 +85,15 @@ namespace PromptEnhancer.Services.EnhancerService
         {
             var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.Settings.ChatClientKey);
             List<ChatMessage> history = ChatHistoryUtility.AddToChatHistoryPipeline(context);
-
+            if(context.Entry is not null)
+            {
+                context.Entry.EntryChatHistory = history;
+            }
+            
             return chatClient.GetStreamingResponseAsync(history, settings.Settings.ChatOptions, ct);
         }
 
-        public async Task<ErrorOr<IList<ResultModel>>> ProcessPipeline(PipelineModel pipeline, IEnumerable<PipelineContext> entries, CancellationToken cancellationToken = default)
+        public async Task<ErrorOr<IList<ResultModel>>> ProcessPipelineAsync(PipelineModel pipeline, IEnumerable<PipelineContext> entries, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -112,7 +116,7 @@ namespace PromptEnhancer.Services.EnhancerService
             }
             catch (Exception ex)
             {
-                return Error.Failure($"{nameof(ProcessPipeline)} failed", ex.Message);
+                return Error.Failure($"{nameof(ProcessPipelineAsync)} failed", ex.Message);
             }
 
         }
@@ -154,7 +158,7 @@ namespace PromptEnhancer.Services.EnhancerService
 
             var pipeline = new PipelineModel(settings.Value, config.Steps);
 
-            return await ProcessPipeline(pipeline, entries.Select(x => new PipelineContext(x)), cancellationToken);
+            return await ProcessPipelineAsync(pipeline, entries.Select(x => new PipelineContext(x)), cancellationToken);
 
             //TODO should this be here? (maybe like sk.invoke and hope there are some plugins? - since there are 3 ways to kernel here, also i would need some plugins in my creation, but i could resolve plugins by injection (common interface))
             //TODO it could also require check for openai, options and some uniform way to work with results, or just put it outside of this method and just work with it there, but it requires same arguments prolly

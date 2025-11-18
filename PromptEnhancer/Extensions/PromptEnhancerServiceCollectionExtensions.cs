@@ -19,6 +19,7 @@ using PromptEnhancer.Search;
 using PromptEnhancer.Search.Interfaces;
 using PromptEnhancer.Services.EmbeddingService;
 using PromptEnhancer.Services.EnhancerService;
+using PromptEnhancer.Services.PromptBuildingService;
 using PromptEnhancer.Services.RankerService;
 using PromptEnhancer.Services.RecordPickerService;
 using PromptEnhancer.Services.RecordRankerService;
@@ -74,6 +75,7 @@ namespace PromptEnhancer.Extensions
             services.TryAddSingleton<IRecordRankerService, RecordRankerService>();
             services.TryAddSingleton<IRankerService, CosineSimilarityRankerService>();
             services.TryAddSingleton<IRecordPickerService, RecordPickerService>();
+            services.TryAddSingleton<IPromptBuildingService, PromptBuildingService>();
 
             services.AddSingleton<ISemanticKernelContextPlugin, DateTimePlugin>();
             services.AddSingleton<ISemanticKernelContextPlugin, TemperaturePlugin>();
