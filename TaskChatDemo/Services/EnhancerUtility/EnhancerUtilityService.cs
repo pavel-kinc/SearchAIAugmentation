@@ -28,8 +28,8 @@ namespace TaskChatDemo.Services.EnhancerUtility
 {
     public class EnhancerUtilityService : IEnhancerUtilityService
     {
-        public const string GeminiApiKey = "gemini";
-        public const string OpenAiApiKey = "openai";
+        public const string GeminiServiceId = "gemini";
+        public const string OpenAiServiceId = "openai";
         private readonly IPromptBuildingService _promptBuildingService;
         private readonly IEnhancerService _enhancerService;
         private readonly IConfiguration _configuration;
@@ -57,15 +57,14 @@ namespace TaskChatDemo.Services.EnhancerUtility
             enhancerConfig.PipelineAdditionalSettings = new PipelineAdditionalSettings()
             {
                 //here to change client and generator for pipeline
-                ChatClientKey = GeminiApiKey,
-                GeneratorKey = GeminiApiKey,
+                ChatClientKey = GeminiServiceId,
+                GeneratorKey = GeminiServiceId,
                 KernelRequestSettings = new PromptExecutionSettings()
                 {
                     FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
-                    ServiceId = OpenAiApiKey
+                    ServiceId = OpenAiServiceId
                 },
             };
-
 
             var settingsResult = _enhancerService.CreatePipelineSettingsFromConfig(enhancerConfig.PromptConfiguration, enhancerConfig.PipelineAdditionalSettings, enhancerConfig.KernelConfiguration, kernel);
             return settingsResult;
@@ -90,6 +89,11 @@ namespace TaskChatDemo.Services.EnhancerUtility
                 {
                     throw new InvalidOperationException($"Pipeline failed: {pipelineRes.ErrorsOrEmptyList.Select(x => x.ToString())}");
                 }
+                var firstResponse = pipelineRes.Value.FirstOrDefault();
+                if (firstResponse is null || !firstResponse.PipelineSuccess)
+                {
+                    throw new InvalidOperationException($"Pipeline failed for query: {firstResponse?.Errors.Select(x => x.Code)}");
+                }
                 context = pipelineRes.Value.FirstOrDefault()!.Result!;
             }
 
@@ -100,7 +104,7 @@ namespace TaskChatDemo.Services.EnhancerUtility
             var taskItemRequest = new KnowledgeSearchRequest<SearchItemFilterModel, ItemDataSearchSettings>()
             {
                 Filter = new SearchItemFilterModel(),
-                Settings = new ItemDataSearchSettings() { Generator = kernel.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>(OpenAiApiKey) }
+                Settings = new ItemDataSearchSettings() { Generator = kernel.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>(OpenAiServiceId) }
             };
             var workItemRequest = new KnowledgeSearchRequest<SearchWorkItemFilterModel, WorkItemSearchSettings>()
             {
@@ -137,10 +141,10 @@ namespace TaskChatDemo.Services.EnhancerUtility
             }
             var configs = new List<KernelServiceBaseConfig>
             {
-                new (AIProviderEnum.OpenAI, "gpt-4o-mini", openAiApiKey, serviceId: OpenAiApiKey),
-                new (AIProviderEnum.OpenAI, "text-embedding-3-small", openAiApiKey, serviceId: OpenAiApiKey, serviceType: KernelServiceEnum.EmbeddingGenerator),
-                new (AIProviderEnum.GoogleGemini, "gemini-2.0-flash", geminiApiKey, serviceId: GeminiApiKey),
-                new (AIProviderEnum.GoogleGemini, "gemini-embedding-001", geminiApiKey, serviceId: GeminiApiKey, serviceType: KernelServiceEnum.EmbeddingGenerator)
+                new (AIProviderEnum.OpenAI, "gpt-4o-mini", openAiApiKey, serviceId: OpenAiServiceId),
+                new (AIProviderEnum.OpenAI, "text-embedding-3-small", openAiApiKey, serviceId: OpenAiServiceId, serviceType: KernelServiceEnum.EmbeddingGenerator),
+                new (AIProviderEnum.GoogleGemini, "gemini-2.0-flash", geminiApiKey, serviceId: GeminiServiceId),
+                new (AIProviderEnum.GoogleGemini, "gemini-embedding-001", geminiApiKey, serviceId: GeminiServiceId, serviceType: KernelServiceEnum.EmbeddingGenerator)
             };
             var kernel = _semanticKernelManager.CreateKernel(configs);
             if (kernel.IsError)

@@ -6,7 +6,7 @@ namespace PromptEnhancer.Models
     public class ResultModel
     {
         public PipelineContext? Result { get; init; }
-
-        public ErrorOr<bool>? PipelineSuccess { get; init; }
+        public IEnumerable<Error> Errors { get; init; } = [];
+        public bool PipelineSuccess => !Errors.Any();
     }
 }

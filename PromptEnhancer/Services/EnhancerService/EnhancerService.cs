@@ -3,14 +3,12 @@ using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
 using Newtonsoft.Json;
 using PromptEnhancer.AIUtility.ChatHistory;
-using PromptEnhancer.ChunkUtilities.Interfaces;
 using PromptEnhancer.CustomJsonResolver;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Pipeline.Interfaces;
-using PromptEnhancer.Search.Interfaces;
 using PromptEnhancer.SK.Interfaces;
 using System.Collections.Concurrent;
 using System.Text;
@@ -20,25 +18,15 @@ namespace PromptEnhancer.Services.EnhancerService
     public class EnhancerService : IEnhancerService
     {
         private readonly ISemanticKernelManager _semanticKernelManager;
-        private readonly ISearchProviderManager _searchProviderManager;
-        private readonly ISearchWebScraper _searchWebScraper;
-        private readonly IChunkGeneratorService _chunkGenerator;
         private readonly IPipelineOrchestrator _pipelineOrchestrator;
-        private readonly IChunkRankerService _chunkRanker;
         private readonly Kernel? _kernel;
-        private readonly IPipelineContextService _pipelineContextService;
         private readonly IServiceProvider _serviceProvider;
 
-        public EnhancerService(IChunkRankerService chunkRanker, ISemanticKernelManager semanticKernelManager, ISearchProviderManager searchProviderManager, ISearchWebScraper searchWebScraper, IChunkGeneratorService chunkGenerator, IPipelineOrchestrator pipelineOrchestrator, IServiceProvider serviceProvider, IPipelineContextService pipelineContextService, Kernel? kernel = null)
+        public EnhancerService(ISemanticKernelManager semanticKernelManager, IPipelineOrchestrator pipelineOrchestrator, IServiceProvider serviceProvider, Kernel? kernel = null)
         {
-            _chunkRanker = chunkRanker;
             _semanticKernelManager = semanticKernelManager;
-            _searchProviderManager = searchProviderManager;
-            _searchWebScraper = searchWebScraper;
-            _chunkGenerator = chunkGenerator;
             _pipelineOrchestrator = pipelineOrchestrator;
             _kernel = kernel;
-            _pipelineContextService = pipelineContextService;
             _serviceProvider = serviceProvider;
         }
 
@@ -86,6 +74,10 @@ namespace PromptEnhancer.Services.EnhancerService
             var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.Settings.ChatClientKey);
             List<ChatMessage> history = ChatHistoryUtility.AddToChatHistoryPipeline(context);
             context.ChatHistory = history;
+            if (ChatHistoryUtility.GetHistoryLength(history) > settings.Settings.MaximumInputLength)
+            {
+                throw new ArgumentOutOfRangeException(nameof(context), ChatHistoryUtility.GetInputSizeExceededLimitMessage(nameof(GetStreamingResponse)));
+            }
 
             return chatClient.GetStreamingResponseAsync(history, settings.Settings.ChatOptions, ct);
         }
@@ -105,7 +97,7 @@ namespace PromptEnhancer.Services.EnhancerService
                     var resultModel = new ResultModel
                     {
                         Result = context,
-                        PipelineSuccess = pipelineRes,
+                        Errors = pipelineRes.ErrorsOrEmptyList,
                     };
                     cb.Add(resultModel);
                 });

@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.AI;
+﻿using ErrorOr;
+using Microsoft.Extensions.AI;
+using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Pipeline;
 
 namespace PromptEnhancer.AIUtility.ChatHistory
@@ -16,6 +18,21 @@ namespace PromptEnhancer.AIUtility.ChatHistory
             }
             history.Add(new ChatMessage(ChatRole.User, context.UserPromptToLLM));
             return history;
+        }
+
+        public static int GetHistoryLength(IEnumerable<ChatMessage> history)
+        {
+            return history.Sum(x => x.Text.Length);
+        }
+
+        public static string GetInputSizeExceededLimitMessage(string source)
+        {
+            return $"{source}: chat history exceeded input size limit. You can modify it in {nameof(PipelineAdditionalSettings)} for {nameof(EnhancerConfiguration)}.";
+        }
+
+        public static Error GetInputSizeExceededLimitError(string source)
+        {
+            return Error.Failure(GetInputSizeExceededLimitMessage(source));
         }
     }
 }

@@ -10,6 +10,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
     //TODO maybe make convenience classes for less generics without required generics (like filters and settings)
     public class MultipleSearchStep : PipelineStep
     {
+        public const char Separator = ';';
         const string prompt = """
                               User search query:
                               {0}
@@ -18,20 +19,23 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
                               {1}
 
                               Pick all object IDs (integers) whose description can help find relevant information for the user search query.
-                              Return only a string of the IDs separated by this char ';'. Try to pick atleast {2} object IDs.
-                              If none are relevant or cannot be picked, return an empty list.
+                              Do not pick any objects, that have very little relevance to the user search query.
+                              Return only a string of the IDs separated by this char ';' no newline. Try to pick atleast {2} object IDs.
+                              If none are relevant or cannot be picked, return an empty string, no newline.
                               """;
 
         private readonly IEnumerable<IKnowledgeBaseContainer> _knowledgeBases;
         private readonly int _atleastToPick;
+        private readonly int _minimumRecordsToRetrieve;
         private readonly bool _allowAutoChoice;
         private readonly string? _additionalInstructions;
         private readonly int _maxRecords;
 
-        public MultipleSearchStep(IEnumerable<IKnowledgeBaseContainer> knowledgeBases, int atleastToPick = 0, bool allowAutoChoice = true, string? additionalChoiceInstructions = null, int maxRecordsPerKB = 50, bool isRequired = false) : base(isRequired)
+        public MultipleSearchStep(IEnumerable<IKnowledgeBaseContainer> knowledgeBases, int atleastKBsToPick = 0, int minimumRecordsToRetrieve = 0, bool allowAutoChoice = true, string? additionalChoiceInstructions = null, int maxRecordsPerKB = 50, bool isRequired = false) : base(isRequired)
         {
             _knowledgeBases = knowledgeBases;
-            _atleastToPick = atleastToPick;
+            _atleastToPick = atleastKBsToPick;
+            _minimumRecordsToRetrieve = minimumRecordsToRetrieve;
             _allowAutoChoice = allowAutoChoice;
             _additionalInstructions = additionalChoiceInstructions;
             _maxRecords = maxRecordsPerKB;
@@ -60,11 +64,11 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
                 });
                 context.RetrievedRecords.AddRange(cb);
 
-                return true;
+                return cb.Count >= _minimumRecordsToRetrieve;
             }
             catch (Exception ex)
             {
-                return Error.Failure($"{GetType()}: Exception during search execution - {ex.Message}", ex.Message);
+                return Error.Failure($"{GetType().Name}: Exception during search execution - {ex.Message}", ex.Message);
             }
         }
 
@@ -79,7 +83,9 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             context.OutputTokenUsage += res.Usage?.OutputTokenCount ?? 0;
 
             // Filter the list by the deserialized indices; caller handles any exceptions.
-            var ids = res.Text.Trim().Split(';').Select(x => int.Parse(x));
+            //var ids = res.Text.Trim().Split(';').Select(x => int.Parse(x));
+            var resultText = res.Text.Trim();
+            var ids = resultText.All(x => char.IsDigit(x) || x == Separator) ? resultText.Split(Separator).Select(x => int.Parse(x)) : [];
             IEnumerable<IKnowledgeBaseContainer> picked = ids!
                 .Where(i => i >= 0 && i < knowledgeBases.Count())
                 .Select(i => knowledgeBases.ElementAt(i));

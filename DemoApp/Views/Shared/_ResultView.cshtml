@@ -27,7 +27,7 @@
                 @for (int i = 0; i < results.Count; i++)
                 {
                     var r = results[i];
-                    var success = r.PipelineSuccess?.Value;
+                    var success = r.PipelineSuccess;
                     var q = r.Result?.QueryString ?? r.Result?.QueryStrings?.FirstOrDefault() ?? "(no query)";
                     <div class="mini @(i == 0 ? "active" : "")" role="button" data-index="@i" title="@q">
                         <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -44,7 +44,7 @@
                             <div style="text-align:right">
                                 <span class="badge" title="Pipeline success">
                                     @(
-                                                                success is null ? "?" : (success.Value ? "OK" : "Fail")
+                                                                success ? "OK" : "Fail"
                                                                 )
                             </span>
                         </div>
@@ -86,8 +86,7 @@
                                 <div style="margin-top:6px;">
                                     <span class="badge">
                                         @(
-                                        r.PipelineSuccess?.Value == true ? "Pipeline: success" :
-                                        r.PipelineSuccess?.Value == false ? "Pipeline: failed" : "Pipeline: unknown"
+                                        r.PipelineSuccess ? "Pipeline: success" : "Pipeline: failed"
                                         )
                                 </span>
                             </div>
@@ -134,6 +133,21 @@
                                     <pre class="response" id="response-@i">@finalText</pre>
                                 </div>
                             </div>
+
+                            @if (r.Errors.Any())
+                            {
+                                <div style="margin-top:12px;">
+                                    <strong>Errors: </strong>
+                                    <div style="margin-top:6px;" class="muted">
+                                        <ul>
+                                            @foreach (var error in r.Errors)
+                                            {
+                                                <li>@error.Code</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            }
 
                             <div style="margin-top:12px;">
                                 <strong>Metadata (sample)</strong>

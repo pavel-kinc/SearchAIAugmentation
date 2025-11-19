@@ -187,7 +187,7 @@ namespace DemoApp.Pages
                 {
                     new PreprocessStep(),
                     new KernelContextPluginsStep(),
-                    //new QueryParserStep(),
+                    new QueryParserStep(),
                     //new SearchStep<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>(request),
                     new MultipleSearchStep([container], allowAutoChoice: false, isRequired: true),
                     new ProcessEmbeddingStep(skipGenerationForEmbData: true, isRequired: true),

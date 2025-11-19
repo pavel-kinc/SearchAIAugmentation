@@ -17,7 +17,7 @@ namespace PromptEnhancer.Pipeline
 
             foreach (var step in steps)
             {
-                //true means step executed correctly, false means step did not execute/start (for unrequired steps), otherwise error
+                //true means step executed correctly, false means step did not execute/start (for non required), otherwise error
                 try
                 {
                     var result = await step.ExecuteAsync(pipeline.Settings, context, ct);

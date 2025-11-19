@@ -40,9 +40,11 @@ namespace PromptEnhancer.Pipeline
             return _isRequired ? Error.Failure($"{GetType()}: Conditions check for this required step failed.") : false;
         }
 
-        protected virtual ErrorOr<bool> FailExecution()
+        protected virtual ErrorOr<bool> FailExecution(string? reason = null)
         {
-            return _isRequired ? Error.Failure($"{GetType()}: Execution for this required step failed.") : false;
+            return _isRequired ?
+                (string.IsNullOrEmpty(reason) ? Error.Failure($"{GetType()}: Execution for this required step failed.") : Error.Failure(reason)) :
+                false;
         }
     }
 }

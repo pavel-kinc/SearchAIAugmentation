@@ -19,7 +19,7 @@ namespace PromptEnhancer.KnowledgeBaseCore.Examples
             _searchProviderManager = searchProviderManager;
         }
 
-        public override string Description => $"This knowledge base uses Google Search to retrieve up-to-date data. Can be used for various queries.";
+        public override string Description => $"This knowledge base uses Google Search to retrieve up-to-date data. Can be used for various queries that could use data from web search.";
 
         public async override Task<IEnumerable<KnowledgeUrlRecord>> SearchAsync(
             IKnowledgeSearchRequest<GoogleSearchFilterModel, GoogleSettings> request, IEnumerable<string> queriesToSearch, UrlRecordFilter? filter = null, CancellationToken ct = default)

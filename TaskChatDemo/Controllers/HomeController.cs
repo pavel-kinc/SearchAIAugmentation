@@ -1,7 +1,5 @@
-using ErrorOr;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.AI;
-using Microsoft.SemanticKernel;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Services.EnhancerService;
@@ -57,6 +55,7 @@ public class HomeController : Controller
         var context = await _enhancerUtilityService.GetContextFromPipeline(q, skipPipeline, entry, settings);
         context.ChatHistory ??= chatHistory;
 
+        //TODO handle errors?
         chatHistory = await HandleStreamingMessage(chatHistory, settings, context, ct);
         HttpContext.Session.SetString(ChatHistory, JsonSerializer.Serialize(chatHistory));
         return;
@@ -64,7 +63,7 @@ public class HomeController : Controller
 
     private async Task<List<ChatMessage>> HandleStreamingMessage(List<ChatMessage>? chatHistory, PipelineSettings settings, PipelineContext context, CancellationToken ct)
     {
-        var res = _enhancerService.GetStreamingResponse(settings, context);
+        var res = _enhancerService.GetStreamingResponse(settings, context, ct);
         List<ChatResponseUpdate> updates = [];
 
         Response.ContentType = "text/event-stream";
@@ -80,6 +79,7 @@ public class HomeController : Controller
         await Response.Body.FlushAsync(ct);
         chatHistory = context.ChatHistory?.ToList() ?? [];
         var chatResponse = updates.ToChatResponse();
+        //TODO delete
         var inputTokens = chatResponse.Usage?.InputTokenCount;
         chatHistory.AddRange(chatResponse.Messages);
         return chatHistory;

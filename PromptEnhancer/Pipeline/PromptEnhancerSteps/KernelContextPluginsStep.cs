@@ -1,6 +1,7 @@
 ﻿using ErrorOr;
 using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
+using PromptEnhancer.AIUtility.ChatHistory;
 using PromptEnhancer.Models.Pipeline;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
@@ -26,7 +27,13 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             {
                 return false;
             }
-            var res = await settings.Kernel.InvokePromptAsync<ChatResponse>(GetPrompt(context.QueryString), new(settings.Settings.KernelRequestSettings), cancellationToken: cancellationToken);
+            var prompt = GetPrompt(context.QueryString);
+            if (prompt.Length > settings.Settings.MaximumInputLength)
+            {
+                return FailExecution(ChatHistoryUtility.GetInputSizeExceededLimitMessage(GetType().Name));
+            }
+
+            var res = await settings.Kernel.InvokePromptAsync<ChatResponse>(prompt, new(settings.Settings.KernelRequestSettings), cancellationToken: cancellationToken);
             var tokenUsage = res?.Usage?.TotalTokenCount;
             context.InputTokenUsage += res?.Usage?.InputTokenCount ?? 0;
             context.OutputTokenUsage += res?.Usage?.OutputTokenCount ?? 0;

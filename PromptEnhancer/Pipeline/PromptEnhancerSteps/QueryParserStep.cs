@@ -1,5 +1,6 @@
 ﻿using ErrorOr;
 using Microsoft.Extensions.AI;
+using PromptEnhancer.AIUtility.ChatHistory;
 using PromptEnhancer.Models.Pipeline;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
@@ -8,13 +9,10 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
     {
         public const string PromptTemplate =
             """
-            Given the user query "{0}", extract up to "{1}" meaningful and relevant search queries, separated by ';'.
+            Given the user query "{0}", extract up to "{1}" meaningful and distinct search queries, separated by ';'.
 
-            Keep only what is useful for search. Context for each part must be clear (you can repeat some words from query).
+            Keep only parts that are useful for search. Context for each part must be clear (you can repeat some words from query).
             Remove filler or irrelevant parts. If the query can’t be improved or split, return "{2}".
-            Example:
-            "What is the average size of a beehive, and I also wanted to ask what time it is?"
-            average size of a beehive;what time is it?
             """;
 
         public const string FailResponseLLM = "NaN";
@@ -33,14 +31,19 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
         {
             //TODO maybe more checks for the llm response?
             var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.Settings.ChatClientKey);
-            var res = await chatClient.GetResponseAsync(string.Format(PromptTemplate, context.QueryString, _maxSplit, FailResponseLLM), _options ?? settings.Settings.ChatOptions, cancellationToken: cancellationToken);
+            var inputPrompt = string.Format(PromptTemplate, context.QueryString, _maxSplit, FailResponseLLM);
+            if (inputPrompt.Length > settings.Settings.MaximumInputLength)
+            {
+                return FailExecution(ChatHistoryUtility.GetInputSizeExceededLimitMessage(GetType().Name));
+            }
+            var res = await chatClient.GetResponseAsync(inputPrompt, _options ?? settings.Settings.ChatOptions, cancellationToken: cancellationToken);
             if (res.Text == FailResponseLLM || res.Text.Length > MaxResponseLength || res.Text.Count(c => c == ';') > _maxSplit)
             {
                 return false;
             }
             context.InputTokenUsage = res.Usage?.InputTokenCount ?? 0;
             context.OutputTokenUsage = res.Usage?.OutputTokenCount ?? 0;
-            context.QueryStrings = res.Text.Split(';').Select(x => x.Trim()).Where(x => !string.IsNullOrEmpty(x));
+            context.QueryStrings = res.Text.Split(';').Select(x => x.Trim()).Where(x => !string.IsNullOrEmpty(x) && !x.Equals(FailResponseLLM));
 
             return true;
         }
