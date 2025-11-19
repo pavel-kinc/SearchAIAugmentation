@@ -4,6 +4,7 @@ using PromptEnhancer.Extensions;
 using TaskChatDemo.KnowledgeBases;
 using TaskChatDemo.Models.TaskItem;
 using TaskChatDemo.Services.ApiConsumer;
+using TaskChatDemo.Services.EnhancerUtility;
 using TaskChatDemo.Services.VectorStore;
 
 namespace TaskChatDemo;
@@ -46,6 +47,7 @@ public class Program
         builder.Services.AddPromptEnhancer();
         builder.Services.AddSingleton<TaskDataKnowledgeBase, TaskDataKnowledgeBase>();
         builder.Services.AddSingleton<WorkItemKnowledgeBase, WorkItemKnowledgeBase>();
+        builder.Services.AddSingleton<IEnhancerUtilityService, EnhancerUtilityService>();
 
         var app = builder.Build();
 
