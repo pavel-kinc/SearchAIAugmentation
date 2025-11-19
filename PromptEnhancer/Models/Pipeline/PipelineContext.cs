@@ -25,6 +25,7 @@ namespace PromptEnhancer.Models.Pipeline
         public string? SystemPromptToLLM { get; set; }
 
         public string? UserPromptToLLM { get; set; }
+        public IEnumerable<ChatMessage>? ChatHistory { get; set; }
 
         public IDictionary<string, object> Metadata { get; init; } = new Dictionary<string, object>();
 

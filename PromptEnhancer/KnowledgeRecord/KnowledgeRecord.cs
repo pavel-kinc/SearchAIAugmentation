@@ -1,12 +1,18 @@
 ﻿using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.Models;
+using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Unicode;
 
 namespace PromptEnhancer.KnowledgeRecord
 {
     public class KnowledgeRecord<T> : IKnowledgeRecord
         where T : class
     {
+        public static readonly JsonSerializerOptions Default = new JsonSerializerOptions
+        {
+            Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.LatinExtendedA, UnicodeRanges.Latin1Supplement),
+        };
         public static Func<T, string>? ChunkSelector => null;
         public static Action<T, string>? AssignChunkToProperty => null;
 
@@ -23,8 +29,8 @@ namespace PromptEnhancer.KnowledgeRecord
         public string UsedSearchQuery { get; set; }
 
         //public virtual (string property, int chunkSize)? ChunkableProperty => null;
-        public virtual string LLMRepresentationString => JsonSerializer.Serialize(SourceObject);
-        public virtual string EmbeddingRepresentationString => JsonSerializer.Serialize(SourceObject);
+        public virtual string LLMRepresentationString => JsonSerializer.Serialize(SourceObject, Default);
+        public virtual string EmbeddingRepresentationString => JsonSerializer.Serialize(SourceObject, Default);
 
         object IKnowledgeRecord.SourceObject => SourceObject;
     }

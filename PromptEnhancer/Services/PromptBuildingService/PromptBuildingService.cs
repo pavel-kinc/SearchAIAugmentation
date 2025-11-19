@@ -21,7 +21,7 @@ namespace PromptEnhancer.Services.PromptBuildingService
             promptConfiguration ??= new PromptConfiguration();
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(@$"{promptConfiguration.SystemInstructions}");
-            sb.AppendLine($"Aim for about {promptConfiguration.TargetOutputLength} words (±20%). Be concise.");
+            sb.AppendLine($"Aim for maximum of {promptConfiguration.TargetOutputLength} words (±10%). Be concise.");
             if (!string.IsNullOrWhiteSpace(promptConfiguration.MacroDefinition))
             {
                 var d = promptConfiguration.MacroDefinition!;
@@ -33,6 +33,7 @@ namespace PromptEnhancer.Services.PromptBuildingService
                 sb.AppendLine("Additional Instructions:");
                 sb.AppendLine(promptConfiguration.AdditionalInstructions!.Trim());
             }
+            sb.AppendLine(@$"The output culture must be in {promptConfiguration.TargetLanguageCultureCode}.");
             sb.AppendLine("Ensure coherence and factual correctness.");
 
             return ApplyRegexReplacement(sb);

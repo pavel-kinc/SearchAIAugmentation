@@ -7,7 +7,7 @@ namespace PromptEnhancer.AIUtility.ChatHistory
     {
         public static List<ChatMessage> AddToChatHistoryPipeline(PipelineContext context)
         {
-            var history = context.Entry?.EntryChatHistory?.ToList() ?? [];
+            var history = context.ChatHistory?.ToList() ?? [];
 
             // if empty, add system role from prompt config, if not empty, add user role
             if (context.SystemPromptToLLM is not null && !history.Any(x => x.Role == ChatRole.System))

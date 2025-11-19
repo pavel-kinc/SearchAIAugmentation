@@ -44,7 +44,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 
                 context.RetrievedRecords.AddRange(recordsToAdd);
                 //TODO work with knowledge bases and processor
-                return recordsToAdd.Count != 0;
+                return true;
             }
             catch (Exception ex)
             {

@@ -19,6 +19,8 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             context.InputTokenUsage += res.Usage?.InputTokenCount ?? 0; //TODO do some custom counter, if the method ends in success but still 0?
             context.OutputTokenUsage += res.Usage?.OutputTokenCount ?? 0;
             context.FinalResponse = res;
+            history.AddRange(res.Messages);
+            context.ChatHistory = history;
             return true;
         }
 

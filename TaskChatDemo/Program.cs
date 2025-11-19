@@ -1,12 +1,6 @@
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel;
 using PromptEnhancer.Extensions;
-using PromptEnhancer.KnowledgeBaseCore;
-using PromptEnhancer.KnowledgeBaseCore.Examples;
-using PromptEnhancer.KnowledgeBaseCore.Interfaces;
-using PromptEnhancer.KnowledgeRecord;
-using PromptEnhancer.KnowledgeSearchRequest.Examples;
-using PromptEnhancer.Models.Examples;
 using TaskChatDemo.KnowledgeBases;
 using TaskChatDemo.Models.TaskItem;
 using TaskChatDemo.Services.ApiConsumer;

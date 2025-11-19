@@ -85,11 +85,8 @@ namespace PromptEnhancer.Services.EnhancerService
         {
             var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.Settings.ChatClientKey);
             List<ChatMessage> history = ChatHistoryUtility.AddToChatHistoryPipeline(context);
-            if(context.Entry is not null)
-            {
-                context.Entry.EntryChatHistory = history;
-            }
-            
+            context.ChatHistory = history;
+
             return chatClient.GetStreamingResponseAsync(history, settings.Settings.ChatOptions, ct);
         }
 

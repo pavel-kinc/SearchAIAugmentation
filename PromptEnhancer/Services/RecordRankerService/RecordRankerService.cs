@@ -49,10 +49,11 @@ namespace PromptEnhancer.Services.RecordRankerService
             }
 
             var queryEmbed = dict[record.UsedSearchQuery];
-            var recordEmbed = embed ?? new Embedding<float>(record.Embeddings!.EmbeddingVector)
-            {
-                ModelId = record.Embeddings.EmbeddingModel,
-            };
+            var recordEmbed = embed ?? new Embedding<float>(record.Embeddings!.EmbeddingVector);
+            // its null (from gemini) and i give it unknown when cant resolve (from that null) meaning here is then null and "unknown"
+            //{
+            //    ModelId = record.Embeddings.EmbeddingModel,
+            //};
 
             if (recordEmbed is null)
             {

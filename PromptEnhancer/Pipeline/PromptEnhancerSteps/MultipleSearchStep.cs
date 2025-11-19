@@ -56,11 +56,11 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
                     {
                         cb.Add(item);
                     }
-                        
+
                 });
                 context.RetrievedRecords.AddRange(cb);
 
-                return !cb.IsEmpty;
+                return true;
             }
             catch (Exception ex)
             {
