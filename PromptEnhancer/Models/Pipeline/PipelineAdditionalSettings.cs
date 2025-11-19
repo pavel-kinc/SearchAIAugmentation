@@ -11,6 +11,6 @@ namespace PromptEnhancer.Models.Pipeline
 
         public string? GeneratorKey { get; init; }
         public string? ChatClientKey { get; init; }
-        public int MaximumInputLength { get; init; } = 500;
+        public int MaximumInputLength { get; init; } = 3000;
     }
 }
