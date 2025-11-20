@@ -6,7 +6,7 @@
     <div id="chat"></div>
 
     <form id="chatForm">
-        <input id="prompt" type="text" placeholder="Type a message..." autocomplete="off" required maxlength="250"/>
+        <input id="prompt" type="text" placeholder="Type a message..." autocomplete="off" required maxlength="250" />
         <button id="sendBtn" type="submit">Send</button>
         <div class="checkbox-container">
             <input type="checkbox" style="margin-right: 0.5rem;"
@@ -15,64 +15,116 @@
             <label for="skipPipeline">Skip pipeline</label>
         </div>
     </form>
+    <form id="clearSessionForm">
+        @Html.AntiForgeryToken()
+        <button type="button" id="btnClearSession" class="btn-clear-session">Clear History</button>
+    </form>
+    <div id="clearSessionMessage" class="message-box" style="display: none;"></div>
 </div>
 
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
-    const chat = document.getElementById('chat');
-    const form = document.getElementById('chatForm');
-    const promptInput = document.getElementById('prompt');
-    const skipPipelineCheckbox = document.getElementById('skipPipeline');
-    let es = null;
+     const chat = document.getElementById('chat');
+     const form = document.getElementById('chatForm');
+     const promptInput = document.getElementById('prompt');
+     const skipPipelineCheckbox = document.getElementById('skipPipeline');
+     let es = null;
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (es) return;
-      const text = promptInput.value.trim();
-      if (!text) return;
+     form.addEventListener('submit', (e) => {
+       e.preventDefault();
+       if (es) return;
+       const text = promptInput.value.trim();
+       if (!text) return;
 
-      // 1) Add user bubble
-      addMessage('user', text);
+       // 1) Add user bubble
+       addMessage('user', text);
 
-      // 2) Prepare assistant bubble to stream into
-      const assistantEl = addMessage('app', '');
+       // 2) Prepare assistant bubble to stream into
+       const assistantEl = addMessage('app', '');
 
-      // 3) Disable UI
-      setDisabled(true);
+       // 3) Disable UI
+       setDisabled(true);
 
-      // 4) Start SSE, passing the prompt (adjust param name as your server expects)
-      es = new EventSource('/chat/stream?q=' + encodeURIComponent(text) + '&skipPipeline=' + encodeURIComponent(skipPipelineCheckbox.checked ? 'true' : 'false'));
+       // 4) Start SSE, passing the prompt (adjust param name as your server expects)
+       es = new EventSource('/chat/stream?q=' + encodeURIComponent(text) + '&skipPipeline=' + encodeURIComponent(skipPipelineCheckbox.checked ? 'true' : 'false'));
 
-      // Append chunks to the same assistant bubble
-      es.onmessage = (ev) => {
-        assistantEl.innerHTML += ev.data;
-      };
+       // Append chunks to the same assistant bubble
+       es.onmessage = (ev) => {
+         assistantEl.innerHTML += ev.data;
+       };
 
-      // Server signals completion with event: done
-      es.addEventListener('done', () => {
-        console.log('Stream complete');
-        cleanup();
-      });
-      es.onerror = cleanup;
-    });
+       // Server signals completion with event: done
+       es.addEventListener('done', () => {
+         console.log('Stream complete');
+         cleanup();
+       });
+       es.onerror = cleanup;
+     });
 
-    function addMessage(role, text) {
-      const el = document.createElement('div');
-      el.className = `msg ${role}`;
-      el.textContent = text || '';
-      chat.appendChild(el);
-      return el;
-    }
+     function addMessage(role, text) {
+       const el = document.createElement('div');
+       el.className = `msg ${role}`;
+       el.textContent = text || '';
+       chat.appendChild(el);
+       return el;
+     }
 
-    function setDisabled(disabled) {
-      promptInput.value = '';
-      sendBtn.disabled = disabled;
-      if (!disabled) {
-        promptInput.focus();
-      }
-    }
+     function setDisabled(disabled) {
+       promptInput.value = '';
+       sendBtn.disabled = disabled;
+       if (!disabled) {
+         promptInput.focus();
+       }
+     }
 
-    function cleanup() {
-      if (es) { es.close(); es = null; }
-      setDisabled(false);
-    }
+    function clearChatUI() {
+       chat.innerHTML = '';
+     }
+
+     function cleanup() {
+       if (es) { es.close(); es = null; }
+       setDisabled(false);
+     }
+     $('#btnClearSession').click(function() {
+     const token = $('input[name="__RequestVerificationToken"]').val();
+     const $msg = $('#clearSessionMessage');
+
+     $.ajax({
+     url: '/session/clear',
+     type: 'POST',
+     headers: {
+         'RequestVerificationToken': token
+     },
+     success: function(response) {
+         if (response.success) {
+         showMessage('History cleared!', 'success');
+         clearChatUI();
+         } else {
+         showMessage('Failed to clear history.', 'error');
+         }
+     },
+     error: function(xhr, status, errorThrown) {
+         showMessage('Error calling server.', 'error');
+         console.error('Error:', status, errorThrown);
+     }
+     });
+
+     function showMessage(text, type) {
+     $msg
+         .stop(true, true)  
+         .removeClass('success error')
+         .addClass(type)
+         .text(text)
+         .css('opacity', 0)
+         .show()
+         .animate({ opacity: 1 }, 500)  
+
+     setTimeout(function() {
+         $msg.animate({ opacity: 0 }, 500, function() {
+         $msg.hide();
+         });
+     }, 3000);
+     }
+     });
 </script>

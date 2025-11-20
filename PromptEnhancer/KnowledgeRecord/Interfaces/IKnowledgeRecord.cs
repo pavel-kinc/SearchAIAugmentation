@@ -12,7 +12,6 @@ namespace PromptEnhancer.KnowledgeRecord.Interfaces
         // maybe just getter to underlying object field?
         public PipelineEmbeddingsModel? Embeddings { get; set; }
 
-        [Range(0, 1)]
         public double? SimilarityScore { get; set; }
 
         public string UsedSearchQuery { get; set; }

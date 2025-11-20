@@ -26,7 +26,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 
         protected override ErrorOr<bool> CheckExecuteConditions(PipelineContext context)
         {
-            // Need retrieved records and no existing embeddings to avoid redundant processing
+            // Need retrieved records
             if (context.RetrievedRecords.Any())
             {
                 return true;

@@ -187,12 +187,12 @@ namespace DemoApp.Pages
                 {
                     new PreprocessStep(),
                     new KernelContextPluginsStep(),
-                    new QueryParserStep(),
+                    new QueryParserStep(maxSplit: 2),
                     //new SearchStep<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>(request),
                     new MultipleSearchStep([container], allowAutoChoice: false, isRequired: true),
                     new ProcessEmbeddingStep(skipGenerationForEmbData: true, isRequired: true),
                     new ProcessRankStep(isRequired: true),
-                    new ProcessFilterStep(new RecordPickerOptions(){MinScoreSimilarity = 0.3d, Take = 5, OrderByScoreDescending = true}, isRequired: true),
+                    new ProcessFilterStep(new RecordPickerOptions(){MinScoreSimilarity = 0.3d, Take = 2, OrderByScoreDescending = true}, isRequired: true),
                     new PostProcessCheckStep(),
                     new PromptBuilderStep(isRequired: true),
                     new GenerationStep(isRequired: true),
@@ -217,7 +217,8 @@ namespace DemoApp.Pages
                 ChatOptions = chatOptions,
                 KernelRequestSettings = executionSettings,
                 GeneratorKey = pipelineAdditionalSettings.GeneratorKey,
-                ChatClientKey = pipelineAdditionalSettings.ChatClientKey
+                ChatClientKey = pipelineAdditionalSettings.ChatClientKey,
+                MaximumInputLength = generationConfiguration.PromptSizeLimit,
             };
         }
 

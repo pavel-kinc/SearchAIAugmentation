@@ -36,9 +36,19 @@ public class HomeController : Controller
         return View();
     }
 
+    [HttpPost("/session/clear")]
+    [ValidateAntiForgeryToken]
+    public IActionResult ClearSession()
+    {
+        HttpContext.Session.Clear();
+
+        return Json(new { success = true });
+    }
+
     [HttpGet("/chat/stream")]
     public async Task Chat(string q, bool skipPipeline = false, CancellationToken ct = default)
     {
+        throw new Exception("wewqq");
         var chatHistory = HttpContext.Session.GetString(ChatHistory) is string json
                 ? JsonSerializer.Deserialize<List<ChatMessage>>(json)
                 : null;

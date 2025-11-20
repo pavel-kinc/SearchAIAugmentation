@@ -55,7 +55,7 @@
             @Html.LabelFor(m => m.SearchConfiguration.SearchFilter.DateRestrict, new { @class = "form-label", title = "Restrict results by date" })
             @Html.TextBoxFor(m => m.SearchConfiguration.SearchFilter.DateRestrict, new { @class = "form-control", placeholder = "e.g. d7 (last 7 days), m6 (6 months)" })
             @Html.ValidationMessageFor(m => m.SearchConfiguration.SearchFilter.DateRestrict, "", new { @class = "text-danger" })
-            <div class="form-text">Optional — restrict results by date range (provider-specific format).</div>
+            <div class="form-text">Optional — restrict results by date range.</div>
         </div>
 
         <!-- Top (number of results) -->

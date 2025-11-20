@@ -11,7 +11,6 @@ namespace PromptEnhancer.Services.EmbeddingService
         {
             //TODO maybe key cant be null? but there is no keyed service so mb okay
             var generator = kernel.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>(generatorKey);
-            //TODO now this generates embedding for all records without embeddings data
             //TODO maybe add settings for embedding limitations, like max number of records or max size of record/records
             var recordsNoEmbed = retrievedRecords.Where(x => !skipGenerationForEmbData ? x.Embeddings is null : !x.HasEmbeddingData);
             var recordsChunked = recordsNoEmbed.Chunk(200);
@@ -30,7 +29,7 @@ namespace PromptEnhancer.Services.EmbeddingService
                     record.Embeddings = new PipelineEmbeddingsModel
                     {
                         EmbeddingSource = generator.GetType().Name ?? "unknown",
-                        EmbeddingModel = embedding.ModelId ?? "unknown",
+                        EmbeddingModel = embedding.ModelId,
                         EmbeddingVector = embedding.Vector
                     };
                 }
