@@ -7,20 +7,6 @@
     <WarningsNotAsErrors>SKEXP0010</WarningsNotAsErrors>
   </PropertyGroup>
 
-    <ItemGroup>
-    <None Remove="model\model.onnx" />
-    <None Remove="model\vocab.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="model\model.onnx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="model\vocab.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="AllMiniLmL6V2Sharp" Version="0.0.3" />
     <PackageReference Include="AngleSharp" Version="1.3.0" />
@@ -38,10 +24,6 @@
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.Onnx" Version="1.66.0-alpha" />
     <PackageReference Include="Microsoft.SemanticKernel.Plugins.Web" Version="1.66.0-alpha" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="EmbeddingRecord\" />
   </ItemGroup>
 
 </Project>

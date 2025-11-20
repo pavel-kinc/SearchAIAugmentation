@@ -40,7 +40,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             var stringResult = res?.Text;
             if (stringResult != null && stringResult != LLMResponseNoResult)
             {
-                context.AdditionalContext.AddRange(stringResult.Split(ResultSeperator).Where(x => x.Length <= MaxContextItemSize));
+                context.AdditionalContext.AddRange(stringResult.Split(ResultSeperator).Where(x => x.Length <= MaxContextItemSize && x != LLMResponseNoResult && !string.IsNullOrEmpty(x)));
             }
             return true;
         }

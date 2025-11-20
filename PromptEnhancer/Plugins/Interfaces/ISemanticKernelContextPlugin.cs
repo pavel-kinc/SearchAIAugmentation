@@ -2,6 +2,5 @@
 {
     public interface ISemanticKernelContextPlugin : ISemanticKernelPlugin
     {
-        public string PluginMethodStartsWith => "get_context";
     }
 }

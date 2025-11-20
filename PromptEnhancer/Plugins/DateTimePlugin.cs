@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace PromptEnhancer.Plugins
 {
-    public class DateTimePlugin : SemanticKernelPlugin, ISemanticKernelContextPlugin
+    public class DateTimePlugin : ISemanticKernelContextPlugin
     {
         [KernelFunction("get_context_current_datetime")]
         [Description("Returns the current datetime (YYYY-MM-dd HH:mm:ss) as context.")]

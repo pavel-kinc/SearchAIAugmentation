@@ -1,4 +1,4 @@
-﻿namespace PromptEnhancer.ChunkUtilities.Interfaces
+﻿namespace ConfigurableGoogleSearchDemo.ChunkRankerService
 {
     public interface IChunkRankerService
     {

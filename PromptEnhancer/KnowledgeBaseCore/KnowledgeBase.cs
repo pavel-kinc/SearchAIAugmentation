@@ -1,4 +1,4 @@
-﻿using PromptEnhancer.ChunkUtilities.Interfaces;
+﻿using PromptEnhancer.ChunkService;
 using PromptEnhancer.KnowledgeBaseCore.Interfaces;
 using PromptEnhancer.KnowledgeRecord;
 using PromptEnhancer.KnowledgeRecord.Interfaces;

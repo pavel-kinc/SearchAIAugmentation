@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.SemanticKernel;
-using PromptEnhancer.ChunkUtilities;
-using PromptEnhancer.ChunkUtilities.Interfaces;
+using PromptEnhancer.ChunkService;
 using PromptEnhancer.KernelServiceTemplates;
 using PromptEnhancer.KnowledgeBaseCore;
 using PromptEnhancer.KnowledgeBaseCore.Examples;
@@ -10,7 +9,6 @@ using PromptEnhancer.KnowledgeBaseCore.Interfaces;
 using PromptEnhancer.KnowledgeRecord;
 using PromptEnhancer.KnowledgeSearchRequest.Examples;
 using PromptEnhancer.Models.Examples;
-using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Pipeline;
 using PromptEnhancer.Pipeline.Interfaces;
 using PromptEnhancer.Plugins;
@@ -25,7 +23,6 @@ using PromptEnhancer.Services.RecordPickerService;
 using PromptEnhancer.Services.RecordRankerService;
 using PromptEnhancer.SK;
 using PromptEnhancer.SK.Interfaces;
-using System.Runtime.CompilerServices;
 
 namespace PromptEnhancer.Extensions
 {
@@ -74,7 +71,6 @@ namespace PromptEnhancer.Extensions
         public static void AddSemanticKernelContextPlugins(this IServiceCollection services)
         {
             services.AddSingleton<ISemanticKernelContextPlugin, DateTimePlugin>();
-            services.AddSingleton<ISemanticKernelContextPlugin, TemperaturePlugin>();
         }
 
         public static void AddGoogleKnowledgeBase(this IServiceCollection services)
@@ -87,7 +83,7 @@ namespace PromptEnhancer.Extensions
         {
             services.TryAddSingleton<IKernelServiceFactory, KernelServiceFactory>();
             services.TryAddSingleton<IChunkGeneratorService, SemanticSlicerChunkService>();
-            services.TryAddSingleton<IChunkRankerService, MiniLmL6V2ChunkRanker>();
+            //services.TryAddSingleton<IChunkRankerService, MiniLmL6V2ChunkRanker>();
             services.TryAddSingleton<ISearchProviderManager, SearchProviderManager>();
             services.TryAddSingleton<ISearchWebScraper, SearchWebScraper>();
             services.TryAddSingleton<ISemanticKernelManager, SemanticKernelManager>();

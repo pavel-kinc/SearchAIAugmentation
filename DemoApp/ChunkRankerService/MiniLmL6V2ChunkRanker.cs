@@ -1,9 +1,8 @@
 ﻿using AllMiniLmL6V2Sharp;
 using AllMiniLmL6V2Sharp.Tokenizer;
-using PromptEnhancer.ChunkUtilities.Interfaces;
 using System.Reflection;
 
-namespace PromptEnhancer.ChunkUtilities
+namespace ConfigurableGoogleSearchDemo.ChunkRankerService
 {
     internal class MiniLmL6V2ChunkRanker : IChunkRankerService
     {

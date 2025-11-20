@@ -1,9 +1,6 @@
-﻿using Microsoft.SemanticKernel;
-using PromptEnhancer.ChunkUtilities.Interfaces;
-using SemanticSlicer;
-using System.ComponentModel;
+﻿using SemanticSlicer;
 
-namespace PromptEnhancer.ChunkUtilities
+namespace PromptEnhancer.ChunkService
 {
     public class SemanticSlicerChunkService : IChunkGeneratorService
     {

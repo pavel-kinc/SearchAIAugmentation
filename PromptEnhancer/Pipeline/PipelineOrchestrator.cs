@@ -29,7 +29,7 @@ namespace PromptEnhancer.Pipeline
                 }
                 catch (Exception ex)
                 {
-                    return Error.Failure($"Error: {nameof(step)} has thrown Exception in step execution", ex.Message);
+                    return Error.Failure($"Error: {step.GetType().Name} has thrown Exception in step execution", ex.Message);
                 }
             }
             return true;

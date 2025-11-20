@@ -1,4 +1,4 @@
-﻿namespace PromptEnhancer.ChunkUtilities.Interfaces
+﻿namespace PromptEnhancer.ChunkService
 {
     public interface IChunkGeneratorService
     {

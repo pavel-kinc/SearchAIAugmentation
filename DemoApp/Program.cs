@@ -28,6 +28,7 @@ namespace DemoApp
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<IConfigurationSetupService, ConfigurationSetupService>();
             builder.Services.AddScoped<IEntrySetupService, EntrySetupService>();
+            //builder.Services.AddSingleton<IChunkRankerService, MiniLmL6V2ChunkRanker>();
 
             builder.Services.AddPromptEnhancer();
 

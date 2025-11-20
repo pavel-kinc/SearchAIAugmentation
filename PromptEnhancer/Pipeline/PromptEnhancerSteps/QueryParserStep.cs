@@ -11,7 +11,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             """
             Given the user query "{0}", extract up to "{1}" meaningful and distinct search queries, separated by ';'.
 
-            Keep only parts that are useful for search. Context for each part must be clear (you can repeat some words from query).
+            Keep only parts that are useful for search. Context for each part must be clear (you can repeat some words from query, but the parts must be distinct).
             Remove filler or irrelevant parts. If the query can’t be improved or split, return "{2}".
             """;
 

@@ -49,10 +49,14 @@ namespace PromptEnhancer.Services.RecordRankerService
             }
 
             var queryEmbed = dict[record.UsedSearchQuery];
-            var recordEmbed = embed ?? new Embedding<float>(record.Embeddings!.EmbeddingVector)
+            var recordEmbed = embed;
+            if (recordEmbed is null && record.Embeddings is not null)
             {
-                ModelId = record.Embeddings.EmbeddingModel,
-            };
+                recordEmbed = new Embedding<float>(record.Embeddings.EmbeddingVector)
+                {
+                    ModelId = record.Embeddings.EmbeddingModel,
+                };
+            }
 
             if (recordEmbed is null)
             {

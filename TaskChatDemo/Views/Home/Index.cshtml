@@ -108,6 +108,10 @@
       setDisabled(false);
     }
 
+    function clearChatUI() {
+      chat.innerHTML = '';
+    }
+
     $('#btnClearSession').click(function () {
       const token = $('input[name="__RequestVerificationToken"]').val();
       const $msg = $('#clearSessionMessage');

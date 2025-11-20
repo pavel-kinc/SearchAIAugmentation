@@ -1,5 +1,5 @@
 ﻿using Microsoft.SemanticKernel.Data;
-using PromptEnhancer.ChunkUtilities.Interfaces;
+using PromptEnhancer.ChunkService;
 using PromptEnhancer.KnowledgeRecord;
 using PromptEnhancer.KnowledgeSearchRequest.Examples;
 using PromptEnhancer.KnowledgeSearchRequest.Interfaces;
