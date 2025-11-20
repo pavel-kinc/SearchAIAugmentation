@@ -2,7 +2,6 @@
 using Microsoft.Extensions.AI;
 using PromptEnhancer.AIUtility.ChatHistory;
 using PromptEnhancer.Models.Pipeline;
-using System.Diagnostics.CodeAnalysis;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {

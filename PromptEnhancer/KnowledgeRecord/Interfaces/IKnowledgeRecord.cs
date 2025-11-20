@@ -1,5 +1,4 @@
 ﻿using PromptEnhancer.Models;
-using System.ComponentModel.DataAnnotations;
 
 namespace PromptEnhancer.KnowledgeRecord.Interfaces
 {

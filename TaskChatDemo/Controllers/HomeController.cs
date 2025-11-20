@@ -45,41 +45,49 @@ public class HomeController : Controller
         return Json(new { success = true });
     }
 
+
+
     [HttpGet("/chat/stream")]
-    public async Task Chat(string q, bool skipPipeline = false, CancellationToken ct = default)
+    public async Task<IActionResult> Chat(string q, bool skipPipeline = false, CancellationToken ct = default)
     {
-        throw new Exception("wewqq");
-        var chatHistory = HttpContext.Session.GetString(ChatHistory) is string json
+        try
+        {
+            var chatHistory = HttpContext.Session.GetString(ChatHistory) is string json
                 ? JsonSerializer.Deserialize<List<ChatMessage>>(json)
                 : null;
-        HttpContext.Session.SetString(ChatHistory, JsonSerializer.Serialize(chatHistory));
-        var entry = new Entry() { QueryString = q };
+            HttpContext.Session.SetString(ChatHistory, JsonSerializer.Serialize(chatHistory));
+            var entry = new Entry() { QueryString = q };
 
-        var settingsResult = _enhancerUtilityService.GetPipelineSettings();
-        if (settingsResult.IsError)
-        {
-            //return RedirectToAction("Error");
+            var settingsResult = _enhancerUtilityService.GetPipelineSettings();
+            if (settingsResult.IsError)
+            {
+                //return RedirectToAction("Error");
+            }
+            var settings = settingsResult.Value;
+
+            var context = await _enhancerUtilityService.GetContextFromPipeline(q, skipPipeline, entry, settings);
+            context.ChatHistory ??= chatHistory;
+            //TODO handle errors?
+            chatHistory = await HandleStreamingMessage(chatHistory, settings, context, ct);
+            HttpContext.Session.SetString(ChatHistory, JsonSerializer.Serialize(chatHistory));
+            return new EmptyResult();
         }
-        var settings = settingsResult.Value;
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed streaming");
+            return BadRequest(ex);
+        }
 
-        var context = await _enhancerUtilityService.GetContextFromPipeline(q, skipPipeline, entry, settings);
-        context.ChatHistory ??= chatHistory;
-
-        //TODO handle errors?
-        chatHistory = await HandleStreamingMessage(chatHistory, settings, context, ct);
-        HttpContext.Session.SetString(ChatHistory, JsonSerializer.Serialize(chatHistory));
-        return;
     }
 
     private async Task<List<ChatMessage>> HandleStreamingMessage(List<ChatMessage>? chatHistory, PipelineSettings settings, PipelineContext context, CancellationToken ct)
     {
         var res = _enhancerService.GetStreamingResponse(settings, context, ct);
         List<ChatResponseUpdate> updates = [];
-
         Response.ContentType = "text/event-stream";
-        await Response.StartAsync(ct);
         await foreach (ChatResponseUpdate update in res)
         {
+            await Response.StartAsync(ct);
             await Response.WriteAsync($"data: {update}\n\n", ct);
             await Response.Body.FlushAsync(ct);
             updates.Add(update);
