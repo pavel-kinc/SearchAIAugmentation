@@ -1,0 +1,92 @@
+﻿[
+  {
+    "Id": "d9fcfddb-cc18-475b-8398-8ab9f3e7b08c",
+    "Title": "Implement login",
+    "Description": "Create user login functionality",
+    "Status": "TODO",
+    "Assignee": "Alice",
+    "CreatedDate": "2025-11-07T12:00:00Z",
+    "Embedding": null
+  },
+  {
+    "Id": "344c3e18-4aa9-4e2e-9bff-6f60b99607ed",
+    "Title": "Set up database",
+    "Description": "Initialize SQL Server database schema",
+    "Status": "TODO",
+    "Assignee": "Bob",
+    "CreatedDate": "2025-11-08T12:00:00Z",
+    "Embedding": null
+  },
+  {
+    "Id": "50ef9725-1d12-4fd2-b62e-297f2c1a56c9",
+    "Title": "Design landing page",
+    "Description": "Create UI mockups for landing page",
+    "Status": "TODO",
+    "Assignee": "Carol",
+    "CreatedDate": "2025-11-09T12:00:00Z",
+    "Embedding": null
+  },
+  {
+    "Id": "b3c1484e-bea9-478b-9c76-f853b7199e75",
+    "Title": "API for tasks",
+    "Description": "Build REST API to CRUD tasks",
+    "Status": "TODO",
+    "Assignee": "Dave",
+    "CreatedDate": "2025-11-10T12:00:00Z",
+    "Embedding": null
+  },
+  {
+    "Id": "a4ed6bcf-27c9-42f0-9f3d-7c3bc1b3b4cc",
+    "Title": "Unit tests",
+    "Description": "Write unit tests for task service",
+    "Status": "TODO",
+    "Assignee": "Eve",
+    "CreatedDate": "2025-11-11T12:00:00Z",
+    "Embedding": null
+  },
+  {
+    "Id": "17d3e625-8d36-4cf7-bb3d-dcf51d37a86e",
+    "Title": "Authentication",
+    "Description": "Implement JWT authentication",
+    "Status": "TODO",
+    "Assignee": "Frank",
+    "CreatedDate": "2025-11-12T12:00:00Z",
+    "Embedding": null
+  },
+  {
+    "Id": "d58f0ba8-0c42-4448-a7e0-70dd1a875e13",
+    "Title": "Authorization",
+    "Description": "Add role-based authorization",
+    "Status": "TODO",
+    "Assignee": "Grace",
+    "CreatedDate": "2025-11-13T12:00:00Z",
+    "Embedding": null
+  },
+  {
+    "Id": "8b5ab824-f2e0-4b90-9057-8c417d739ab3",
+    "Title": "UI validation",
+    "Description": "Validate form inputs on frontend",
+    "Status": "TODO",
+    "Assignee": "Heidi",
+    "CreatedDate": "2025-11-14T12:00:00Z",
+    "Embedding": null
+  },
+  {
+    "Id": "4e4a7aab-1a0d-44d9-a9fa-2f8b5d5fd8a9",
+    "Title": "Error logging",
+    "Description": "Set up global error logging",
+    "Status": "TODO",
+    "Assignee": "Ivan",
+    "CreatedDate": "2025-11-15T12:00:00Z",
+    "Embedding": null
+  },
+  {
+    "Id": "1f5483d6-7d50-4ca5-8bbe-33412c0f5d3c",
+    "Title": "Deploy to staging",
+    "Description": "Deploy the app to staging environment",
+    "Status": "TODO",
+    "Assignee": "Judy",
+    "CreatedDate": "2025-11-16T12:00:00Z",
+    "Embedding": null
+  }
+]

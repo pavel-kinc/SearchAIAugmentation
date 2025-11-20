@@ -1,0 +1,45 @@
+﻿@model DemoApp.Models.ConfigurationSetup
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <strong>Configuration Overview</strong>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            @* ── Kernel Configuration ── *@
+            @if (!string.IsNullOrWhiteSpace(Model.KernelConfiguration?.Model))
+            {
+                <dt class="col-sm-4">@Html.LabelFor(m => m.KernelConfiguration.Model, new { @class = "mb-0 fw-semibold" })</dt>
+                <dd class="col-sm-8">@Model.KernelConfiguration.Model</dd>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Model.KernelConfiguration?.EmbeddingModel))
+            {
+                <dt class="col-sm-4">@Html.LabelFor(m => m.KernelConfiguration.EmbeddingModel, new { @class = "mb-0 fw-semibold" })</dt>
+                <dd class="col-sm-8">@Model.KernelConfiguration.EmbeddingModel</dd>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Model.KernelConfiguration?.Provider.ToString()))
+            {
+                <dt class="col-sm-4">@Html.LabelFor(m => m.KernelConfiguration.Provider, new { @class = "mb-0 fw-semibold" })</dt>
+                <dd class="col-sm-8">@Model.KernelConfiguration.Provider</dd>
+            }
+
+            <dt class="col-sm-4">@Html.LabelFor(m => m.KernelConfiguration.AIApiKey, new { @class = "mb-0 fw-semibold" })</dt>
+            <dd class="col-sm-8">@Model.DemoAppConfigSetup.AIApiKeyFromInput</dd>
+
+            <dt class="col-sm-4">@Html.LabelFor(m => m.SearchConfiguration.SearchProviderSettings.SearchApiKey, new { @class = "mb-0 fw-semibold" })</dt>
+            <dd class="col-sm-8">@Model.DemoAppConfigSetup.SearchApiKeyFromInput</dd>
+
+            <dt class="col-sm-4">@Html.LabelFor(m => m.SearchConfiguration.SearchProviderSettings.Engine, new { @class = "mb-0 fw-semibold" })</dt>
+            <dd class="col-sm-8">@Model.DemoAppConfigSetup.SearchEngineFromInput</dd>
+
+            @if (!string.IsNullOrWhiteSpace(Model.SearchConfiguration?.SearchProviderSettings?.Provider.ToString()))
+            {
+                <dt class="col-sm-4">@Html.LabelFor(m => m.SearchConfiguration.SearchProviderSettings.Provider, new { @class = "mb-0 fw-semibold" })</dt>
+                <dd class="col-sm-8">@Model.SearchConfiguration.SearchProviderSettings.Provider</dd>
+            }
+        </dl>
+    </div>
+    @await Html.PartialAsync("_ConfigLoadForms", null)
+</div>

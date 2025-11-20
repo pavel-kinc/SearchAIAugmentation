@@ -1,0 +1,156 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div id="chatComponent">
+    <div id="chat"></div>
+
+    <form id="chatForm">
+        <input id="prompt" type="text" placeholder="Type a message..." autocomplete="off" required maxlength="250" />
+        <button id="sendBtn" type="submit">Send</button>
+        <div class="checkbox-container">
+            <input type="checkbox" style="margin-right: 0.5rem;"
+                   id="skipPipeline"
+                   name="skipPipeline" />
+            <label for="skipPipeline">Skip pipeline</label>
+        </div>
+    </form>
+    <form id="clearSessionForm">
+        @Html.AntiForgeryToken()
+        <button type="button" id="btnClearSession" class="btn-clear-session">Clear History</button>
+    </form>
+    <div id="clearSessionMessage" class="message-box" style="display: none;"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+    const chat = document.getElementById('chat');
+    const form = document.getElementById('chatForm');
+    const promptInput = document.getElementById('prompt');
+    const skipPipelineCheckbox = document.getElementById('skipPipeline');
+    const sendBtn = document.getElementById('sendBtn');
+    let es = null;
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = promptInput.value.trim();
+      if (!text) return;
+
+      addMessage('user', text);
+      setDisabled(true);
+
+      startChat(text, skipPipelineCheckbox.checked);
+    });
+
+    function startChat(q, skipPipeline) {
+      const url = `/chat/stream?q=${encodeURIComponent(q)}&skipPipeline=${skipPipeline}`;
+
+      if (es) {
+        es.close();
+      }
+
+      // Create assistant element and keep reference
+      const assistantEl = addMessage('app', '');
+      es = new EventSource(url);
+
+      es.onopen = () => {
+        console.log("SSE connection opened");
+      };
+
+      es.onmessage = (ev) => {
+        if (assistantEl) {
+          assistantEl.innerHTML += ev.data;
+        } else {
+          console.error('Assistant element not found when receiving message');
+        }
+      };
+
+      es.addEventListener('done', () => {
+        if (assistantEl) {
+          console.error('Streaming done');
+        }
+        cleanup();
+      });
+
+      es.addEventListener('failure', (ev) => {
+        assistantEl.innerHTML += `Error: ${ev.data}`;
+        cleanup();
+      });
+
+      es.onerror = (err) => {
+        console.error('SSE error', err);
+        assistantEl.innerHTML += `Error: Processing failed`;
+        cleanup();
+      };
+    }
+
+    function addMessage(role, text) {
+      const el = document.createElement('div');
+      el.className = `msg ${role}`;
+      el.textContent = text;
+      chat.appendChild(el);
+      return el;  // **Return** so caller can use the DOM element
+    }
+
+    function setDisabled(disabled) {
+      promptInput.value = '';
+      sendBtn.disabled = disabled;
+      if (!disabled) {
+        promptInput.focus();
+      }
+    }
+
+    function cleanup() {
+      if (es) {
+        es.close();
+        es = null;
+      }
+      setDisabled(false);
+    }
+
+    function clearChatUI() {
+      chat.innerHTML = '';
+    }
+
+    $('#btnClearSession').click(function () {
+      const token = $('input[name="__RequestVerificationToken"]').val();
+      const $msg = $('#clearSessionMessage');
+
+      $.ajax({
+        url: '/session/clear',
+        type: 'POST',
+        headers: {
+          'RequestVerificationToken': token
+        },
+        success: function (response) {
+          if (response.success) {
+            showMessage('History cleared!', 'success');
+            clearChatUI();
+          } else {
+            showMessage('Failed to clear history.', 'error');
+          }
+        },
+        error: function (xhr, status, errorThrown) {
+          showMessage('Error calling server.', 'error');
+          console.error('Error:', status, errorThrown);
+        }
+      });
+
+      function showMessage(text, type) {
+        $msg
+          .stop(true, true)
+          .removeClass('success error')
+          .addClass(type)
+          .text(text)
+          .css('opacity', 0)
+          .show()
+          .animate({ opacity: 1 }, 500)
+
+        setTimeout(function () {
+          $msg.animate({ opacity: 0 }, 500, function () {
+            $msg.hide();
+          });
+        }, 3000);
+      }
+    });
+</script>

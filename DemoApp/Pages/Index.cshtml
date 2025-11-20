@@ -1,10 +1,139 @@
 ﻿@page
 @model IndexModel
+
 @{
     ViewData["Title"] = "Home page";
+    var prefixedViewData = new ViewDataDictionary(ViewData)
+    {
+        TemplateInfo = { HtmlFieldPrefix = "ViewModel.ConfigurationSetup" }
+    };
 }
+@if (Model.ViewModel.ResultModelList.Count > 0)
+{
+    @await Html.PartialAsync("_ResultView", Model.ViewModel.ResultModelList)
+}
+else{
+<h2 class="mb-3">Enhancer Setup</h2>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<ul class="nav nav-tabs mb-2" id="configTabs">
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#overview">Overview</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#kernel">Kernel Config</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#search">Search Config</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#prompt">Prompt Config</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#generation">Generation Config</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#entry">Entries</a></li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade" id="overview">
+        @await Html.PartialAsync("_ConfigOverview", Model.ViewModel.ConfigurationSetup)
+    </div>
+    <div class="tab-pane fade" id="kernel">
+        <form method="post" asp-page-handler="UpdateKernelConf">
+            @await Html.PartialAsync("_AIServiceFormValuesView", Model.ViewModel.ConfigurationSetup, prefixedViewData)
+
+            <button type="submit" class="btn btn-primary">Save Kernel configuration</button>
+        </form>
+    </div>
+
+    <div class="tab-pane fade" id="search">
+        <form method="post" asp-page-handler="UpdateSearchConf">
+            @await Html.PartialAsync("_SearchConfigFormValuesView", Model.ViewModel.ConfigurationSetup, prefixedViewData)
+            <button type="submit" class="btn btn-primary">Save Search configuration</button>
+        </form>
+    </div>
+
+    <div class="tab-pane fade" id="prompt">
+        <form method="post" asp-page-handler="UpdatePromptConf">
+            @await Html.PartialAsync("_PromptConfigFormValuesView", Model.ViewModel.ConfigurationSetup, prefixedViewData)
+            <button type="submit" class="btn btn-primary">Save Prompt configuration</button>
+        </form>
+    </div>
+
+    <div class="tab-pane fade" id="generation">
+        <form method="post" asp-page-handler="UpdateGenerationConf">
+            @await Html.PartialAsync("_GenerationConfigFormValuesView", Model.ViewModel.ConfigurationSetup, prefixedViewData)
+            <button type="submit" class="btn btn-primary mt-3">Save Generation configuration</button>
+        </form>
+    </div>
+
+    <div class="tab-pane fade" id="entry">
+        <form method="post" asp-page-handler="UpdateEntries">
+            @await Html.PartialAsync("_EntriesFormValuesView", Model.Entries)
+            <button type="submit" class="btn btn-primary">Save Entries</button>
+        </form>
+        @await Html.PartialAsync("_AddEntry", null)
+    </div>
 </div>
+
+<hr />
+@if (Model.ViewModel.Errors != null && Model.ViewModel.Errors.Any())
+{
+    <div id="error-alert"
+         class="alert alert-danger custom-alert d-flex justify-content-between align-items-start"
+         role="alert"
+         aria-live="polite"
+         tabindex="-1">
+        <div>
+            <strong>Errors:</strong>
+            <ul class="mb-0 mt-1">
+                @foreach (var e in Model.ViewModel.Errors)
+                {
+                    <li>@e</li>
+                }
+            </ul>
+        </div>
+
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+<div class="d-flex gap-3">
+
+    <form method="post" asp-page-handler="ProcessResultModel">
+        <button type="submit" class="btn btn-success">Finish and Show Results</button>
+    </form>
+    <form method="post" asp-page-handler="ClearSession">
+        <button type="submit" class="btn btn-danger">Reset Setup</button>
+    </form>
+</div>
+}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tabLinks = document.querySelectorAll('#configTabs a[data-bs-toggle="tab"]');
+        const activeTab = localStorage.getItem('activeTab');
+
+        if (activeTab) {
+            const activeTabElement = document.querySelector(`a[href="${activeTab}"]`);
+            if (activeTabElement) {
+                new bootstrap.Tab(activeTabElement).show();
+            }
+        } else {
+            const firstTab = tabLinks[0];
+            if (firstTab) {
+                new bootstrap.Tab(firstTab).show();
+            }
+        }
+
+        window.addEventListener("load", function () {
+            if (window.location.search.includes("handler=")) {
+            history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+
+        tabLinks.forEach(tab => {
+            tab.addEventListener('shown.bs.tab', e => {
+                const href = e.target.getAttribute('href');
+                localStorage.setItem('activeTab', href);
+            });
+        });
+
+        const message = '@(Model.ViewModel.FloatingAlertMessage ?? "")';
+        if (message) showFloatingAlert(message, 3000);
+
+        var alertEl = document.getElementById('error-alert');
+        if (alertEl) {
+            alertEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            alertEl.focus();
+        }
+    });
+</script>

@@ -1,0 +1,57 @@
+﻿@model DemoApp.Models.ConfigurationSetup
+
+
+<div class="mb-3 mt-3"><h3>Generation configuration setup</h3></div>
+
+<div class="row g-3">
+    <!-- Temperature -->
+    <div class="col-md-3">
+        @Html.LabelFor(m => m.GenerationConfiguration.Temperature, new { @class = "form-label", title = "Controls randomness (0.0 = deterministic, 1.0 = more creative)." })
+        @Html.TextBoxFor(m => m.GenerationConfiguration.Temperature, new { @type = "number", @step = "0.05", @min = "0", @max = "2", @class = "form-control", placeholder = "0.2" })
+        @Html.ValidationMessageFor(m => m.GenerationConfiguration.Temperature, "", new { @class = "text-danger" })
+        <div class="form-text">0–2 typical. Use lower for deterministic outputs (summaries/code).</div>
+    </div>
+
+    <!-- TopP -->
+    <div class="col-md-3">
+        @Html.LabelFor(m => m.GenerationConfiguration.TopP, new { @class = "form-label", title = "Nucleus sampling (top-p). 1.0 = disabled." })
+        @Html.TextBoxFor(m => m.GenerationConfiguration.TopP, new { @type = "number", step = "0.01", lang = "en", min = "0.5", max = "1", @class = "form-control", placeholder = "1.0" })
+        @Html.ValidationMessageFor(m => m.GenerationConfiguration.TopP, "", new { @class = "text-danger" })
+        <div class="form-text">Typical: 0.8–1.0. Use together with temperature if needed.</div>
+    </div>
+
+    <!-- MaxTokens -->
+    <div class="col-md-4">
+        @Html.LabelFor(m => m.GenerationConfiguration.MaxTokens, new { @class = "form-label", title = "Maximum tokens for the model response." })
+        @Html.TextBoxFor(m => m.GenerationConfiguration.MaxTokens, new { @type = "number", @min = "1", @step = "1", @class = "form-control", placeholder = "512" })
+        @Html.ValidationMessageFor(m => m.GenerationConfiguration.MaxTokens, "", new { @class = "text-danger" })
+        <div class="form-text">Upper limit for response length (tokens). Adjust based on model limits.</div>
+    </div>
+</div>
+
+<div class="mt-3">
+
+    <div class="mt-3">
+        <div class="row g-3">
+            <div class="col-md-3">
+                @Html.LabelFor(m => m.GenerationConfiguration.FrequencyPenalty, new { @class = "form-label", title = "Discourage repeated tokens (frequency penalty)." })
+                @Html.TextBoxFor(m => m.GenerationConfiguration.FrequencyPenalty, new { @type = "number", @step = "0.01", @min = "0", @max = "1", @class = "form-control", placeholder = "0.0" })
+                @Html.ValidationMessageFor(m => m.GenerationConfiguration.FrequencyPenalty, "", new { @class = "text-danger" })
+                <div class="form-text">Range typically 0..1. Positive reduces token repetition.</div>
+            </div>
+
+            <div class="col-md-3">
+                @Html.LabelFor(m => m.GenerationConfiguration.PresencePenalty, new { @class = "form-label", title = "Discourage repeating topics (presence penalty)." })
+                @Html.TextBoxFor(m => m.GenerationConfiguration.PresencePenalty, new { @type = "number", @step = "0.01", @min = "0", @max = "1", @class = "form-control", placeholder = "0.0" })
+                @Html.ValidationMessageFor(m => m.GenerationConfiguration.PresencePenalty, "", new { @class = "text-danger" })
+                <div class="form-text">Range typically 0..1. Positive encourages new topics.</div>
+            </div>
+            <div class="col-md-4">
+                @Html.LabelFor(m => m.GenerationConfiguration.PromptSizeLimit, new { @class = "form-label", title = "Limit for prompt size." })
+                @Html.TextBoxFor(m => m.GenerationConfiguration.PromptSizeLimit, new { @type = "number", @step = "100", @min = "100", @max = "100000", @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.GenerationConfiguration.PromptSizeLimit, "", new { @class = "text-danger" })
+                <div class="form-text">Limits calls to LLM based on input prompt size. Used in steps for generation.</div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,260 @@
+﻿@model List<PromptEnhancer.Models.ResultModel>
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using System.Linq
+
+@{
+    var results = Model ?? new List<PromptEnhancer.Models.ResultModel>();
+    var total = results.Count;
+    var jsonOpts = new JsonSerializerOptions
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        WriteIndented = true
+    };
+}
+
+<div id="results-container">
+    <div class="results-grid">
+        <aside class="sidebar card" aria-label="Results list">
+            <h4 style="margin:0 0 10px 0;">Results (@total)</h4>
+
+            @if (total == 0)
+            {
+                <div class="muted">No results</div>
+            }
+            else
+            {
+                @for (int i = 0; i < results.Count; i++)
+                {
+                    var r = results[i];
+                    var success = r.PipelineSuccess;
+                    var q = r.Result?.QueryString ?? r.Result?.QueryStrings?.FirstOrDefault() ?? "(no query)";
+                    <div class="mini @(i == 0 ? "active" : "")" role="button" data-index="@i" title="@q">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div style="min-width:0">
+                                <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                    @(!string.IsNullOrWhiteSpace(r.Result?.Entry?.EntryName)
+                                                                ? r.Result.Entry.EntryName
+                                                                : $"Result {i + 1} / {total}")
+                                </div>
+                                <div class="muted" style="font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                    @q
+                                </div>
+                            </div>
+                            <div style="text-align:right">
+                                <span class="badge" title="Pipeline success">
+                                    @(
+                                                                success ? "OK" : "Fail"
+                                                                )
+                            </span>
+                        </div>
+                    </div>
+                    <div class="small" style="margin-top:6px;">
+                        <span class="meta-kv">Tokens: @(r.Result?.TokenUsage ?? 0)</span>
+                        <span class="meta-kv">Retrieved: @(r.Result?.RetrievedRecords?.Count ?? 0)</span>
+                    </div>
+                </div>
+                        }
+            }
+        </aside>
+
+        <section class="main">
+            @for (int i = 0; i < results.Count; i++)
+            {
+                var r = results[i];
+                var ctx = r.Result;
+                var finalText = ctx?.FinalResponse?.Text ?? "(no final response)";
+                var qsList = ctx?.QueryStrings ?? Enumerable.Empty<string>();
+                var metaItems = (ctx?.Metadata ?? new Dictionary<string, object>()).Take(6);
+                <div class="result-panel" data-index="@i" style="display:@(i == 0 ? "block" : "none")">
+                    <div class="card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <h3 style="margin:0 0 6px 0;">
+                                    @(!string.IsNullOrWhiteSpace(r.Result?.Entry?.EntryName)
+                                                                    ? r.Result.Entry.EntryName
+                                                                    : $"Result {i + 1} / {total}")
+                                </h3>
+                                <div class="muted">Query: <strong>@(ctx?.QueryString ?? "(none)")</strong></div>
+                            </div>
+                            <div style="text-align:right">
+                                <div class="counts">
+                                    <div class="small">Tokens <strong>@(ctx?.TokenUsage ?? 0)</strong></div>
+                                    <div class="small">In <strong>@(ctx?.InputTokenUsage ?? 0)</strong></div>
+                                    <div class="small">Out <strong>@(ctx?.OutputTokenUsage ?? 0)</strong></div>
+                                </div>
+                                <div style="margin-top:6px;">
+                                    <span class="badge">
+                                        @(
+                                        r.PipelineSuccess ? "Pipeline: success" : "Pipeline: failed"
+                                        )
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                        <div style="margin-top:12px;">
+                            <div class="row-res">
+                                <div class="chips" aria-hidden="false">
+                                @foreach (var s in qsList.Take(5))
+                                    {
+                                        <span class="chip">@s</span>
+                                    }
+                                    @if (qsList.Skip(5).Any())
+                                    {
+                                        <span class="chip">+@qsList.Skip(5).Count() more</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div style="display:flex;gap:12px;align-items:center;margin:10px 0;">
+                                <div class="small"><strong>Retrieved records:</strong> @(ctx?.RetrievedRecords?.Count ?? 0)</div>
+                                <div class="small"><strong>Picked records:</strong> @(ctx?.PickedRecords?.Count() ?? 0)</div>
+                                <div class="small"><strong>Extra context:</strong> @(ctx?.AdditionalContext?.Count ?? 0)</div>
+                            </div>
+
+                            <details style="margin-top:8px;">
+                                <summary>System / User prompts (click to expand)</summary>
+                                <div style="margin-top:8px;">
+                                    <div style="margin-bottom:6px;">
+                                        <strong>System prompt:</strong>
+                                        <div class="muted">@(!string.IsNullOrEmpty(ctx?.SystemPromptToLLM) ? ctx.SystemPromptToLLM : "(none)")</div>
+                                    </div>
+                                    <div>
+                                        <strong>User prompt:</strong>
+                                        <div class="muted">@(!string.IsNullOrEmpty(ctx?.UserPromptToLLM) ? ctx.UserPromptToLLM : "(none)")</div>
+                                    </div>
+                                </div>
+                            </details>
+
+                            <div style="margin-top:12px;">
+                                <strong>Final LLM response</strong>
+                                <div style="margin-top:8px;">
+                                    <pre class="response" id="response-@i">@finalText</pre>
+                                </div>
+                            </div>
+
+                            @if (r.Errors.Any())
+                            {
+                                <div style="margin-top:12px;">
+                                    <strong>Errors: </strong>
+                                    <div style="margin-top:6px;" class="muted">
+                                        <ul>
+                                            @foreach (var error in r.Errors)
+                                            {
+                                                <li>@error.Code</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            }
+
+                            <div style="margin-top:12px;">
+                                <strong>Metadata (sample)</strong>
+                                <div style="margin-top:6px;" class="muted">
+                                    @if (metaItems.Any())
+                                    {
+                                        <ul>
+                                            @foreach (var kv in metaItems)
+                                            {
+                                                <li><code>@kv.Key</code>: @kv.Value?.ToString()</li>
+                                            }
+                                        </ul>
+                                    }
+                                    else
+                                    {
+                                        <div>(no metadata)</div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="footer">
+                                <div class="page-controls">
+                                    <button id="prev-btn" class="icon" aria-label="Previous result">&lt;</button>
+                                    <span class="muted">Result <strong id="current-pos">@(i+1)</strong> / @total</span>
+                                    <button id="next-btn" class="icon" aria-label="Next result">&gt;</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </section>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const miniItems = document.querySelectorAll('.sidebar .mini');
+      const panels = document.querySelectorAll('.result-panel');
+      const total = panels.length;
+      let current = 0;
+
+      function setActive(idx) {
+        if (idx < 0 || idx >= total) return;
+        // panels
+        panels.forEach((p, i) => p.style.display = (i === idx) ? 'block' : 'none');
+        // sidebar highlight
+        miniItems.forEach((m, i) => m.classList.toggle('active', i === idx));
+        current = idx;
+        // update small position text if present
+        const pos = document.getElementById('current-pos');
+        if (pos) pos.innerText = (idx + 1);
+      }
+
+      miniItems.forEach(m => m.addEventListener('click', (e) => {
+        const idx = Number(m.getAttribute('data-index'));
+        setActive(idx);
+      }));
+
+      // Prev / Next (global)
+      const prevBtn = document.querySelectorAll('#prev-btn');
+      const nextBtn = document.querySelectorAll('#next-btn');
+
+      function prev() { if (current > 0) setActive(current - 1); }
+      function next() { if (current < total - 1) setActive(current + 1); }
+
+      prevBtn.forEach(b => b.addEventListener('click', prev));
+      nextBtn.forEach(b => b.addEventListener('click', next));
+
+      // keyboard
+      document.addEventListener('keydown', (e) => {
+        if (e.key === "ArrowRight") next();
+        if (e.key === "ArrowLeft") prev();
+      });
+
+      // Copy response
+      document.querySelectorAll('button[data-copy-target]').forEach(btn => {
+        btn.addEventListener('click', function () {
+          const selector = btn.getAttribute('data-copy-target');
+          const el = document.querySelector(selector);
+          if (!el) return;
+          const text = el.innerText;
+          navigator.clipboard?.writeText(text).then(() => {
+            btn.textContent = "Copied ✓";
+            setTimeout(() => btn.textContent = "Copy", 900);
+          }).catch(() => {
+            alert("Copy failed — try selecting text and Ctrl+C");
+          });
+        });
+      });
+
+      // Download JSON: data-download contains small JSON with index + result snapshot
+      document.querySelectorAll('button[data-download]').forEach(btn => {
+        btn.addEventListener('click', function () {
+          const payload = btn.getAttribute('data-download');
+          const blob = new Blob([payload], { type: "application/json" });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = `result-${JSON.parse(payload).index || '0'}.json`;
+          document.body.appendChild(a);
+          a.click();
+          URL.revokeObjectURL(a.href);
+          a.remove();
+        });
+      });
+
+      // initial
+      setActive(0);
+    });
+</script>

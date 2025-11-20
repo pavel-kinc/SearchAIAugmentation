@@ -1,0 +1,17 @@
+﻿using DemoApp.Models;
+using PromptEnhancer.Models.Configurations;
+
+namespace DemoApp.Services.Interfaces
+{
+    public interface IConfigurationSetupService
+    {
+        ConfigurationSetup GetConfiguration(bool withSecrets = false);
+        void UpdateKernelConfig(KernelConfiguration kernelConfiguration);
+        void UpdateSearchConfig(SearchConfiguration searchConfiguration);
+        void UpdatePromptConfig(PromptConfiguration promptConfiguration);
+        void UpdateGenerationConfig(GenerationConfiguration generationConfiguration);
+        void UploadConfiguration(ConfigurationSetup configuration);
+        void ClearSession();
+
+    }
+}

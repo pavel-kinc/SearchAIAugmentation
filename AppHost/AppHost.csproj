@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.0.0" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAspireHost>true</IsAspireHost>
+    <UserSecretsId>37da7418-7d87-4fea-a744-5269bd81404f</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DemoApp\ConfigurableGoogleSearchDemo.csproj" />
+    <ProjectReference Include="..\TaskChatDemo\TaskChatDemo.csproj" />
+    <ProjectReference Include="..\TaskDemoAPI\TaskDemoAPI.csproj" />
+  </ItemGroup>
+
+</Project>

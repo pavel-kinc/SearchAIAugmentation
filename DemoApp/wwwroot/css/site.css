@@ -20,3 +20,240 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.config-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    margin: 0.5rem;
+    padding: 1rem;
+}
+
+.upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.btn {
+    padding: 10px 18px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    min-width: 150px;
+}
+
+.btn-download {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-upload {
+    background-color: #28a745;
+    color: white;
+}
+
+.file-input {
+    font-size: 0.95rem;
+}
+
+.select2-container {
+    width: 15rem !important; /* Adjust the width as necessary */
+}
+
+.select2-container .select2-selection--single {
+    height: calc(1.5em + .75rem + 2px) !important;
+    border: 1px solid #ced4da !important;
+    border-radius: .25rem !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: calc(1.5em + .75rem + 2px) !important;
+    padding-left: .75rem !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: calc(1.5em + .75rem + 2px) !important;
+    width: 2rem !important;
+}
+
+.select2-dropdown {
+    border-radius: .25rem !important;
+    font-size: .875rem;
+}
+
+.select2-results__option {
+    padding: .5rem .75rem;
+}
+
+.input-container {
+    width: 300px !important; /* Fixed width for the dropdown */
+}
+
+.custom-alert {
+    padding: 0.9rem 1rem;
+    border-left: 4px solid #c82333; /* stronger left accent */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+}
+
+.custom-alert ul {
+    padding-left: 1.15rem;
+    margin: 0;
+}
+
+.floating-alert {
+    background-color: #d4edda;
+    color: #155724;
+    border: 3px solid #c3e6cb;
+    padding: 13px 21px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: auto;
+    margin-top: 3rem;
+}
+
+.floating-alert.show {
+    opacity: 1;
+}
+
+/* Simple, modern card layout (Bootstrap-ish without requiring bootstrap) */
+#results-container {
+    max-width: 1100px;
+    margin: 18px auto;
+    font-family: Segoe UI, Roboto, Arial, sans-serif;
+}
+
+.results-grid {
+    display: flex;
+    gap: 16px;
+}
+
+.sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    border-right: 1px solid #ececec;
+    padding-right: 12px;
+}
+
+    .sidebar .mini {
+        cursor: pointer;
+        padding: 8px;
+        margin-bottom: 8px;
+        border-radius: 6px;
+        transition: background .15s;
+    }
+
+        .sidebar .mini.active, .sidebar .mini:hover {
+            background: #f0f7ff;
+        }
+
+.main {
+    flex: 1;
+    padding-left: 18px;
+}
+
+.card {
+    background: white;
+    border: 1px solid #e6e9ee;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 1px 2px rgba(18,24,34,0.03);
+}
+
+.row-res {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    background: #eef2ff;
+    color: #1f3bb3;
+}
+
+.meta-kv {
+    font-size: 0.9rem;
+    color: #333;
+    margin-right: 10px;
+}
+
+.chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.chip {
+    background: #f6f8ff;
+    padding: 6px 8px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+}
+
+.muted {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+pre.response {
+    background: #0f1724;
+    color: #e6eef8;
+    padding: 12px;
+    border-radius: 6px;
+    white-space: pre-wrap;
+    overflow: auto;
+    max-height: 420px;
+}
+
+.controls {
+    display: flex;
+    gap: 8px;
+}
+
+button.icon {
+    border: 1px solid #dfe6f4;
+    background: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.counts {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.small {
+    font-size: 0.9rem;
+    color: #444;
+}
+
+details summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.footer {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.page-controls {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}

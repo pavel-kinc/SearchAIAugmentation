@@ -1,0 +1,85 @@
+﻿@using PromptEnhancer.Models.Enums
+@model DemoApp.Models.ConfigurationSetup
+
+@{
+    var searchProviders = Enum.GetValues(typeof(SearchProviderEnum))
+               .Cast<SearchProviderEnum>()
+               .Select(e => e.ToString())
+               .ToList();
+}
+
+<div class ="mb-3 mt-3"><h3>Search configuration setup</h3></div>
+
+<div class="mb-3">
+    @Html.LabelFor(m => m.SearchConfiguration.SearchProviderSettings.SearchApiKey, new { @class = "form-label", title = "The API key used to authenticate with the search provider." })
+    @Html.TextBoxFor(m => m.SearchConfiguration.SearchProviderSettings.SearchApiKey, new { @class = "form-control", placeholder = "Enter new API key" })
+    @Html.ValidationMessageFor(m => m.SearchConfiguration.SearchProviderSettings.SearchApiKey, "", new { @class = "text-danger" })
+    <div class="form-text text-muted">
+        @Model.DemoAppConfigSetup.SearchApiKeyFromInput
+    </div>
+</div>
+
+<div class="mb-3">
+    @Html.LabelFor(m => m.SearchConfiguration.SearchProviderSettings.Engine, new { @class = "form-label", title = "The name or ID of the search engine (e.g., Google)." })
+    @Html.TextBoxFor(m => m.SearchConfiguration.SearchProviderSettings.Engine, new { @class = "form-control", placeholder = "Enter new Search Engine" })
+    @Html.ValidationMessageFor(m => m.SearchConfiguration.SearchProviderSettings.Engine, "", new { @class = "text-danger" })
+    <div class="form-text text-muted">
+        @Model.DemoAppConfigSetup.SearchEngineFromInput
+    </div>
+</div>
+
+<div class="input-container">
+    <div class="mb-3">
+        @Html.LabelFor(m => m.SearchConfiguration.SearchProviderSettings.Provider, new { @class = "form-label", title = "The search provider name (e.g., Google, Bing)." })
+        @Html.DropDownListFor(m => m.SearchConfiguration.SearchProviderSettings.Provider,
+                 new SelectList(searchProviders, Model.SearchConfiguration.SearchProviderSettings.Provider),
+                 "Select AI provider", new { @class = "form-control js-example-basic-single" })
+        @Html.ValidationMessageFor(m => m.SearchConfiguration.SearchProviderSettings.Provider, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<fieldset class="mb-4 p-3 border rounded">
+    <legend class="w-auto px-2">Google search filters (optional)</legend>
+
+    <div class="row g-3">
+        <!-- Country code -->
+        <div class="col-md-4">
+            @Html.LabelFor(m => m.SearchConfiguration.SearchFilter.CountryCode, new { @class = "form-label", title = "Country code (ISO 2-letter)" })
+            @Html.TextBoxFor(m => m.SearchConfiguration.SearchFilter.CountryCode, new { @class = "form-control", placeholder = "e.g. US, GB, FR" })
+            @Html.ValidationMessageFor(m => m.SearchConfiguration.SearchFilter.CountryCode, "", new { @class = "text-danger" })
+            <div class="form-text">ISO 2-letter country code to bias results.</div>
+        </div>
+
+        <!-- Date restrict -->
+        <div class="col-md-4">
+            @Html.LabelFor(m => m.SearchConfiguration.SearchFilter.DateRestrict, new { @class = "form-label", title = "Restrict results by date" })
+            @Html.TextBoxFor(m => m.SearchConfiguration.SearchFilter.DateRestrict, new { @class = "form-control", placeholder = "e.g. d7 (last 7 days), m6 (6 months)" })
+            @Html.ValidationMessageFor(m => m.SearchConfiguration.SearchFilter.DateRestrict, "", new { @class = "text-danger" })
+            <div class="form-text">Optional — restrict results by date range.</div>
+        </div>
+
+        <!-- Top (number of results) -->
+        <div class="col-md-4">
+            @Html.LabelFor(m => m.SearchConfiguration.SearchFilter.Top, new { @class = "form-label", title = "How many top results to return" })
+            @Html.TextBoxFor(m => m.SearchConfiguration.SearchFilter.Top, new { @type = "number", @class = "form-control", min = "1", max = "50", step = "1", placeholder = "3" })
+            @Html.ValidationMessageFor(m => m.SearchConfiguration.SearchFilter.Top, "", new { @class = "text-danger" })
+            <div class="form-text">Number of results to return (default: 3).</div>
+        </div>
+
+        <!-- Exact terms -->
+        <div class="col-md-6">
+            @Html.LabelFor(m => m.SearchConfiguration.SearchFilter.ExactTerms, new { @class = "form-label", title = "Words that must appear in results" })
+            @Html.TextBoxFor(m => m.SearchConfiguration.SearchFilter.ExactTerms, new { @class = "form-control", placeholder = "Enter exact terms (e.g. \"api key\")" })
+            @Html.ValidationMessageFor(m => m.SearchConfiguration.SearchFilter.ExactTerms, "", new { @class = "text-danger" })
+            <div class="form-text">Results must include these exact words/phrases.</div>
+        </div>
+
+        <!-- Site search -->
+        <div class="col-md-6">
+            @Html.LabelFor(m => m.SearchConfiguration.SearchFilter.SiteSearch, new { @class = "form-label", title = "Restrict results to a specific site" })
+            @Html.TextBoxFor(m => m.SearchConfiguration.SearchFilter.SiteSearch, new { @class = "form-control", placeholder = "e.g. example.com" })
+            @Html.ValidationMessageFor(m => m.SearchConfiguration.SearchFilter.SiteSearch, "", new { @class = "text-danger" })
+            <div class="form-text">Restrict search to a specific site (optional).</div>
+        </div>
+    </div>
+</fieldset>

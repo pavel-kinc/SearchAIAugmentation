@@ -1,0 +1,77 @@
+﻿using ErrorOr;
+using PromptEnhancer.KnowledgeBaseCore.Interfaces;
+using PromptEnhancer.KnowledgeRecord.Interfaces;
+using PromptEnhancer.KnowledgeSearchRequest;
+using PromptEnhancer.Models.Pipeline;
+
+namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
+{
+    //TODO maybe make convenience classes for less generics without required generics (like filters and settings)
+    public class SearchStep<TRecord, TSearchFilter, TSearchSettings, TFilter, T> : PipelineStep
+        where TRecord : class, IKnowledgeRecord
+        where TSearchFilter : class, IKnowledgeBaseSearchFilter
+        where TSearchSettings : class, IKnowledgeBaseSearchSettings
+        where TFilter : class, IModelFilter<T>
+        where T : class
+    {
+        private readonly string? _knowledgeBaseKey = null;
+        private readonly KnowledgeSearchRequest<TSearchFilter, TSearchSettings> _request;
+        private readonly TFilter? _filter;
+        private readonly int _maxRecords;
+
+        public SearchStep(KnowledgeSearchRequest<TSearchFilter, TSearchSettings> request, TFilter? filter = null, int maxRecords = 50, string? knowledgeBaseKey = null, bool isRequired = false) : base(isRequired)
+        {
+            // is key needed here? should i put knowledge base here directly?
+            _knowledgeBaseKey = knowledgeBaseKey;
+            _request = request;
+            _filter = filter;
+            _maxRecords = maxRecords;
+        }
+
+        protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                List<IKnowledgeRecord> recordsToAdd = [];
+                var kernel = settings.Kernel;
+                //TODO plugins in each step? how to choose, how to setup needed ones
+                var kb = settings.GetService<IKnowledgeBase<TRecord, TSearchFilter, TSearchSettings, TFilter, T>>(_knowledgeBaseKey);
+                //TODO make the search accept more queryStrings, probably inside Search, here if it is not expensive to create the connection each time
+                // aka now user can implement paralel async searches easily, so its prolly better to keep it this way
+                //TODO more query strings
+                var res = await kb!.SearchAsync(_request, context.QueryStrings.Any() ? context.QueryStrings : [context.QueryString!], _filter, cancellationToken);
+                recordsToAdd.AddRange(res.Take(_maxRecords));
+
+                context.RetrievedRecords.AddRange(recordsToAdd);
+                //TODO work with knowledge bases and processor
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure($"{GetType()}: Exception during search execution - {ex.Message}");
+            }
+        }
+
+        protected override ErrorOr<bool> CheckExecuteConditions(PipelineContext context)
+        {
+            if (!string.IsNullOrEmpty(context.QueryString))
+            {
+                return true;
+            }
+
+            return FailCondition();
+        }
+
+        //private DateTimePlugin? GetDateTimePlugin(Microsoft.SemanticKernel.Kernel kernel)
+        //{
+        //    var plugin = kernel.Plugins.TryGetPlugin<DateTimePlugin>(nameof(DateTimePlugin));
+        //    return plugin;
+        //}
+    }
+
+    //TODO replace interfaces with "empty" base classes if needed
+    //public class SearchStep<TRecord, T> : SearchStep<TRecord, IKnowledgeBaseSearchFilter, IKnowledgeBaseSearchSettings, IRecordFilter<T>, T>
+    //where TRecord : class, IKnowledgeRecord
+    //where T : class
+    //{ }
+}
