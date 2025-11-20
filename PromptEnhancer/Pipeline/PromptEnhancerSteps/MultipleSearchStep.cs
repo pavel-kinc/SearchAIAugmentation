@@ -1,5 +1,6 @@
 ﻿using ErrorOr;
 using Microsoft.Extensions.AI;
+using PromptEnhancer.AIUtility.ChatHistory;
 using PromptEnhancer.KnowledgeBaseCore.Interfaces;
 using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.Models.Pipeline;
@@ -46,6 +47,10 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             try
             {
                 var pickedBases = _allowAutoChoice ? await PickKnowledgeBases(_knowledgeBases, settings, context, cancellationToken) : _knowledgeBases;
+                if (pickedBases is null)
+                {
+                    return FailExecution(ChatHistoryUtility.GetInputSizeExceededLimitMessage(GetType().Name));
+                }
                 if (pickedBases.Count() < _atleastToPick)
                 {
                     return false;
@@ -72,12 +77,16 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             }
         }
 
-        protected virtual async Task<IEnumerable<IKnowledgeBaseContainer>> PickKnowledgeBases(IEnumerable<IKnowledgeBaseContainer> knowledgeBases, PipelineSettings settings, PipelineContext context, CancellationToken ct)
+        protected virtual async Task<IEnumerable<IKnowledgeBaseContainer>?> PickKnowledgeBases(IEnumerable<IKnowledgeBaseContainer> knowledgeBases, PipelineSettings settings, PipelineContext context, CancellationToken ct)
         {
             var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.Settings.ChatClientKey);
             var picking = string.Join(Environment.NewLine, knowledgeBases.Select((kb, i) => $"{i}: {kb.Description}"));
             var choicePrompt = string.Format(prompt, context.QueryString!, string.IsNullOrWhiteSpace(picking) ? "Nothing to pick from" : picking, _atleastToPick);
             choicePrompt = choicePrompt + (string.IsNullOrWhiteSpace(_additionalInstructions) ? string.Empty : $"{Environment.NewLine}Additional user instructions:{Environment.NewLine}{_additionalInstructions}");
+            if (prompt.Length > settings.Settings.MaximumInputLength)
+            {
+                return null;
+            }
             var res = await chatClient.GetResponseAsync(choicePrompt, settings.Settings.ChatOptions, ct);
             context.InputTokenUsage += res.Usage?.InputTokenCount ?? 0;
             context.OutputTokenUsage += res.Usage?.OutputTokenCount ?? 0;

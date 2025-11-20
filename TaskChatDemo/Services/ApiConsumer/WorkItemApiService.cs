@@ -5,22 +5,25 @@ namespace TaskChatDemo.Services.ApiConsumer
 {
     public class WorkItemApiService : IWorkItemApiService
     {
-        private readonly HttpClient _http;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public WorkItemApiService(HttpClient http)
+        public WorkItemApiService(IHttpClientFactory httpClientFactory)
         {
-            _http = http;
+            _httpClientFactory = httpClientFactory;
         }
 
         public async Task<List<WorkItem>> GetWorkItemsAsync(SearchWorkItemFilterModel? filter, string apiUrl)
         {
-            _http.BaseAddress = new Uri(apiUrl);
+            var client = _httpClientFactory.CreateClient();
+
+            client.BaseAddress = new Uri(apiUrl);
+
             string qs = filter?.BuildQuery() ?? string.Empty;
-            var response = await _http.GetAsync("work-items?" + qs);
+            var response = await client.GetAsync($"work-items?{qs}");
             response.EnsureSuccessStatusCode();
 
             var items = await response.Content.ReadFromJsonAsync<List<WorkItem>>();
-            return items ?? [];
+            return items ?? new List<WorkItem>();
         }
     }
 }

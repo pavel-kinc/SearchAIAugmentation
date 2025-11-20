@@ -79,7 +79,7 @@
 
       es.onerror = (err) => {
         console.error('SSE error', err);
-        assistantEl.innerHTML += `Error: Unhandled exception`;
+        assistantEl.innerHTML += `Error: Processing failed`;
         cleanup();
       };
     }
