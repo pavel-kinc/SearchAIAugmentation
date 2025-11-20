@@ -19,9 +19,6 @@ namespace PromptEnhancer.ChunkUtilities
             };
         }
 
-        //TODO delete kernel functions
-        [KernelFunction("generate_chunks_from_string")]
-        [Description("Generates chunks from string and returns List of strings")]
         public IList<string> GenerateChunksFromData(string rawText, int? chunkSize)
         {
             var _slicerInstance = new Slicer(new SlicerOptions

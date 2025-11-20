@@ -25,18 +25,28 @@ using PromptEnhancer.Services.RecordPickerService;
 using PromptEnhancer.Services.RecordRankerService;
 using PromptEnhancer.SK;
 using PromptEnhancer.SK.Interfaces;
+using System.Runtime.CompilerServices;
 
 namespace PromptEnhancer.Extensions
 {
     public static class PromptEnhancerServiceCollectionExtensions
     {
-        // needs to be atleast scoped based on current logic
-        public static IServiceCollection AddPromptEnhancer(this IServiceCollection services, ServiceLifetime lifetime = ServiceLifetime.Singleton, IEnumerable<IKernelServiceTemplate>? kernelServices = null, bool addKernelToDI = false)
+        public static IServiceCollection AddPromptEnhancer(this IServiceCollection services, ServiceLifetime lifetime = ServiceLifetime.Singleton, bool addContextPlugins = true, bool addGoogleKnowledgeBase = true, bool addKernelToDI = false, IEnumerable<IKernelServiceTemplate>? kernelServices = null)
         {
             var descriptor = new ServiceDescriptor(typeof(IEnhancerService), typeof(EnhancerService), lifetime);
 
             services.TryAdd(descriptor);
             services.AddInternalServices();
+
+            if (addContextPlugins)
+            {
+                services.AddSemanticKernelContextPlugins();
+            }
+
+            if (addGoogleKnowledgeBase)
+            {
+                services.AddGoogleKnowledgeBase();
+            }
 
             if (kernelServices is not null && kernelServices.Any())
             {
@@ -61,9 +71,20 @@ namespace PromptEnhancer.Extensions
             return services;
         }
 
+        public static void AddSemanticKernelContextPlugins(this IServiceCollection services)
+        {
+            services.AddSingleton<ISemanticKernelContextPlugin, DateTimePlugin>();
+            services.AddSingleton<ISemanticKernelContextPlugin, TemperaturePlugin>();
+        }
+
+        public static void AddGoogleKnowledgeBase(this IServiceCollection services)
+        {
+            services.TryAddSingleton<IKnowledgeBase<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>, GoogleKnowledgeBase>();
+            services.TryAddSingleton<GoogleKnowledgeBase, GoogleKnowledgeBase>();
+        }
+
         public static void AddInternalServices(this IServiceCollection services)
         {
-            services.AddInMemoryVectorStore();
             services.TryAddSingleton<IKernelServiceFactory, KernelServiceFactory>();
             services.TryAddSingleton<IChunkGeneratorService, SemanticSlicerChunkService>();
             services.TryAddSingleton<IChunkRankerService, MiniLmL6V2ChunkRanker>();
@@ -76,16 +97,6 @@ namespace PromptEnhancer.Extensions
             services.TryAddSingleton<IRankerService, CosineSimilarityRankerService>();
             services.TryAddSingleton<IRecordPickerService, RecordPickerService>();
             services.TryAddSingleton<IPromptBuildingService, PromptBuildingService>();
-
-            services.AddSingleton<ISemanticKernelContextPlugin, DateTimePlugin>();
-            services.AddSingleton<ISemanticKernelContextPlugin, TemperaturePlugin>();
-
-
-            //services.TryAddKeyedSingleton<IKnowledgeBase, TestKnowledgeBaseProcessor>("test");
-            services.TryAddSingleton<IKnowledgeBase<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>, GoogleKnowledgeBase>();
-            services.TryAddSingleton<GoogleKnowledgeBase, GoogleKnowledgeBase>();
-            //Delete prolly?
-            services.TryAddSingleton<IPipelineContextService, PipelineContextService>();
         }
 
         private static void AddKernelToDI(this IServiceCollection services, IEnumerable<IKernelServiceTemplate>? kernelServices = null)
