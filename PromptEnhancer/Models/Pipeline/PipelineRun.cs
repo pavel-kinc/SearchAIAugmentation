@@ -4,10 +4,11 @@ using PromptEnhancer.KnowledgeRecord.Interfaces;
 namespace PromptEnhancer.Models.Pipeline
 {
     //TODO maybe implement locks for this class? (now there is no concurrency)
-    public class PipelineContext
+    //TODO PipelineRun/PipelineEntry
+    public class PipelineRun
     {
         //TODO not required (pipeline can be used from any point to do any step, when the needed data is there)
-        public PipelineContext(Entry? entry = null)
+        public PipelineRun(Entry? entry = null)
         {
             Entry = entry;
             QueryString = entry?.QueryString;

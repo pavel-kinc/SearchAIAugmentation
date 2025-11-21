@@ -7,7 +7,7 @@ namespace PromptEnhancer.AIUtility.ChatHistory
 {
     public static class ChatHistoryUtility
     {
-        public static List<ChatMessage> AddToChatHistoryPipeline(PipelineContext context)
+        public static List<ChatMessage> AddToChatHistoryPipeline(PipelineRun context)
         {
             var history = context.ChatHistory?.ToList() ?? [];
 

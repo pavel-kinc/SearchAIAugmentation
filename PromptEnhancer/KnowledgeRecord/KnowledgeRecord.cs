@@ -1,5 +1,6 @@
 ﻿using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.Models;
+using System.Linq.Expressions;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
@@ -13,8 +14,7 @@ namespace PromptEnhancer.KnowledgeRecord
         {
             Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.LatinExtendedA, UnicodeRanges.Latin1Supplement),
         };
-        public static Func<T, string>? ChunkSelector => null;
-        public static Action<T, string>? AssignChunkToProperty => null;
+        public virtual Expression<Func<T, string?>>? ChunkSelector => null;
 
         public string? Id { get; set; }
         //TODO required here makes the base knowledge to fail in T creation - then there is error in concrete implementations, same with other properties

@@ -8,7 +8,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
     public class GenerationStep : PipelineStep
     {
         public GenerationStep(bool isRequired = false) : base(isRequired) { }
-        protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
+        protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default)
         {
             var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.Settings.ChatClientKey);
             List<ChatMessage> history = ChatHistoryUtility.AddToChatHistoryPipeline(context);
@@ -26,7 +26,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             return true;
         }
 
-        protected override ErrorOr<bool> CheckExecuteConditions(PipelineContext context)
+        protected override ErrorOr<bool> CheckExecuteConditions(PipelineRun context)
         {
             if (!string.IsNullOrEmpty(context.QueryString) || !string.IsNullOrEmpty(context.UserPromptToLLM))
             {

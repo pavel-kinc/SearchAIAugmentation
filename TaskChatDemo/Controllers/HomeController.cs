@@ -80,7 +80,7 @@ public class HomeController : Controller
 
     }
 
-    private async Task<List<ChatMessage>> HandleStreamingMessage(List<ChatMessage>? chatHistory, PipelineSettings settings, PipelineContext context, CancellationToken ct)
+    private async Task<List<ChatMessage>> HandleStreamingMessage(List<ChatMessage>? chatHistory, PipelineSettings settings, PipelineRun context, CancellationToken ct)
     {
         var res = _enhancerService.GetStreamingResponse(settings, context, ct);
         List<ChatResponseUpdate> updates = [];

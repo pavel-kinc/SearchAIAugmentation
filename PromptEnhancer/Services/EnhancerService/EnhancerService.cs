@@ -69,7 +69,7 @@ namespace PromptEnhancer.Services.EnhancerService
             return JsonConvert.DeserializeObject<EnhancerConfiguration>(json);
         }
 
-        public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponse(PipelineSettings settings, PipelineContext context, CancellationToken ct = default)
+        public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponse(PipelineSettings settings, PipelineRun context, CancellationToken ct = default)
         {
             var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.Settings.ChatClientKey);
             List<ChatMessage> history = ChatHistoryUtility.AddToChatHistoryPipeline(context);
@@ -82,7 +82,7 @@ namespace PromptEnhancer.Services.EnhancerService
             return chatClient.GetStreamingResponseAsync(history, settings.Settings.ChatOptions, ct);
         }
 
-        public async Task<ErrorOr<IList<ResultModel>>> ProcessPipelineAsync(PipelineModel pipeline, IEnumerable<PipelineContext> entries, CancellationToken cancellationToken = default)
+        public async Task<ErrorOr<IList<ResultModel>>> ProcessPipelineAsync(PipelineModel pipeline, IEnumerable<PipelineRun> entries, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -147,7 +147,7 @@ namespace PromptEnhancer.Services.EnhancerService
 
             var pipeline = new PipelineModel(settings.Value, config.Steps);
 
-            return await ProcessPipelineAsync(pipeline, entries.Select(x => new PipelineContext(x)), cancellationToken);
+            return await ProcessPipelineAsync(pipeline, entries.Select(x => new PipelineRun(x)), cancellationToken);
 
             //TODO should this be here? (maybe like sk.invoke and hope there are some plugins? - since there are 3 ways to kernel here, also i would need some plugins in my creation, but i could resolve plugins by injection (common interface))
             //TODO it could also require check for openai, options and some uniform way to work with results, or just put it outside of this method and just work with it there, but it requires same arguments prolly

@@ -70,12 +70,12 @@ namespace TaskChatDemo.Services.EnhancerUtility
             return settingsResult;
         }
 
-        public async Task<PipelineContext> GetContextFromPipeline(string q, bool skipPipeline, Entry entry, PipelineSettings settings)
+        public async Task<PipelineRun> GetContextFromPipeline(string q, bool skipPipeline, Entry entry, PipelineSettings settings)
         {
-            PipelineContext context;
+            PipelineRun context;
             if (skipPipeline)
             {
-                context = new PipelineContext(entry)
+                context = new PipelineRun(entry)
                 {
                     UserPromptToLLM = q,
                     SystemPromptToLLM = _promptBuildingService.BuildSystemPrompt(settings.PromptConfiguration),
@@ -84,7 +84,7 @@ namespace TaskChatDemo.Services.EnhancerUtility
             else
             {
                 var pipeline = GetPipeline(settings, settings.Kernel);
-                var pipelineRes = await _enhancerService.ProcessPipelineAsync(pipeline, [new PipelineContext(entry)]);
+                var pipelineRes = await _enhancerService.ProcessPipelineAsync(pipeline, [new PipelineRun(entry)]);
                 if (pipelineRes.IsError || pipelineRes.Value.FirstOrDefault()?.Result is null)
                 {
                     throw new InvalidOperationException($"Pipeline failed: {pipelineRes.ErrorsOrEmptyList.Select(x => x.ToString())}");
