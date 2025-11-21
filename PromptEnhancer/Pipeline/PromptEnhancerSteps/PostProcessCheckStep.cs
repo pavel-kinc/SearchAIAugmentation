@@ -7,12 +7,12 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
     public class PostProcessCheckStep : PipelineStep
     {
         public PostProcessCheckStep(bool isRequired = false) : base(isRequired) { }
-        protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
+        protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default)
         {
             return CheckContextState(context);
         }
 
-        protected virtual ErrorOr<bool> CheckContextState(PipelineContext context)
+        protected virtual ErrorOr<bool> CheckContextState(PipelineRun context)
         {
             if (context.PickedRecords.Any() && context.RetrievedRecords.Any())
             {

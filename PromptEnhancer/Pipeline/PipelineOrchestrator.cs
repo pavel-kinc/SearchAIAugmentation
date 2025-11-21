@@ -6,7 +6,7 @@ namespace PromptEnhancer.Pipeline
 {
     public class PipelineOrchestrator : IPipelineOrchestrator
     {
-        public virtual async Task<ErrorOr<bool>> RunPipelineAsync(PipelineModel pipeline, PipelineContext context, CancellationToken ct = default)
+        public virtual async Task<ErrorOr<bool>> RunPipelineAsync(PipelineModel pipeline, PipelineRun context, CancellationToken ct = default)
         {
             var steps = pipeline.Steps;
             if (steps is null || !steps.Any())

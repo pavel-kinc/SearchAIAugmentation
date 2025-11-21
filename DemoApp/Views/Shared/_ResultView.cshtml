@@ -43,18 +43,16 @@
                             </div>
                             <div style="text-align:right">
                                 <span class="badge" title="Pipeline success">
-                                    @(
-                                                                success ? "OK" : "Fail"
-                                                                )
-                            </span>
+                                    @(success ? "OK" : "Fail")
+                                </span>
+                            </div>
+                        </div>
+                        <div class="small" style="margin-top:6px;">
+                            <span class="meta-kv">Tokens: @(r.Result?.TokenUsage ?? 0)</span>
+                            <span class="meta-kv">Retrieved: @(r.Result?.RetrievedRecords?.Count ?? 0)</span>
                         </div>
                     </div>
-                    <div class="small" style="margin-top:6px;">
-                        <span class="meta-kv">Tokens: @(r.Result?.TokenUsage ?? 0)</span>
-                        <span class="meta-kv">Retrieved: @(r.Result?.RetrievedRecords?.Count ?? 0)</span>
-                    </div>
-                </div>
-                        }
+                }
             }
         </aside>
 
@@ -88,15 +86,15 @@
                                         @(
                                         r.PipelineSuccess ? "Pipeline: success" : "Pipeline: failed"
                                         )
-                                </span>
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
                         <div style="margin-top:12px;">
                             <div class="row-res">
                                 <div class="chips" aria-hidden="false">
-                                @foreach (var s in qsList.Take(5))
+                                    @foreach (var s in qsList.Take(5))
                                     {
                                         <span class="chip">@s</span>
                                     }
@@ -185,76 +183,76 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-      const miniItems = document.querySelectorAll('.sidebar .mini');
-      const panels = document.querySelectorAll('.result-panel');
-      const total = panels.length;
-      let current = 0;
+        const miniItems = document.querySelectorAll('.sidebar .mini');
+        const panels = document.querySelectorAll('.result-panel');
+        const total = panels.length;
+        let current = 0;
 
-      function setActive(idx) {
-        if (idx < 0 || idx >= total) return;
-        // panels
-        panels.forEach((p, i) => p.style.display = (i === idx) ? 'block' : 'none');
-        // sidebar highlight
-        miniItems.forEach((m, i) => m.classList.toggle('active', i === idx));
-        current = idx;
-        // update small position text if present
-        const pos = document.getElementById('current-pos');
-        if (pos) pos.innerText = (idx + 1);
-      }
+        function setActive(idx) {
+            if (idx < 0 || idx >= total) return;
+            // panels
+            panels.forEach((p, i) => p.style.display = (i === idx) ? 'block' : 'none');
+            // sidebar highlight
+            miniItems.forEach((m, i) => m.classList.toggle('active', i === idx));
+            current = idx;
+            // update small position text if present
+            const pos = document.getElementById('current-pos');
+            if (pos) pos.innerText = (idx + 1);
+        }
 
-      miniItems.forEach(m => m.addEventListener('click', (e) => {
-        const idx = Number(m.getAttribute('data-index'));
-        setActive(idx);
-      }));
+        miniItems.forEach(m => m.addEventListener('click', (e) => {
+            const idx = Number(m.getAttribute('data-index'));
+            setActive(idx);
+        }));
 
-      // Prev / Next (global)
-      const prevBtn = document.querySelectorAll('#prev-btn');
-      const nextBtn = document.querySelectorAll('#next-btn');
+        // Prev / Next (global)
+        const prevBtn = document.querySelectorAll('#prev-btn');
+        const nextBtn = document.querySelectorAll('#next-btn');
 
-      function prev() { if (current > 0) setActive(current - 1); }
-      function next() { if (current < total - 1) setActive(current + 1); }
+        function prev() { if (current > 0) setActive(current - 1); }
+        function next() { if (current < total - 1) setActive(current + 1); }
 
-      prevBtn.forEach(b => b.addEventListener('click', prev));
-      nextBtn.forEach(b => b.addEventListener('click', next));
+        prevBtn.forEach(b => b.addEventListener('click', prev));
+        nextBtn.forEach(b => b.addEventListener('click', next));
 
-      // keyboard
-      document.addEventListener('keydown', (e) => {
-        if (e.key === "ArrowRight") next();
-        if (e.key === "ArrowLeft") prev();
-      });
-
-      // Copy response
-      document.querySelectorAll('button[data-copy-target]').forEach(btn => {
-        btn.addEventListener('click', function () {
-          const selector = btn.getAttribute('data-copy-target');
-          const el = document.querySelector(selector);
-          if (!el) return;
-          const text = el.innerText;
-          navigator.clipboard?.writeText(text).then(() => {
-            btn.textContent = "Copied ✓";
-            setTimeout(() => btn.textContent = "Copy", 900);
-          }).catch(() => {
-            alert("Copy failed — try selecting text and Ctrl+C");
-          });
+        // keyboard
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "ArrowRight") next();
+            if (e.key === "ArrowLeft") prev();
         });
-      });
 
-      // Download JSON: data-download contains small JSON with index + result snapshot
-      document.querySelectorAll('button[data-download]').forEach(btn => {
-        btn.addEventListener('click', function () {
-          const payload = btn.getAttribute('data-download');
-          const blob = new Blob([payload], { type: "application/json" });
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = `result-${JSON.parse(payload).index || '0'}.json`;
-          document.body.appendChild(a);
-          a.click();
-          URL.revokeObjectURL(a.href);
-          a.remove();
+        // Copy response
+        document.querySelectorAll('button[data-copy-target]').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const selector = btn.getAttribute('data-copy-target');
+                const el = document.querySelector(selector);
+                if (!el) return;
+                const text = el.innerText;
+                navigator.clipboard?.writeText(text).then(() => {
+                    btn.textContent = "Copied ✓";
+                    setTimeout(() => btn.textContent = "Copy", 900);
+                }).catch(() => {
+                    alert("Copy failed — try selecting text and Ctrl+C");
+                });
+            });
         });
-      });
 
-      // initial
-      setActive(0);
+        // Download JSON: data-download contains small JSON with index + result snapshot
+        document.querySelectorAll('button[data-download]').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const payload = btn.getAttribute('data-download');
+                const blob = new Blob([payload], { type: "application/json" });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `result-${JSON.parse(payload).index || '0'}.json`;
+                document.body.appendChild(a);
+                a.click();
+                URL.revokeObjectURL(a.href);
+                a.remove();
+            });
+        });
+
+        // initial
+        setActive(0);
     });
 </script>

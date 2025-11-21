@@ -42,7 +42,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             _maxRecords = maxRecordsPerKB;
         }
 
-        protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
+        protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -77,7 +77,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             }
         }
 
-        protected virtual async Task<IEnumerable<IKnowledgeBaseContainer>?> PickKnowledgeBases(IEnumerable<IKnowledgeBaseContainer> knowledgeBases, PipelineSettings settings, PipelineContext context, CancellationToken ct)
+        protected virtual async Task<IEnumerable<IKnowledgeBaseContainer>?> PickKnowledgeBases(IEnumerable<IKnowledgeBaseContainer> knowledgeBases, PipelineSettings settings, PipelineRun context, CancellationToken ct)
         {
             var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.Settings.ChatClientKey);
             var picking = string.Join(Environment.NewLine, knowledgeBases.Select((kb, i) => $"{i}: {kb.Description}"));
@@ -101,7 +101,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             return picked;
         }
 
-        protected override ErrorOr<bool> CheckExecuteConditions(PipelineContext context)
+        protected override ErrorOr<bool> CheckExecuteConditions(PipelineRun context)
         {
             if (!string.IsNullOrEmpty(context.QueryString))
             {

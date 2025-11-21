@@ -27,7 +27,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             _maxSplit = maxSplit;
             _options = options;
         }
-        protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
+        protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default)
         {
             //TODO maybe more checks for the llm response?
             var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.Settings.ChatClientKey);
@@ -39,7 +39,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             var res = await chatClient.GetResponseAsync(inputPrompt, _options ?? settings.Settings.ChatOptions, cancellationToken: cancellationToken);
             if (res.Text == FailResponseLLM || res.Text.Length > MaxResponseLength || res.Text.Count(c => c == ';') > _maxSplit)
             {
-                return false;
+                return FailExecution();
             }
             context.InputTokenUsage = res.Usage?.InputTokenCount ?? 0;
             context.OutputTokenUsage = res.Usage?.OutputTokenCount ?? 0;
@@ -48,7 +48,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             return true;
         }
 
-        protected override ErrorOr<bool> CheckExecuteConditions(PipelineContext context)
+        protected override ErrorOr<bool> CheckExecuteConditions(PipelineRun context)
         {
             if (!string.IsNullOrEmpty(context.QueryString))
             {

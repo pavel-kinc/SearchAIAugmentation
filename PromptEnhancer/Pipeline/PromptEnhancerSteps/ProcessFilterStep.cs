@@ -15,14 +15,14 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             _filter = filter;
             _pickerServiceKey = pickerServiceKey;
         }
-        protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
+        protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default)
         {
             var pickerService = settings.GetService<IRecordPickerService>(_pickerServiceKey);
             context.PickedRecords = await pickerService!.GetPickedRecordsBasedOnFilter(_filter, context.RetrievedRecords);
             return true;
         }
 
-        protected override ErrorOr<bool> CheckExecuteConditions(PipelineContext context)
+        protected override ErrorOr<bool> CheckExecuteConditions(PipelineRun context)
         {
             if (!context.PickedRecords.Any() && context.RetrievedRecords.Any())
             {

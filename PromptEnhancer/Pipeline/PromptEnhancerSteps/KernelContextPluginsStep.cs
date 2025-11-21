@@ -21,7 +21,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
         public const char ResultSeperator = ';';
 
         public KernelContextPluginsStep(bool isRequired = false) : base(isRequired) { }
-        protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
+        protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default)
         {
             if (settings.Settings.KernelRequestSettings is null || settings.Settings.KernelRequestSettings.FunctionChoiceBehavior?.GetType() != FunctionChoiceBehavior.Auto().GetType())
             {
@@ -45,7 +45,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             return true;
         }
 
-        protected override ErrorOr<bool> CheckExecuteConditions(PipelineContext context)
+        protected override ErrorOr<bool> CheckExecuteConditions(PipelineRun context)
         {
             if (!string.IsNullOrEmpty(context.QueryString))
             {

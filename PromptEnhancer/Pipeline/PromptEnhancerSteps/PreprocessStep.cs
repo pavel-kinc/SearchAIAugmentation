@@ -6,7 +6,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
     public class PreprocessStep : PipelineStep
     {
         public PreprocessStep(bool isRequired = false) : base(isRequired) { }
-        protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
+        protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default)
         {
             if (context.QueryString is null)
             {
@@ -17,7 +17,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             return true;
         }
 
-        protected override ErrorOr<bool> CheckExecuteConditions(PipelineContext context)
+        protected override ErrorOr<bool> CheckExecuteConditions(PipelineRun context)
         {
             if (!string.IsNullOrEmpty(context.QueryString))
             {

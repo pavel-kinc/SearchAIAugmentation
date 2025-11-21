@@ -11,7 +11,7 @@ namespace PromptEnhancer.Pipeline
         {
             _isRequired = isRequired;
         }
-        public async Task<ErrorOr<bool>> ExecuteAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
+        public async Task<ErrorOr<bool>> ExecuteAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default)
         {
             var check = CheckExecuteConditions(context);
             if (check.IsError)
@@ -27,10 +27,10 @@ namespace PromptEnhancer.Pipeline
             return _isRequired ? FailExecution() : false;
         }
 
-        protected abstract Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default);
+        protected abstract Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default);
 
         //TODO: mostly for pipeline context conditions, maybe rename?
-        protected virtual ErrorOr<bool> CheckExecuteConditions(PipelineContext context)
+        protected virtual ErrorOr<bool> CheckExecuteConditions(PipelineRun context)
         {
             return true;
         }
@@ -43,7 +43,7 @@ namespace PromptEnhancer.Pipeline
         protected virtual ErrorOr<bool> FailExecution(string? reason = null)
         {
             return _isRequired ?
-                (string.IsNullOrEmpty(reason) ? Error.Failure($"{GetType()}: Execution for this required step failed.") : Error.Failure(reason)) :
+                (string.IsNullOrEmpty(reason) ? Error.Failure($"{GetType().Name}: Execution for this required step failed.") : Error.Failure(reason)) :
                 false;
         }
     }

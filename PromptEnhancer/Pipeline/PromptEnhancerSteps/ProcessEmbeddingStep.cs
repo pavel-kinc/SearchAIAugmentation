@@ -18,13 +18,13 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             _options = options;
         }
 
-        protected override async Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineContext context, CancellationToken cancellationToken = default)
+        protected override async Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default)
         {
             var embService = settings.GetService<IEmbeddingService>(_embeddingServiceKey);
             return await embService!.GenerateEmbeddingsForRecordsAsync(settings.Kernel, context.RetrievedRecords, settings.Settings.GeneratorKey, _options, _skipGenerationForEmbData);
         }
 
-        protected override ErrorOr<bool> CheckExecuteConditions(PipelineContext context)
+        protected override ErrorOr<bool> CheckExecuteConditions(PipelineRun context)
         {
             // Need retrieved records
             if (context.RetrievedRecords.Any())

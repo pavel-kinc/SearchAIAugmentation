@@ -53,8 +53,7 @@ namespace PromptEnhancer.KnowledgeBaseCore.Examples
             await Parallel.ForEachAsync(queriesToSearch, async (queryString, _) =>
             {
                 IEnumerable<UrlRecord> data = await GetDataFromGoogle(queryString, textSearch, options, settings);
-
-                var results = GetKnowledgeRecords(data, filter, queryString, settings.AllowChunking, KnowledgeUrlRecord.ChunkSelector, KnowledgeUrlRecord.AssignChunkToProperty, settings.ChunkSize ?? KnowledgeUrlRecord.DefaultChunkSize, settings.ChunkLimitPerUrl, ct);
+                var results = GetKnowledgeRecords(data, filter, queryString, settings.AllowChunking, settings.ChunkSize ?? KnowledgeUrlRecord.DefaultChunkSize, settings.ChunkLimitPerUrl, ct);
                 foreach (var record in results)
                 {
                     cb.Add(record);
