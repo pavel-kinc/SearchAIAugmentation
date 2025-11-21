@@ -27,7 +27,7 @@ namespace PromptEnhancer.KnowledgeBaseCore
 
         public abstract Task<IEnumerable<TRecord>> SearchAsync(IKnowledgeSearchRequest<TSearchFilter, TSearchSettings> request, IEnumerable<string> queriesToSearch, TFilter? filter = null, CancellationToken ct = default);
 
-        protected virtual IEnumerable<TRecord> GetKnowledgeRecords(IEnumerable<TModel> data, TFilter? filter, string queryString, bool allowChunking, int chunkSize = 300, int chunkLimit = 10, CancellationToken ct = default)
+        protected virtual IEnumerable<TRecord> GetKnowledgeRecords(IEnumerable<TModel> data, TFilter? filter, string queryString, bool allowChunking, int chunkTokenSize = 300, int chunkLimit = 10, CancellationToken ct = default)
         {
             if (filter is not null)
             {
@@ -37,7 +37,7 @@ namespace PromptEnhancer.KnowledgeBaseCore
             //TODO maybe move chunkgenerator check completely elsewhere? now it just skips chunking if not defined, if deleted it throws error in method below
             if (_chunkGenerator is not null && allowChunking && dummyRecord.ChunkSelector is not null)
             {
-                return ChunkRecords(data, queryString, dummyRecord.ChunkSelector, chunkSize, chunkLimit);
+                return ChunkRecords(data, queryString, dummyRecord.ChunkSelector, chunkTokenSize, chunkLimit);
             }
 
             return data.Select(x => CreateRecord(x, queryString));

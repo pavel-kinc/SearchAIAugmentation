@@ -15,7 +15,7 @@ namespace PromptEnhancer.KnowledgeRecord
         //    get => SourceObject.Content;
         //    set => SourceObject.Content = value!;
         //}
-        public static int DefaultChunkSize => 500;
+        public static int DefaultChunkTokenSize => 300;
         public override string EmbeddingRepresentationString => SourceObject!.Content;
     }
 }

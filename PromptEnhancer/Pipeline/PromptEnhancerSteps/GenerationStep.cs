@@ -1,6 +1,7 @@
 ﻿using ErrorOr;
 using Microsoft.Extensions.AI;
 using PromptEnhancer.AIUtility.ChatHistory;
+using PromptEnhancer.AIUtility.TokenCountFallback;
 using PromptEnhancer.Models.Pipeline;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
@@ -18,8 +19,8 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             }
 
             var res = await chatClient.GetResponseAsync(history, settings.Settings.ChatOptions, cancellationToken);
-            context.InputTokenUsage += res.Usage?.InputTokenCount ?? 0; //TODO do some custom counter, if the method ends in success but still 0?
-            context.OutputTokenUsage += res.Usage?.OutputTokenCount ?? 0;
+            context.InputTokenUsage += res.Usage?.InputTokenCount ?? TokenCounter.CountTokens(history); //TODO do some custom counter, if the method ends in success but still 0? - make it in other parts of code too
+            context.OutputTokenUsage += res.Usage?.OutputTokenCount ?? TokenCounter.CountTokens(res.Messages);
             context.FinalResponse = res;
             history.AddRange(res.Messages);
             context.ChatHistory = history;

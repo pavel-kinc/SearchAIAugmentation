@@ -50,7 +50,6 @@ public class Program
         builder.Services.AddSingleton<IEnhancerUtilityService, EnhancerUtilityService>();
 
         var app = builder.Build();
-
         var path = Path.Combine(builder.Environment.ContentRootPath, "Data", "task_models.json");
         var taskModels = TaskItemModelUtility.LoadFromJson(path);
 

@@ -17,7 +17,7 @@ namespace PromptEnhancer.KnowledgeRecord
         public virtual Expression<Func<T, string?>>? ChunkSelector => null;
 
         public string? Id { get; set; }
-        //TODO required here makes the base knowledge to fail in T creation - then there is error in concrete implementations, same with other properties
+        //TODO required here makes the base knowledge to fail in T creation - then there is error in concrete implementations, same with other properties (now even dummy object - it does not use those)
         public T SourceObject { get; set; }
         public IDictionary<string, string>? Metadata { get; set; }
 
