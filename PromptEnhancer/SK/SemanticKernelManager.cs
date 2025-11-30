@@ -84,16 +84,16 @@ namespace PromptEnhancer.SK
             try
             {
                 var configs = new List<KernelServiceBaseConfig>
-                    {
-                    new(kernelData.Provider, kernelData.Model!, kernelData.AIApiKey!, kernelData.DeploymentName)
-                    };
+                {
+                    new(kernelData.Provider, kernelData.Model!, kernelData.AIApiKey!, kernelData.DeploymentName, serviceId: kernelData.ClientServiceId)
+                };
                 if (!string.IsNullOrWhiteSpace(kernelData.EmbeddingModel) && kernelData.UseLLMConfigForEmbeddings)
                 {
-                    configs.Add(new KernelServiceBaseConfig(kernelData.Provider, kernelData.EmbeddingModel!, kernelData.AIApiKey!, serviceType: KernelServiceEnum.EmbeddingGenerator));
+                    configs.Add(new KernelServiceBaseConfig(kernelData.Provider, kernelData.EmbeddingModel!, kernelData.AIApiKey!, serviceId: kernelData.GeneratorServiceId, serviceType: KernelServiceEnum.EmbeddingGenerator));
                 }
                 if (!string.IsNullOrWhiteSpace(kernelData.EmbeddingModel) && !kernelData.UseLLMConfigForEmbeddings && kernelData.EmbeddingProvider is not null)
                 {
-                    configs.Add(new KernelServiceBaseConfig((AIProviderEnum)kernelData.EmbeddingProvider, kernelData.EmbeddingModel!, kernelData.EmbeddingKey!, serviceType: KernelServiceEnum.EmbeddingGenerator));
+                    configs.Add(new KernelServiceBaseConfig((AIProviderEnum)kernelData.EmbeddingProvider, kernelData.EmbeddingModel!, kernelData.EmbeddingKey!, serviceId: kernelData.GeneratorServiceId, serviceType: KernelServiceEnum.EmbeddingGenerator));
                 }
                 return configs;
             }

@@ -14,7 +14,6 @@ namespace PromptEnhancer.KnowledgeRecord
         {
             Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.LatinExtendedA, UnicodeRanges.Latin1Supplement),
         };
-        public virtual Expression<Func<T, string?>>? ChunkSelector => null;
 
         public string? Id { get; set; }
         //TODO required here makes the base knowledge to fail in T creation - then there is error in concrete implementations, same with other properties (now even dummy object - it does not use those)
@@ -26,9 +25,10 @@ namespace PromptEnhancer.KnowledgeRecord
         public PipelineEmbeddingsModel? Embeddings { get; set; }
         public double? SimilarityScore { get; set; }
 
+        // this is now used also for ranking the embeddings, maybe use combination of more things?
         public string UsedSearchQuery { get; set; }
 
-        //public virtual (string property, int chunkSize)? ChunkableProperty => null;
+        public virtual Expression<Func<T, string?>>? ChunkSelector => null;
         public virtual string LLMRepresentationString => JsonSerializer.Serialize(SourceObject, Default);
         public virtual string EmbeddingRepresentationString => JsonSerializer.Serialize(SourceObject, Default);
 

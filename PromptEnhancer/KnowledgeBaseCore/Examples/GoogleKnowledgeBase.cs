@@ -24,7 +24,6 @@ namespace PromptEnhancer.KnowledgeBaseCore.Examples
         public async override Task<IEnumerable<KnowledgeUrlRecord>> SearchAsync(
             IKnowledgeSearchRequest<GoogleSearchFilterModel, GoogleSettings> request, IEnumerable<string> queriesToSearch, UrlRecordFilter? filter = null, CancellationToken ct = default)
         {
-            //TODO more queires
             if (!queriesToSearch.Any())
             {
                 return [];

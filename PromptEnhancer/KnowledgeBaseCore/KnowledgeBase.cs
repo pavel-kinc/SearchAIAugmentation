@@ -23,7 +23,7 @@ namespace PromptEnhancer.KnowledgeBaseCore
             _chunkGenerator = chunkGenerator;
         }
 
-        public virtual string Description => $"Knowledge base with name {GetType().Name}";
+        public virtual string Description => $"Knowledge base with name {GetType().Name} and data {typeof(TModel).Name} and record {typeof(TRecord).Name}";
 
         public abstract Task<IEnumerable<TRecord>> SearchAsync(IKnowledgeSearchRequest<TSearchFilter, TSearchSettings> request, IEnumerable<string> queriesToSearch, TFilter? filter = null, CancellationToken ct = default);
 

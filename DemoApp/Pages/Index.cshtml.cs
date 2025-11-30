@@ -6,17 +6,14 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
-using PromptEnhancer.KnowledgeBaseCore;
+using Newtonsoft.Json;
+using PromptEnhancer.CustomJsonResolver;
 using PromptEnhancer.KnowledgeBaseCore.Examples;
-using PromptEnhancer.KnowledgeRecord;
-using PromptEnhancer.KnowledgeSearchRequest.Examples;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
-using PromptEnhancer.Models.Examples;
 using PromptEnhancer.Models.Pipeline;
-using PromptEnhancer.Pipeline.Interfaces;
-using PromptEnhancer.Pipeline.PromptEnhancerSteps;
 using PromptEnhancer.Services.EnhancerService;
+using System.Text;
 
 namespace DemoApp.Pages
 {
@@ -113,8 +110,9 @@ namespace DemoApp.Pages
 
         public IActionResult OnPostDownloadConfiguration()
         {
-            var config = _configurationService.GetConfiguration().Adapt<EnhancerConfiguration>();
-            var bytes = _enhancerService.ExportConfigurationToBytes(config);
+            var config = _configurationService.GetConfiguration();
+            var json = GetConfigurationJson(config, true);
+            var bytes = Encoding.UTF8.GetBytes(json);
             return File(bytes, "application/json", "enhancer_config.json");
         }
 
@@ -123,10 +121,12 @@ namespace DemoApp.Pages
             await using var ms = new MemoryStream();
             await configFile.CopyToAsync(ms);
 
-            var config = _enhancerService.ImportConfigurationFromBytes(ms.ToArray());
+            var json = Encoding.UTF8.GetString(ms.ToArray());
+            var config = JsonConvert.DeserializeObject<ConfigurationSetup>(json);
+            //var config = _enhancerService.ImportConfigurationFromBytes(ms.ToArray());
             if (config is not null)
             {
-                _configurationService.UploadConfiguration(config.Adapt<ConfigurationSetup>());
+                _configurationService.UploadConfiguration(config);
             }
 
             return Page();
@@ -165,38 +165,31 @@ namespace DemoApp.Pages
             return Page();
         }
 
+        public IActionResult OnPostClearSession()
+        {
+            _configurationService.ClearSession();
+            _entrySetupService.AddEntry(new Entry());
+            return Page();
+        }
+
+        public override void OnPageHandlerExecuted(PageHandlerExecutedContext context)
+        {
+            base.OnPageHandlerExecuted(context);
+            ViewModel.ConfigurationSetup = _configurationService.GetConfiguration();
+            Entries = _entrySetupService.GetEntries().ToList();
+        }
+
         private EnhancerConfiguration GetEnhancerConfiguration(ConfigurationSetup appConfig)
         {
             var enhancerConfig = appConfig.Adapt<EnhancerConfiguration>();
 
-            var request = new GoogleSearchRequest
-            {
-                Settings = new GoogleSettings
-                {
-                    SearchApiKey = appConfig.SearchConfiguration.SearchProviderSettings.SearchApiKey!,
-                    Engine = appConfig.SearchConfiguration.SearchProviderSettings.Engine!,
-                },
-                Filter = appConfig.SearchConfiguration.SearchFilter
-            };
+            var apiKey = appConfig.SearchConfiguration.SearchProviderSettings.SearchApiKey!;
+            var engine = appConfig.SearchConfiguration.SearchProviderSettings.Engine!;
+            var searchFilter = appConfig.SearchConfiguration.SearchFilter;
 
-            var container = new KnowledgeBaseContainer<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>(_googleKB, request, null);
             enhancerConfig.PipelineAdditionalSettings = AssignExecutionSettingsAndOptions(enhancerConfig.PipelineAdditionalSettings, appConfig.GenerationConfiguration);
 
-            //TODO defensive copy in lib? (and also of settings and such)
-            enhancerConfig.Steps = new List<IPipelineStep>
-                {
-                    new PreprocessStep(),
-                    new KernelContextPluginsStep(),
-                    new QueryParserStep(maxSplit: 2),
-                    //new SearchStep<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>(request),
-                    new MultipleSearchStep([container], allowAutoChoice: false, isRequired: true),
-                    new ProcessEmbeddingStep(skipGenerationForEmbData: true, isRequired: true),
-                    new ProcessRankStep(isRequired: true),
-                    new ProcessFilterStep(new RecordPickerOptions(){MinScoreSimilarity = 0.3d, Take = 2, OrderByScoreDescending = true}, isRequired: true),
-                    new PostProcessCheckStep(),
-                    new PromptBuilderStep(isRequired: true),
-                    new GenerationStep(isRequired: true),
-                };
+            enhancerConfig.Steps = _enhancerService.CreateDefaultGoogleSearchPipelineSteps(apiKey, engine, searchFilter);
             return enhancerConfig;
         }
 
@@ -251,18 +244,19 @@ namespace DemoApp.Pages
             return promptSettings;
         }
 
-        public IActionResult OnPostClearSession()
+        private string GetConfigurationJson(ConfigurationSetup configuration, bool hideSecrets = true)
         {
-            _configurationService.ClearSession();
-            _entrySetupService.AddEntry(new Entry());
-            return Page();
-        }
+            var settings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented
+            };
 
-        public override void OnPageHandlerExecuted(PageHandlerExecutedContext context)
-        {
-            base.OnPageHandlerExecuted(context);
-            ViewModel.ConfigurationSetup = _configurationService.GetConfiguration();
-            Entries = _entrySetupService.GetEntries().ToList();
+            if (hideSecrets)
+            {
+                settings.ContractResolver = new SensitiveContractResolver();
+            }
+
+            return JsonConvert.SerializeObject(configuration, settings);
         }
     }
 }

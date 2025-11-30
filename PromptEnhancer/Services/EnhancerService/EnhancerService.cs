@@ -1,14 +1,22 @@
 ﻿using ErrorOr;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Newtonsoft.Json;
 using PromptEnhancer.AIUtility.ChatHistory;
 using PromptEnhancer.CustomJsonResolver;
+using PromptEnhancer.KnowledgeBaseCore;
+using PromptEnhancer.KnowledgeBaseCore.Examples;
+using PromptEnhancer.KnowledgeBaseCore.Interfaces;
+using PromptEnhancer.KnowledgeRecord;
+using PromptEnhancer.KnowledgeSearchRequest.Examples;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
+using PromptEnhancer.Models.Examples;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Pipeline.Interfaces;
+using PromptEnhancer.Pipeline.PromptEnhancerSteps;
 using PromptEnhancer.SK.Interfaces;
 using System.Collections.Concurrent;
 using System.Text;
@@ -21,13 +29,15 @@ namespace PromptEnhancer.Services.EnhancerService
         private readonly IPipelineOrchestrator _pipelineOrchestrator;
         private readonly Kernel? _kernel;
         private readonly IServiceProvider _serviceProvider;
+        private readonly GoogleKnowledgeBase _googleKB;
 
-        public EnhancerService(ISemanticKernelManager semanticKernelManager, IPipelineOrchestrator pipelineOrchestrator, IServiceProvider serviceProvider, Kernel? kernel = null)
+        public EnhancerService(ISemanticKernelManager semanticKernelManager, IPipelineOrchestrator pipelineOrchestrator, IServiceProvider serviceProvider, GoogleKnowledgeBase googleKB, Kernel? kernel = null)
         {
             _semanticKernelManager = semanticKernelManager;
             _pipelineOrchestrator = pipelineOrchestrator;
             _kernel = kernel;
             _serviceProvider = serviceProvider;
+            _googleKB = googleKB;
         }
 
         // supports single completion and embedding
@@ -48,7 +58,7 @@ namespace PromptEnhancer.Services.EnhancerService
         public async Task DownloadConfiguration(EnhancerConfiguration configuration, string filePath = "config.json", bool hideSecrets = true)
         {
             var json = GetConfigurationJson(configuration, hideSecrets);
-            await File.WriteAllTextAsync("filePath", json);
+            await File.WriteAllTextAsync(filePath, json);
         }
 
         public byte[] ExportConfigurationToBytes(EnhancerConfiguration configuration, bool hideSecrets = true)
@@ -135,7 +145,6 @@ namespace PromptEnhancer.Services.EnhancerService
             return new PipelineSettings(sk, _serviceProvider, pipelineSettings, promptConf);
         }
 
-        //TODO here i need pipeline, figure out configs
         public async Task<ErrorOr<IList<ResultModel>>> ProcessConfiguration(EnhancerConfiguration config, IEnumerable<Entry> entries, Kernel? kernel = null, CancellationToken cancellationToken = default)
         {
             var settings = CreatePipelineSettingsFromConfig(config.PromptConfiguration, config.PipelineAdditionalSettings, config.KernelConfiguration, kernel);
@@ -246,6 +255,90 @@ namespace PromptEnhancer.Services.EnhancerService
                 ////resultView.AIResult = await _semanticKernelManager.GetAICompletionResult(sk!, resultView.Prompt);
                 //resultView.AIResult.UsedURLs = usedUrls;
             });
+        }
+
+        // only for not search and KB normal functionality (when you want to give data without defining knowledge base), for greater control setup normal knowledge base
+        public IKnowledgeBaseContainer CreateDefaultDataContainer<TModel>(IEnumerable<TModel> data)
+            where TModel : class
+        {
+            Type recordType = typeof(KnowledgeRecord<>).MakeGenericType(typeof(TModel));
+            Type kbType = typeof(KnowledgeBaseDefault<,>).MakeGenericType(recordType, typeof(TModel));
+            var kb = (KnowledgeBaseDefault<KnowledgeRecord<TModel>, TModel>)ActivatorUtilities.CreateInstance(_serviceProvider, kbType);
+            return new KnowledgeBaseDataContainer<KnowledgeRecord<TModel>, TModel>(kb, data);
+        }
+
+        // only for not search and KB normal functionality (when you want to give data without defining knowledge base) with specified record, for greater control setup normal knowledge base
+        public IKnowledgeBaseContainer CreateDefaultDataContainer<TRecord, TModel>(IEnumerable<TModel> data)
+            where TModel : class
+            where TRecord : KnowledgeRecord<TModel>, new()
+        {
+            Type recordType = typeof(TRecord);
+            Type kbType = typeof(KnowledgeBaseDefault<,>).MakeGenericType(recordType, typeof(TModel));
+            var kb = (KnowledgeBaseDefault<TRecord, TModel>)ActivatorUtilities.CreateInstance(_serviceProvider, kbType);
+            return new KnowledgeBaseDataContainer<TRecord, TModel>(kb, data);
+        }
+
+        public ErrorOr<PipelineModel> CreateDefaultSearchPipeline(IEnumerable<IKnowledgeBaseContainer> containers, PromptConfiguration? promptConf = null, PipelineAdditionalSettings? pipelineSettings = null, KernelConfiguration? kernelData = null, Kernel? kernel = null)
+        {
+            return CreateDefaultSearchPipelineCommon(containers, promptConf, pipelineSettings, kernelData, kernel, true);
+        }
+
+        public ErrorOr<PipelineModel> CreateDefaultSearchPipelineWithoutGenerationStep(IEnumerable<IKnowledgeBaseContainer> containers, PromptConfiguration? promptConf = null, PipelineAdditionalSettings? pipelineSettings = null, KernelConfiguration? kernelData = null, Kernel? kernel = null)
+        {
+            return CreateDefaultSearchPipelineCommon(containers, promptConf, pipelineSettings, kernelData, kernel, false);
+        }
+
+        public IEnumerable<IPipelineStep> CreateDefaultGoogleSearchPipelineSteps(string googleApiKey, string googleEngine, GoogleSearchFilterModel? searchFilter = null, GoogleSettings? googleSettings = null, UrlRecordFilter? filter = null)
+        {
+            searchFilter ??= new GoogleSearchFilterModel();
+            googleSettings ??= new GoogleSettings() { SearchApiKey = googleApiKey, Engine = googleEngine };
+            var request = new GoogleSearchRequest
+            {
+                Settings = googleSettings,
+                Filter = searchFilter
+            };
+
+            var container = new KnowledgeBaseContainer<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>(_googleKB, request, filter);
+            return
+                [
+                    new PreprocessStep(),
+                    new KernelContextPluginsStep(),
+                    new QueryParserStep(maxSplit: 2),
+                    new MultipleSearchStep([container], allowAutoChoice: false, isRequired: true),
+                    new ProcessEmbeddingStep(skipGenerationForEmbData: true, isRequired: true),
+                    new ProcessRankStep(isRequired: true),
+                    new ProcessFilterStep(new RecordPickerOptions(){MinScoreSimilarity = 0.3d, Take = 4, OrderByScoreDescending = true}, isRequired: true),
+                    new PostProcessCheckStep(),
+                    new PromptBuilderStep(isRequired: true),
+                    new GenerationStep(isRequired: true),
+                ];
+        }
+
+        private ErrorOr<PipelineModel> CreateDefaultSearchPipelineCommon(IEnumerable<IKnowledgeBaseContainer> containers, PromptConfiguration? promptConf, PipelineAdditionalSettings? pipelineSettings, KernelConfiguration? kernelData, Kernel? kernel, bool addGenerationStep)
+        {
+            var defaultConfig = new EnhancerConfiguration();
+            var settings = CreatePipelineSettingsFromConfig(promptConf ?? defaultConfig.PromptConfiguration, pipelineSettings ?? defaultConfig.PipelineAdditionalSettings, kernelData, kernel);
+            if (settings.IsError)
+            {
+                return settings.Errors;
+            }
+            var steps = new List<IPipelineStep>
+            {
+                new PreprocessStep(),
+                new MultipleSearchStep(containers, allowAutoChoice: true, isRequired: true),
+                new ProcessEmbeddingStep(skipGenerationForEmbData: true, isRequired: true),
+                new ProcessRankStep(isRequired: true),
+                new ProcessFilterStep(new RecordPickerOptions(){MinScoreSimilarity = 0.2d, Take = 5, OrderByScoreDescending = true}, isRequired: true),
+                new PostProcessCheckStep(),
+                new PromptBuilderStep(isRequired: true),
+            };
+
+            if (addGenerationStep)
+            {
+                steps.Add(new GenerationStep(isRequired: true));
+            }
+
+            return new PipelineModel(settings.Value, steps);
         }
 
         private string GetConfigurationJson(EnhancerConfiguration configuration, bool hideSecrets = true)

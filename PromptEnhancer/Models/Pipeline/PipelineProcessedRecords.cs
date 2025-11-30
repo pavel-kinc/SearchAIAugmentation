@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PromptEnhancer.Models.Pipeline
 {
+    //TODO DELETE
     public class PipelineRankedRecord
     {
         public required IKnowledgeRecord AssociatedRecord { get; set; }

@@ -15,6 +15,7 @@ namespace PromptEnhancer.Services.RecordRankerService
             _rankerService = rankerService;
         }
 
+        // TODO add smth to embed together with queryString - for example if user searches only ean, it is compared to only ean embeddings (number)
         public async Task<bool> GetSimilarityScoreForRecordsAsync(Kernel kernel, IEnumerable<IKnowledgeRecord> records, string? queryString, string? generatorKey = null)
         {
             var dict = new Dictionary<string, Embedding<float>>();
