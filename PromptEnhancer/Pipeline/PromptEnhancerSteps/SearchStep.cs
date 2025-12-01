@@ -52,7 +52,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             }
         }
 
-        protected override ErrorOr<bool> CheckExecuteConditions(PipelineRun context)
+        protected override ErrorOr<bool> CheckExecutionConditions(PipelineRun context)
         {
             if (!string.IsNullOrEmpty(context.QueryString))
             {

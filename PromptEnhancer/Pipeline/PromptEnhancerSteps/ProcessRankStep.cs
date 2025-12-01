@@ -20,7 +20,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             return await rankerService!.GetSimilarityScoreForRecordsAsync(settings.Kernel, context.RetrievedRecords, context.QueryString, settings.Settings.GeneratorKey);
         }
 
-        protected override ErrorOr<bool> CheckExecuteConditions(PipelineRun context)
+        protected override ErrorOr<bool> CheckExecutionConditions(PipelineRun context)
         {
             if (context.RetrievedRecords.Any())
             {

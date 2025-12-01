@@ -13,12 +13,12 @@ namespace PromptEnhancer.Pipeline
         }
         public async Task<ErrorOr<bool>> ExecuteAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default)
         {
-            var check = CheckExecuteConditions(context);
+            var check = CheckExecutionConditions(context);
             if (check.IsError)
             {
                 return check;
             }
-            //TODO here try catch? also maybe delete cancellation token, i dont use it in my methods/services
+
             if (check.Value)
             {
                 var res = await ExecuteStepAsync(settings, context, cancellationToken);
@@ -29,15 +29,14 @@ namespace PromptEnhancer.Pipeline
 
         protected abstract Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default);
 
-        //TODO: mostly for pipeline context conditions, maybe rename?
-        protected virtual ErrorOr<bool> CheckExecuteConditions(PipelineRun context)
+        protected virtual ErrorOr<bool> CheckExecutionConditions(PipelineRun context)
         {
             return true;
         }
 
         protected virtual ErrorOr<bool> FailCondition()
         {
-            return _isRequired ? Error.Failure($"{GetType()}: Conditions check for this required step failed.") : false;
+            return _isRequired ? Error.Failure($"{GetType().Name}: Conditions check for this required step failed.") : false;
         }
 
         protected virtual ErrorOr<bool> FailExecution(string? reason = null)

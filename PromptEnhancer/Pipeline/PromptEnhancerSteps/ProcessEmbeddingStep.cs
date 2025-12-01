@@ -24,7 +24,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             return await embService!.GenerateEmbeddingsForRecordsAsync(settings.Kernel, context.RetrievedRecords, settings.Settings.GeneratorKey, _options, _skipGenerationForEmbData);
         }
 
-        protected override ErrorOr<bool> CheckExecuteConditions(PipelineRun context)
+        protected override ErrorOr<bool> CheckExecutionConditions(PipelineRun context)
         {
             // Need retrieved records
             if (context.RetrievedRecords.Any())

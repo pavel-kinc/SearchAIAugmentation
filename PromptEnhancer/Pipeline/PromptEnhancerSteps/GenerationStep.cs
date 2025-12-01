@@ -19,7 +19,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             }
 
             var res = await chatClient.GetResponseAsync(history, settings.Settings.ChatOptions, cancellationToken);
-            context.InputTokenUsage += res.Usage?.InputTokenCount ?? TokenCounter.CountTokens(history); //TODO do some custom counter, if the method ends in success but still 0? - make it in other parts of code too
+            context.InputTokenUsage += res.Usage?.InputTokenCount ?? TokenCounter.CountTokens(history);
             context.OutputTokenUsage += res.Usage?.OutputTokenCount ?? TokenCounter.CountTokens(res.Messages);
             context.FinalResponse = res;
             history.AddRange(res.Messages);
@@ -27,7 +27,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             return true;
         }
 
-        protected override ErrorOr<bool> CheckExecuteConditions(PipelineRun context)
+        protected override ErrorOr<bool> CheckExecutionConditions(PipelineRun context)
         {
             if (!string.IsNullOrEmpty(context.QueryString) || !string.IsNullOrEmpty(context.UserPromptToLLM))
             {

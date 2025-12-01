@@ -22,7 +22,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             return true;
         }
 
-        protected override ErrorOr<bool> CheckExecuteConditions(PipelineRun context)
+        protected override ErrorOr<bool> CheckExecutionConditions(PipelineRun context)
         {
             if (!context.PickedRecords.Any() && context.RetrievedRecords.Any())
             {

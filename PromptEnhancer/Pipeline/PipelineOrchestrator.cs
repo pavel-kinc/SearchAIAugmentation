@@ -17,18 +17,27 @@ namespace PromptEnhancer.Pipeline
 
             foreach (var step in steps)
             {
-                //true means step executed correctly, false means step did not execute/start (for non required), otherwise error
                 try
                 {
                     var result = await step.ExecuteAsync(pipeline.Settings, context, ct);
                     if (result.IsError)
                     {
-                        //TODO logging
+                        context.PipelineLog.Add($"Error in step: {GetType().Name}, {string.Join(';', result.Errors.Select(x => x.Code))}");
                         return result;
                     }
+                    if (result.Value)
+                    {
+                        context.PipelineLog.Add($"Step {GetType().Name} was successfully executed.");
+                    }
+                    else
+                    {
+                        context.PipelineLog.Add($"Step {GetType().Name} was not executed. Continuing in the pipeline.");
+                    }
+
                 }
                 catch (Exception ex)
                 {
+                    context.PipelineLog.Add($"Exception in step: {GetType().Name}, {ex.Message}");
                     return Error.Failure($"Error: {step.GetType().Name} has thrown Exception in step execution", ex.Message);
                 }
             }
