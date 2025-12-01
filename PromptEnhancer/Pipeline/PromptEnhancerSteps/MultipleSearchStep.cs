@@ -67,9 +67,13 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
                     }
 
                 });
+                if (cb.Count >= _minimumRecordsToRetrieve)
+                {
+                    return FailExecution($"Error: {GetType().Name}, retrieved record count - {cb.Count} was smaller than minimum - {_minimumRecordsToRetrieve}");
+                }
                 context.RetrievedRecords.AddRange(cb);
 
-                return cb.Count >= _minimumRecordsToRetrieve;
+                return true;
             }
             catch (Exception ex)
             {
@@ -92,7 +96,6 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             context.OutputTokenUsage += res.Usage?.OutputTokenCount ?? 0;
 
             // Filter the list by the deserialized indices; caller handles any exceptions.
-            //var ids = res.Text.Trim().Split(';').Select(x => int.Parse(x));
             var resultText = res.Text.Trim();
             var ids = resultText.All(x => char.IsDigit(x) || x == Separator) ? resultText.Split(Separator).Select(x => int.Parse(x)) : [];
             IEnumerable<IKnowledgeBaseContainer> picked = ids!
@@ -110,18 +113,5 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 
             return FailCondition();
         }
-
-
-        //private DateTimePlugin? GetDateTimePlugin(Microsoft.SemanticKernel.Kernel kernel)
-        //{
-        //    var plugin = kernel.Plugins.TryGetPlugin<DateTimePlugin>(nameof(DateTimePlugin));
-        //    return plugin;
-        //}
     }
-
-    //TODO replace interfaces with "empty" base classes if needed
-    //public class SearchStep<TRecord, T> : SearchStep<TRecord, IKnowledgeBaseSearchFilter, IKnowledgeBaseSearchSettings, IRecordFilter<T>, T>
-    //where TRecord : class, IKnowledgeRecord
-    //where T : class
-    //{ }
 }

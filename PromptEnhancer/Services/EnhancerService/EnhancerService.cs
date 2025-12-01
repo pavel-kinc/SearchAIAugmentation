@@ -1,6 +1,7 @@
 ﻿using ErrorOr;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Newtonsoft.Json;
 using PromptEnhancer.AIUtility.ChatHistory;
@@ -30,14 +31,16 @@ namespace PromptEnhancer.Services.EnhancerService
         private readonly Kernel? _kernel;
         private readonly IServiceProvider _serviceProvider;
         private readonly GoogleKnowledgeBase _googleKB;
+        private readonly ILogger<EnhancerService> _logger;
 
-        public EnhancerService(ISemanticKernelManager semanticKernelManager, IPipelineOrchestrator pipelineOrchestrator, IServiceProvider serviceProvider, GoogleKnowledgeBase googleKB, Kernel? kernel = null)
+        public EnhancerService(ISemanticKernelManager semanticKernelManager, IPipelineOrchestrator pipelineOrchestrator, IServiceProvider serviceProvider, GoogleKnowledgeBase googleKB, ILogger<EnhancerService> logger, Kernel? kernel = null)
         {
             _semanticKernelManager = semanticKernelManager;
             _pipelineOrchestrator = pipelineOrchestrator;
             _kernel = kernel;
             _serviceProvider = serviceProvider;
             _googleKB = googleKB;
+            _logger = logger;
         }
 
         // supports single completion and embedding
@@ -117,7 +120,6 @@ namespace PromptEnhancer.Services.EnhancerService
             {
                 return Error.Failure($"{nameof(ProcessPipelineAsync)} failed", ex.Message);
             }
-
         }
 
         public ErrorOr<PipelineSettings> CreatePipelineSettingsFromConfig(PromptConfiguration promptConf, PipelineAdditionalSettings pipelineSettings, KernelConfiguration? kernelData = null, Kernel? kernel = null)
