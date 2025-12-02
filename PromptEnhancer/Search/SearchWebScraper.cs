@@ -15,6 +15,8 @@ namespace PromptEnhancer.Search
         [GeneratedRegex(@"\s{2,}", RegexOptions.Compiled)]
         private static partial Regex NormalizeWhitespaceRegex();
 
+        private static readonly HttpClient _httpClient = new HttpClient();
+
         public async Task<IEnumerable<UrlRecord>> ScrapeDataFromUrlsAsync(IEnumerable<string> usedUrls, string selectors = "body")
         {
             if (!usedUrls.Any())
@@ -37,7 +39,15 @@ namespace PromptEnhancer.Search
 
         private async Task<UrlRecord> ScrapeUrlContent(IBrowsingContext context, string url, string selectors)
         {
-            var document = await context.OpenAsync(url);
+            var resp = await _httpClient.GetAsync(url);
+            if (!resp.IsSuccessStatusCode)
+            {
+                return new UrlRecord { Content = "Scraping not successfull", Url = url };
+            }
+
+            var html = await resp.Content.ReadAsStringAsync();
+
+            var document = await context.OpenAsync(req => req.Content(html));
             var sb = new StringBuilder();
 
             //var seen = new HashSet<string>();

@@ -305,7 +305,7 @@ namespace PromptEnhancer.Services.EnhancerService
                 [
                     new PreprocessStep(),
                     new KernelContextPluginsStep(),
-                    new QueryParserStep(maxSplit: 2),
+                    //new QueryParserStep(maxSplit: 2),
                     new MultipleSearchStep([container], allowAutoChoice: false, isRequired: true),
                     new ProcessEmbeddingStep(skipGenerationForEmbData: true, isRequired: true),
                     new ProcessRankStep(isRequired: true),

@@ -123,6 +123,7 @@ namespace TaskChatDemo.Services.EnhancerUtility
             {
                 new PreprocessStep(),
                 new KernelContextPluginsStep(),
+                new QueryParserStep(maxSplit: 2),
                 new MultipleSearchStep(containers, isRequired: true),
                 new ProcessEmbeddingStep(skipGenerationForEmbData: true, isRequired: true),
                 new ProcessRankStep(isRequired: true),

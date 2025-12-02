@@ -3,8 +3,9 @@ using PromptEnhancer.KernelServiceTemplates.ChatClients;
 using PromptEnhancer.KernelServiceTemplates.EmbeddingGenerators;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
+using PromptEnhancer.SK.Interfaces;
 
-namespace PromptEnhancer.Extensions
+namespace PromptEnhancer.SK
 {
     public class KernelServiceFactory : IKernelServiceFactory
     {

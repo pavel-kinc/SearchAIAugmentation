@@ -8,7 +8,6 @@ using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
 using Newtonsoft.Json;
 using PromptEnhancer.CustomJsonResolver;
-using PromptEnhancer.KnowledgeBaseCore.Examples;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Pipeline;
@@ -23,7 +22,6 @@ namespace DemoApp.Pages
 
         private readonly IConfigurationSetupService _configurationService;
         private readonly IEntrySetupService _entrySetupService;
-        private readonly GoogleKnowledgeBase _googleKB;
         private readonly IEnhancerService _enhancerService;
 
         [BindProperty]
@@ -32,13 +30,12 @@ namespace DemoApp.Pages
         public List<Entry> Entries { get; set; } = [];
 
 
-        public IndexModel(ILogger<IndexModel> logger, IConfiguration configuration, IConfigurationSetupService configurationService, IEnhancerService enhancerService, IEntrySetupService entrySetupService, GoogleKnowledgeBase googleKB)
+        public IndexModel(ILogger<IndexModel> logger, IConfiguration configuration, IConfigurationSetupService configurationService, IEnhancerService enhancerService, IEntrySetupService entrySetupService)
         {
             _logger = logger;
             _configurationService = configurationService;
             _enhancerService = enhancerService;
             _entrySetupService = entrySetupService;
-            _googleKB = googleKB;
         }
 
         public void OnGet()

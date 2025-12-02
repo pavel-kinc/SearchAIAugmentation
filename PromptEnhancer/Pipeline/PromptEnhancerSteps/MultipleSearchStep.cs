@@ -67,7 +67,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
                     }
 
                 });
-                if (cb.Count >= _minimumRecordsToRetrieve)
+                if (cb.Count <= _minimumRecordsToRetrieve)
                 {
                     return FailExecution($"Error: {GetType().Name}, retrieved record count - {cb.Count} was smaller than minimum - {_minimumRecordsToRetrieve}");
                 }

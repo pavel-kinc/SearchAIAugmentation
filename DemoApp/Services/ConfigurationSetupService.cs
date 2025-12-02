@@ -125,6 +125,13 @@ namespace DemoApp.Services
         {
             var enhancerConfig = _enhancerService.CreateDefaultConfiguration(aiApiKey: _configuration["AIServices:OpenAI:ApiKey"]);
             var configSetup = enhancerConfig.Adapt<ConfigurationSetup>();
+            configSetup.PromptConfiguration.SystemInstructions = """
+                You are a professional e-commerce copywriter.
+                Given the product defined by the user query, write a full, SEO-optimized product description.
+                The output must contain exactly 5 paragraphs and nothing else, the first one should be general summary.
+                If you use any information from given context, make sure you properly create a citation for the given url (after the used text, just the citation), but do not advertise in any way to go there.
+                """;
+            configSetup.PromptConfiguration.TargetOutputLength = 400;
             configSetup.SearchConfiguration.SearchProviderSettings = new SearchProviderSettings
             {
                 SearchApiKey = _configuration["SearchConfigurations:Google:ApiKey"],

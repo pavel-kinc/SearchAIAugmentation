@@ -1,7 +1,7 @@
 ﻿using PromptEnhancer.KernelServiceTemplates;
 using PromptEnhancer.Models.Configurations;
 
-namespace PromptEnhancer.Extensions
+namespace PromptEnhancer.SK.Interfaces
 {
     public interface IKernelServiceFactory
     {

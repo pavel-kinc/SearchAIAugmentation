@@ -46,7 +46,7 @@ namespace PromptEnhancer.Services.PromptBuildingService
 
             if (pickedRecords.Any())
             {
-                sb.AppendLine("Augmented data:");
+                sb.AppendLine("Augmented data (context):");
                 foreach (var record in pickedRecords)
                 {
                     sb.AppendLine(record.LLMRepresentationString);
@@ -65,7 +65,7 @@ namespace PromptEnhancer.Services.PromptBuildingService
             if (entry is not null)
             {
                 _ = entry.EntryOriginalText is not null ? sb.AppendLine($"Original text (for query): {entry.EntryOriginalText}") : sb;
-                _ = entry.EntryAdditionalData is not null ? sb.AppendLine($"Original text (for query): {entry.EntryAdditionalData}") : sb;
+                _ = entry.EntryAdditionalData is not null ? sb.AppendLine($"Additional data (for query): {entry.EntryAdditionalData}") : sb;
             }
 
             return ApplyRegexReplacement(sb);
