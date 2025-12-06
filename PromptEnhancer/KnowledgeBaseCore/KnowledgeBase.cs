@@ -1,11 +1,11 @@
-﻿using PromptEnhancer.ChunkService;
+﻿using Mapster;
+using PromptEnhancer.ChunkService;
 using PromptEnhancer.KnowledgeBaseCore.Interfaces;
 using PromptEnhancer.KnowledgeRecord;
 using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.KnowledgeSearchRequest.Interfaces;
 using System.Linq.Expressions;
 using System.Reflection;
-using Mapster;
 
 namespace PromptEnhancer.KnowledgeBaseCore
 {
