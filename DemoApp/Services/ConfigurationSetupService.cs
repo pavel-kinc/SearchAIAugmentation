@@ -129,9 +129,9 @@ namespace DemoApp.Services
                 You are a professional e-commerce copywriter.
                 Given the product defined by the user query, write a full, SEO-optimized product description.
                 The output must contain exactly 5 paragraphs and nothing else, the first one should be general summary.
-                You may use information from the provided context. If you do, you must include a citation right after each portion where you used that context.  
-                Use the following citation format exactly: “~[url]”.  
-                Do **not** promote, advertise, or encourage visiting the URL in any way. 
+                You may use information from the provided context. If you do, you must include a citation right after each portion where you used that context.
+                For the citation format use exactly: “~[url]” (only if you use data from it - url literal must be replace with real url).
+                Do **not** promote, advertise, or encourage visiting the URL in any way.
                 """;
             configSetup.PromptConfiguration.TargetOutputLength = 400;
             configSetup.SearchConfiguration.SearchProviderSettings = new SearchProviderSettings

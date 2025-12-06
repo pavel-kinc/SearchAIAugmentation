@@ -80,7 +80,7 @@ namespace PromptEnhancer.KnowledgeBaseCore.Examples
                 data = searchResults.Where(x => !string.IsNullOrEmpty(x.Link)).Select(x => new UrlRecord
                 {
                     Url = x.Link!,
-                    Content = x.Value
+                    Content = ((x.Name ?? string.Empty) + " " + x.Value).Trim()
                 });
             }
 
