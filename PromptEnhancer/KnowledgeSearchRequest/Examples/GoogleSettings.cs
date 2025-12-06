@@ -10,6 +10,6 @@ namespace PromptEnhancer.KnowledgeSearchRequest.Examples
         public int? ChunkTokenSize { get; set; }
         public int ChunkLimitPerUrl { get; set; } = 5;
         public int TopN { get; set; } = 3;
-        public bool UseScraper { get; set; } = true;
+        public bool UseScraper { get; set; } = false;
     }
 }
