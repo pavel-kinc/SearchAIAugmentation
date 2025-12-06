@@ -5,6 +5,7 @@ using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.KnowledgeSearchRequest.Interfaces;
 using System.Linq.Expressions;
 using System.Reflection;
+using Mapster;
 
 namespace PromptEnhancer.KnowledgeBaseCore
 {
@@ -64,8 +65,9 @@ namespace PromptEnhancer.KnowledgeBaseCore
                 var i = 0;
                 foreach (var chunk in chunks)
                 {
-                    chunkPropertyInfo!.SetValue(model, chunk);
-                    result.Add(CreateRecord(model, queryString));
+                    var newModel = model.Adapt<TModel>();
+                    chunkPropertyInfo!.SetValue(newModel, chunk);
+                    result.Add(CreateRecord(newModel, queryString));
                     i++;
                     if (i >= chunkLimit)
                     {

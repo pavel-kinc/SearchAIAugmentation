@@ -6,19 +6,19 @@ using PromptEnhancer.Models.Pipeline;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
-    //TODO FINISH
     public class KernelContextPluginsStep : PipelineStep
     {
-        public const string ContextPromptTemplate =
+        public const string LLMResponseNoResult = "NaN";
+        public const int MaxContextItemSize = 100;
+        public const char ResultSeperator = ';';
+
+        public virtual string ContextPromptTemplate =>
             """
             Get context for user query: "{0}" from context functions, where there is real connection between their result and the query.
             • Output a single string with each result separated by a separator '{1}'.
             • If no functions are considered to be relevant to the user query just output "{2}".
             Do not output anything else (no extra explanation, no formatting other than the string described).
             """;
-        public const string LLMResponseNoResult = "NaN";
-        public const int MaxContextItemSize = 100;
-        public const char ResultSeperator = ';';
 
         public KernelContextPluginsStep(bool isRequired = false) : base(isRequired) { }
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default)
@@ -54,7 +54,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 
             return FailCondition();
         }
-        private string GetPrompt(string? queryString)
+        protected string GetPrompt(string? queryString)
         {
             if (queryString is null)
             {

@@ -58,13 +58,20 @@ namespace TaskChatDemo.Services.EnhancerUtility
             {
                 //here to change client and generator for pipeline
                 ChatClientKey = GeminiServiceId,
-                GeneratorKey = GeminiServiceId,
+                GeneratorKey = OpenAiServiceId,
                 KernelRequestSettings = new PromptExecutionSettings()
                 {
                     FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
                     ServiceId = OpenAiServiceId
                 },
             };
+
+            enhancerConfig.PromptConfiguration.AdditionalInstructions =
+                """
+                You are an AI assistant helping a software development team manage their tasks and work items effectively.
+                Provide clear, concise, and relevant information based on the context provided from their task and work item data.
+                Do not use any formatting or newlines in your response. Use whole sentences.
+                """;
 
             var settingsResult = _enhancerService.CreatePipelineSettingsFromConfig(enhancerConfig.PromptConfiguration, enhancerConfig.PipelineAdditionalSettings, enhancerConfig.KernelConfiguration, kernel);
             return settingsResult;
@@ -123,11 +130,11 @@ namespace TaskChatDemo.Services.EnhancerUtility
             {
                 new PreprocessStep(),
                 new KernelContextPluginsStep(),
-                new QueryParserStep(maxSplit: 2),
+                // new QueryParserStep(maxSplit: 2),
                 new MultipleSearchStep(containers, isRequired: true),
                 new ProcessEmbeddingStep(skipGenerationForEmbData: true, isRequired: true),
                 new ProcessRankStep(isRequired: true),
-                new ProcessFilterStep(new RecordPickerOptions(){MinScoreSimilarity = 0.4d, Take = 10, OrderByScoreDescending = true}, isRequired: true),
+                new ProcessFilterStep(new RecordPickerOptions(){MinScoreSimilarity = 0.3d, Take = 10, OrderByScoreDescending = true}, isRequired: true),
                 new PostProcessCheckStep(),
                 new PromptBuilderStep(isRequired: true)
             };

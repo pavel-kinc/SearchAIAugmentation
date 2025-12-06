@@ -1,11 +1,11 @@
 ﻿@model List<PromptEnhancer.Models.Entry>
 
-<div class="mb-3 mt-3"><h4>Entries setup</h4></div>
+<div class="mb-3 mt-3"><h3>Entries setup</h3></div>
 
 @for (int i = 0; i < Model.Count; i++)
 {
     <div class="entry">
-        <h3>Entry @(i + 1)</h3>
+        <h4>Entry @(i + 1)</h4>
         <div class="mb-3">
             @Html.LabelFor(m => m[i].QueryString, new { @class = "form-label", title = "Search query used for augmentation." })
             @Html.TextBoxFor(m => m[i].QueryString, new { @class = "form-control", placeholder = "Query for Search", required = "required" })

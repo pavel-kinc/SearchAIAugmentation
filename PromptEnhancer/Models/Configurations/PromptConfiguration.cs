@@ -5,7 +5,7 @@ namespace PromptEnhancer.Models.Configurations
     public class PromptConfiguration
     {
         [Display(Name = "System Instructions:")]
-        public string SystemInstructions { get; set; } = "React to the given prompt: ";//= "Create SEO description of product with the help of Used Search Query and Augmented Data";
+        public string SystemInstructions { get; set; } = "React to the given prompt: ";
         [Display(Name = "Macro definition (optional):")]
         public string? MacroDefinition { get; set; }
         [Display(Name = "Additional Instructions (optional):")]

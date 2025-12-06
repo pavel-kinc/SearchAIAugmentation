@@ -11,8 +11,10 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             """
             Given the user query "{0}", extract up to "{1}" meaningful and distinct search queries, separated by ';'.
 
-            Keep only parts that are useful for search. Context for each part must be clear (you can repeat some words from query, but the parts must be distinct).
-            Remove filler or irrelevant parts. If the query can’t be improved or split, return "{2}".
+            From the provided user query, keep only the parts that are useful for search.  
+            Each retained part must have a clear relationship to the user’s query (you can repeat some query keywords if needed), but the parts must remain distinct from each other.  
+            Do not include any extraneous information that is not directly relevant to search.
+            If the query can’t be improved or split, return "{2}".
             """;
 
         public const string FailResponseLLM = "NaN";
@@ -37,7 +39,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
                 return FailExecution(ChatHistoryUtility.GetInputSizeExceededLimitMessage(GetType().Name));
             }
             var res = await chatClient.GetResponseAsync(inputPrompt, _options ?? settings.Settings.ChatOptions, cancellationToken: cancellationToken);
-            if (res.Text == FailResponseLLM || res.Text.Length > MaxResponseLength || res.Text.Count(c => c == ';') > _maxSplit)
+            if (res.Text == FailResponseLLM || res.Text.Length > MaxResponseLength || res.Text.Count(c => c == ';') >= _maxSplit)
             {
                 return FailExecution();
             }

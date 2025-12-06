@@ -9,6 +9,5 @@ namespace PromptEnhancer.SK.Interfaces
         public void AddPluginToSemanticKernel<Plugin>(Kernel kernel) where Plugin : class;
         public ErrorOr<Kernel> CreateKernel(IEnumerable<KernelServiceBaseConfig> kernelServiceConfigs, bool addInternalServices = false, bool addContextPlugins = true);
         public ErrorOr<IEnumerable<KernelServiceBaseConfig>> ConvertConfig(KernelConfiguration kernelData);
-        //public Task<ChatCompletionResult> GetAICompletionResult(Kernel kernel, string prompt, int? maxPromptLength = null);
     }
 }
