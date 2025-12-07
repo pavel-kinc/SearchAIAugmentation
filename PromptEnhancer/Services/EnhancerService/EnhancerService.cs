@@ -290,10 +290,10 @@ namespace PromptEnhancer.Services.EnhancerService
             return CreateDefaultSearchPipelineCommon(containers, promptConf, pipelineSettings, kernelData, kernel, false);
         }
 
-        public IEnumerable<IPipelineStep> CreateDefaultGoogleSearchPipelineSteps(string googleApiKey, string googleEngine, GoogleSearchFilterModel? searchFilter = null, GoogleSettings? googleSettings = null, UrlRecordFilter? filter = null)
+        public IEnumerable<IPipelineStep> CreateDefaultGoogleSearchPipelineSteps(string googleApiKey, string googleEngine, GoogleSearchFilterModel? searchFilter = null, GoogleSettings? googleSettings = null, UrlRecordFilter? filter = null, bool useScraper = false)
         {
             searchFilter ??= new GoogleSearchFilterModel();
-            googleSettings ??= new GoogleSettings() { SearchApiKey = googleApiKey, Engine = googleEngine };
+            googleSettings ??= new GoogleSettings() { SearchApiKey = googleApiKey, Engine = googleEngine, UseScraper = useScraper };
             var request = new GoogleSearchRequest
             {
                 Settings = googleSettings,

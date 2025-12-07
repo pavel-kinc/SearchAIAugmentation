@@ -28,7 +28,7 @@ namespace PromptEnhancer.Services.EnhancerService
 
         public ErrorOr<PipelineModel> CreateDefaultSearchPipelineWithoutGenerationStep(IEnumerable<IKnowledgeBaseContainer> containers, PromptConfiguration? promptConf = null, PipelineAdditionalSettings? pipelineSettings = null, KernelConfiguration? kernelData = null, Kernel? kernel = null);
 
-        public IEnumerable<IPipelineStep> CreateDefaultGoogleSearchPipelineSteps(string googleApiKey, string googleEngine, GoogleSearchFilterModel? searchFilter = null, GoogleSettings? googleSettings = null, UrlRecordFilter? filter = null);
+        public IEnumerable<IPipelineStep> CreateDefaultGoogleSearchPipelineSteps(string googleApiKey, string googleEngine, GoogleSearchFilterModel? searchFilter = null, GoogleSettings? googleSettings = null, UrlRecordFilter? filter = null, bool useScraper = false);
 
         public Task DownloadConfiguration(EnhancerConfiguration configuration, string filePath = "config.json", bool hideSecrets = true);
         public byte[] ExportConfigurationToBytes(EnhancerConfiguration configuration, bool hideSecrets = true);
