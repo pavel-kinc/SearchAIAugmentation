@@ -4,6 +4,9 @@ using OllamaSharp;
 
 namespace PromptEnhancer.KernelServiceTemplates.ChatClients
 {
+    /// <summary>
+    /// Service template for adding an Ollama Chat Client to the kernel's service collection.
+    /// </summary>
     public class OllamaChatClient : KernelServiceTemplate
     {
         public string Uri { get; }
@@ -17,6 +20,7 @@ namespace PromptEnhancer.KernelServiceTemplates.ChatClients
             ServiceId = serviceId;
         }
 
+        /// <inheritdoc/>
         public override IServiceCollection AddToServices(IServiceCollection services)
         {
             IChatClient chatClient = new OllamaApiClient(Uri, Model);

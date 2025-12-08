@@ -24,6 +24,13 @@ using System.Text;
 
 namespace PromptEnhancer.Services.EnhancerService
 {
+    /// <summary>
+    /// Provides services for creating, managing, and processing configurations, pipelines, and data containers for
+    /// enhancing workflows using semantic kernels, AI models, and knowledge bases.
+    /// </summary>
+    /// <remarks>The <see cref="EnhancerService"/> class offers a variety of methods to configure and execute
+    /// pipelines, import and export configurations, and manage knowledge bases. It integrates with semantic kernel
+    /// managers, pipeline orchestrators, and external services such as Google Knowledge Base.</remarks>
     public class EnhancerService : IEnhancerService
     {
         private readonly ISemanticKernelManager _semanticKernelManager;
@@ -43,6 +50,7 @@ namespace PromptEnhancer.Services.EnhancerService
             _logger = logger;
         }
 
+        /// <inheritdoc/>
         // supports single completion and embedding
         public EnhancerConfiguration CreateDefaultConfiguration(string? aiApiKey = null, AIProviderEnum aiProvider = AIProviderEnum.OpenAI, string aiModel = "gpt-4o-mini", string? embeddingModel = "text-embedding-3-small")
         {
@@ -58,30 +66,35 @@ namespace PromptEnhancer.Services.EnhancerService
             return enhancerConfiguration;
         }
 
+        /// <inheritdoc/>
         public async Task DownloadConfiguration(EnhancerConfiguration configuration, string filePath = "config.json", bool hideSecrets = true)
         {
             var json = GetConfigurationJson(configuration, hideSecrets);
             await File.WriteAllTextAsync(filePath, json);
         }
 
+        /// <inheritdoc/>
         public byte[] ExportConfigurationToBytes(EnhancerConfiguration configuration, bool hideSecrets = true)
         {
             var json = GetConfigurationJson(configuration, hideSecrets);
             return Encoding.UTF8.GetBytes(json);
         }
 
+        /// <inheritdoc/>
         public async Task<EnhancerConfiguration?> ImportConfigurationFromFile(string filePath)
         {
             var json = await File.ReadAllTextAsync(filePath);
             return JsonConvert.DeserializeObject<EnhancerConfiguration>(json);
         }
 
+        /// <inheritdoc/>
         public EnhancerConfiguration? ImportConfigurationFromBytes(byte[] jsonBytes)
         {
             var json = Encoding.UTF8.GetString(jsonBytes);
             return JsonConvert.DeserializeObject<EnhancerConfiguration>(json);
         }
 
+        /// <inheritdoc/>
         public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponse(PipelineSettings settings, PipelineRun context, CancellationToken ct = default)
         {
             var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.Settings.ChatClientKey);
@@ -95,7 +108,8 @@ namespace PromptEnhancer.Services.EnhancerService
             return chatClient.GetStreamingResponseAsync(history, settings.Settings.ChatOptions, ct);
         }
 
-        public async Task<ErrorOr<IList<ResultModel>>> ProcessPipelineAsync(PipelineModel pipeline, IEnumerable<PipelineRun> entries, CancellationToken cancellationToken = default)
+        /// <inheritdoc/>
+        public async Task<ErrorOr<IList<PipelineResultModel>>> ExecutePipelineAsync(PipelineModel pipeline, IEnumerable<PipelineRun> entries, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -103,11 +117,11 @@ namespace PromptEnhancer.Services.EnhancerService
                 {
                     return Error.Unexpected("No input specified, nothing to proccess");
                 }
-                var cb = new ConcurrentBag<ResultModel>();
+                var cb = new ConcurrentBag<PipelineResultModel>();
                 await Parallel.ForEachAsync(entries, async (context, _) =>
                 {
                     var pipelineRes = await _pipelineOrchestrator.RunPipelineAsync(pipeline, context, cancellationToken);
-                    var resultModel = new ResultModel
+                    var resultModel = new PipelineResultModel
                     {
                         Result = context,
                         Errors = pipelineRes.ErrorsOrEmptyList,
@@ -118,10 +132,11 @@ namespace PromptEnhancer.Services.EnhancerService
             }
             catch (Exception ex)
             {
-                return Error.Failure($"{nameof(ProcessPipelineAsync)} failed", ex.Message);
+                return Error.Failure($"{nameof(ExecutePipelineAsync)} failed", ex.Message);
             }
         }
 
+        /// <inheritdoc/>
         public ErrorOr<PipelineSettings> CreatePipelineSettingsFromConfig(PromptConfiguration promptConf, PipelineAdditionalSettings pipelineSettings, KernelConfiguration? kernelData = null, Kernel? kernel = null)
         {
             var sk = kernel ?? _kernel;
@@ -147,7 +162,8 @@ namespace PromptEnhancer.Services.EnhancerService
             return new PipelineSettings(sk, _serviceProvider, pipelineSettings, promptConf);
         }
 
-        public async Task<ErrorOr<IList<ResultModel>>> ProcessConfiguration(EnhancerConfiguration config, IEnumerable<Entry> entries, Kernel? kernel = null, CancellationToken cancellationToken = default)
+        /// <inheritdoc/>
+        public async Task<ErrorOr<IList<PipelineResultModel>>> ProcessConfiguration(EnhancerConfiguration config, IEnumerable<Entry> entries, Kernel? kernel = null, CancellationToken cancellationToken = default)
         {
             var settings = CreatePipelineSettingsFromConfig(config.PromptConfiguration, config.PipelineAdditionalSettings, config.KernelConfiguration, kernel);
 
@@ -158,138 +174,45 @@ namespace PromptEnhancer.Services.EnhancerService
 
             var pipeline = new PipelineModel(settings.Value, config.Steps);
 
-            return await ProcessPipelineAsync(pipeline, entries.Select(x => new PipelineRun(x)), cancellationToken);
-
-            //TODO should this be here? (maybe like sk.invoke and hope there are some plugins? - since there are 3 ways to kernel here, also i would need some plugins in my creation, but i could resolve plugins by injection (common interface))
-            //TODO it could also require check for openai, options and some uniform way to work with results, or just put it outside of this method and just work with it there, but it requires same arguments prolly
-            //TODO ye just put it outside of here, this is bad, just if else with this config i guess
-            //if (config.UseAutomaticFunctionCalling)
-            //{
-            //    return await HandleAutomaticFunctionCalling(sk, entries.FirstOrDefault());
-            //}
-
-            //if(config.PipeLineSteps?.Any() != true)
-            //{
-            //    return Error.Unexpected("No pipeline steps defined in configuration.");
-            //}
-
-            //delete
-            //_pipelineContextService.SetCurrentContext(context);
-
-
-
-            //change to list of results, deal with errors in result creation
-
-            // will be needed to search by params/config
-            // refactor into pipeline
-            //var sk = _semanticKernelManager.CreateKernel(skData!);
-            //_semanticKernelManager.AddPluginToSemanticKernel<SemanticSlicerChunkGenerator>(sk!);
-            //sk!.Plugins.TryGetPlugin(typeof(SemanticSlicerChunkGenerator).Name, out var plugin);
-            //var service = sk.GetRequiredService<IChunkGenerator>();
-
-
-
-            //var prompt = "{{SemanticSlicerChunkGenerator.generate_chunks_from_string $rawText}}";
-            //var arg = "Multiple Implementations: If there are multiple implementations of generate_chunks_from_string, ensure that the correct one is invoked by specifying the appropriate function name or handling the selection logic.\n\nError Handling: Implement robust error handling to manage scenarios where the function might not be available or the invocation fails.\n\nFunction Signatures: Ensure that the function signatures match the expected parameters to avoid runtime errors.";
-            //var c = new PromptTemplateConfig
-            //{
-            //    Template = prompt,
-            //    TemplateFormat = PromptTemplateConfig.SemanticKernelTemplateFormat,
-            //    Name = "ChunkGenTemplate"
-            //};
-            //var factory = new KernelPromptTemplateFactory();
-            //var b = factory.TryCreate(c, out var promptTemplate);
-            //var rendered = await promptTemplate.RenderAsync(sk, new KernelArguments { { "rawText", arg } });
-            //var res = await sk.InvokePromptAsync(prompt, new KernelArguments { { "rawText", arg } });
-            //var result = await sk.InvokeAsync(typeof(SemanticSlicerChunkGenerator).Name, "generate_chunks_from_string", new KernelArguments{ { "rawText", arg } });
-            //var result2 = await sk.InvokePromptAsync($"Generate chunks from this string and return only list of strings: {arg}", new(settings));
-            //var val1 = result.GetValue<IList<string>>();
-            //var val = result2.GetValue<string>();
-            //var val = res.GetValue<string>();
-            //var textSearch = _searchProviderManager.CreateTextSearch(searchData!)!;
-
-            //var strings = new List<string> { "Pes šel do lesa.", "Kočka spí v koši.", "Auto jede rychle." };
-            //var embeddingGenerator = sk.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>();
-            //var emb = await embeddingGenerator.GenerateAsync("závodní vůz.");
-            //var vectorStore = new InMemoryVectorStore();
-            //var collection = new InMemoryCollection<string, VectorStore>("myCollection");
-            //await collection.EnsureCollectionExistsAsync();
-            ////var embeddings = await embeddingGenerator.GenerateAsync(strings.ToArray());
-
-            //for (int i = 0; i < strings.Count; i++)
-            //{
-            //    var e = await embeddingGenerator.GenerateAsync(strings[i]);
-            //    await collection.UpsertAsync(new VectorStore
-            //    {
-            //        Id = $"doc-{i}",
-            //        Text = strings[i],
-            //        Embedding = e.Vector
-            //    });
-            //}
-            //var searchResult = collection.SearchAsync(emb, top: 3);
-
-            //await foreach (var record in searchResult)
-            //{
-            //    Console.WriteLine($"Best match: {record.Record.Text}");
-            //    Console.WriteLine($"Score: {record.Score}");
-            //}
-
-            await Parallel.ForEachAsync(entries, async (entry, _) =>
-            {
-                //var query = entry.QueryString!;
-                //var res = await _searchProviderManager.GetSearchResults(textSearch, query);
-                //var searchResults = await res.Results.ToListAsync();
-                //var usedUrls = searchResults.Where(x => !string.IsNullOrEmpty(x.Link)).Select(x => x.Link!);
-                //temporary
-                //if (useScraper)
-                //{
-                //    //will be needed some specifications from config what to search for maybe?
-                //    var rawScrapedContent = await _searchWebScraper.ScrapeDataFromUrlsAsync(usedUrls);
-                //    var chunks = _chunkGenerator.GenerateChunksFromData(rawScrapedContent);
-                //    resultView.SearchResult = _chunkRanker.ExtractRelevantDataFromChunks(chunks, query);
-                //}
-                //else
-                //{
-                //    //this uses snippets from search only
-                //    resultView.SearchResult = string.Join('\n', searchResults.Select(x => x.Value));
-                //}
-                //resultView.Prompt = PromptUtility.BuildPrompt(promptConf, query, resultView.SearchResult);
-                ////resultView.AIResult = await _semanticKernelManager.GetAICompletionResult(sk!, resultView.Prompt);
-                //resultView.AIResult.UsedURLs = usedUrls;
-            });
+            return await ExecutePipelineAsync(pipeline, entries.Select(x => new PipelineRun(x)), cancellationToken);
         }
 
+        /// <inheritdoc/>
         // only for not search and KB normal functionality (when you want to give data without defining knowledge base), for greater control setup normal knowledge base
         public IKnowledgeBaseContainer CreateDefaultDataContainer<TModel>(IEnumerable<TModel> data)
             where TModel : class
         {
             Type recordType = typeof(KnowledgeRecord<>).MakeGenericType(typeof(TModel));
-            Type kbType = typeof(KnowledgeBaseDefault<,>).MakeGenericType(recordType, typeof(TModel));
-            var kb = (KnowledgeBaseDefault<KnowledgeRecord<TModel>, TModel>)ActivatorUtilities.CreateInstance(_serviceProvider, kbType);
+            Type kbType = typeof(KnowledgeBaseDataDefault<,>).MakeGenericType(recordType, typeof(TModel));
+            var kb = (KnowledgeBaseDataDefault<KnowledgeRecord<TModel>, TModel>)ActivatorUtilities.CreateInstance(_serviceProvider, kbType);
             return new KnowledgeBaseDataContainer<KnowledgeRecord<TModel>, TModel>(kb, data);
         }
 
+        /// <inheritdoc/>
         // only for not search and KB normal functionality (when you want to give data without defining knowledge base) with specified record, for greater control setup normal knowledge base
         public IKnowledgeBaseContainer CreateDefaultDataContainer<TRecord, TModel>(IEnumerable<TModel> data)
             where TModel : class
             where TRecord : KnowledgeRecord<TModel>, new()
         {
             Type recordType = typeof(TRecord);
-            Type kbType = typeof(KnowledgeBaseDefault<,>).MakeGenericType(recordType, typeof(TModel));
-            var kb = (KnowledgeBaseDefault<TRecord, TModel>)ActivatorUtilities.CreateInstance(_serviceProvider, kbType);
+            Type kbType = typeof(KnowledgeBaseDataDefault<,>).MakeGenericType(recordType, typeof(TModel));
+            var kb = (KnowledgeBaseDataDefault<TRecord, TModel>)ActivatorUtilities.CreateInstance(_serviceProvider, kbType);
             return new KnowledgeBaseDataContainer<TRecord, TModel>(kb, data);
         }
 
+        /// <inheritdoc/>
         public ErrorOr<PipelineModel> CreateDefaultSearchPipeline(IEnumerable<IKnowledgeBaseContainer> containers, PromptConfiguration? promptConf = null, PipelineAdditionalSettings? pipelineSettings = null, KernelConfiguration? kernelData = null, Kernel? kernel = null)
         {
             return CreateDefaultSearchPipelineCommon(containers, promptConf, pipelineSettings, kernelData, kernel, true);
         }
 
+        /// <inheritdoc/>
         public ErrorOr<PipelineModel> CreateDefaultSearchPipelineWithoutGenerationStep(IEnumerable<IKnowledgeBaseContainer> containers, PromptConfiguration? promptConf = null, PipelineAdditionalSettings? pipelineSettings = null, KernelConfiguration? kernelData = null, Kernel? kernel = null)
         {
             return CreateDefaultSearchPipelineCommon(containers, promptConf, pipelineSettings, kernelData, kernel, false);
         }
 
+        /// <inheritdoc/>
         public IEnumerable<IPipelineStep> CreateDefaultGoogleSearchPipelineSteps(string googleApiKey, string googleEngine, GoogleSearchFilterModel? searchFilter = null, GoogleSettings? googleSettings = null, UrlRecordFilter? filter = null, bool useScraper = false)
         {
             searchFilter ??= new GoogleSearchFilterModel();
@@ -316,6 +239,22 @@ namespace PromptEnhancer.Services.EnhancerService
                 ];
         }
 
+        /// <summary>
+        /// Creates a default search pipeline model with the specified configuration and settings.
+        /// </summary>
+        /// <remarks>This method constructs a pipeline model with a predefined sequence of steps,
+        /// including preprocessing, multiple search,  embedding processing, ranking, filtering, and prompt building. If
+        /// <paramref name="addGenerationStep"/> is set to  <see langword="true"/>, a generation step is appended to the
+        /// pipeline.</remarks>
+        /// <param name="containers">A collection of knowledge base containers used for the search pipeline.</param>
+        /// <param name="promptConf">The prompt configuration to use for the pipeline. If null, a default configuration is applied.</param>
+        /// <param name="pipelineSettings">Additional settings for the pipeline. If null, default settings are applied.</param>
+        /// <param name="kernelData">The kernel configuration to use for the pipeline. Can be null if not required.</param>
+        /// <param name="kernel">The kernel instance to use for the pipeline. Can be null if not required.</param>
+        /// <param name="addGenerationStep">A boolean value indicating whether to include a generation step in the pipeline.  <see langword="true"/> to
+        /// include the generation step; otherwise, <see langword="false"/>.</param>
+        /// <returns>An <see cref="ErrorOr{T}"/> containing the created <see cref="PipelineModel"/> if successful, or an error if
+        /// the pipeline configuration is invalid.</returns>
         private ErrorOr<PipelineModel> CreateDefaultSearchPipelineCommon(IEnumerable<IKnowledgeBaseContainer> containers, PromptConfiguration? promptConf, PipelineAdditionalSettings? pipelineSettings, KernelConfiguration? kernelData, Kernel? kernel, bool addGenerationStep)
         {
             var defaultConfig = new EnhancerConfiguration();
@@ -343,6 +282,16 @@ namespace PromptEnhancer.Services.EnhancerService
             return new PipelineModel(settings.Value, steps);
         }
 
+        /// <summary>
+        /// Converts the specified <see cref="EnhancerConfiguration"/> object to a JSON string.
+        /// </summary>
+        /// <remarks>The output JSON is formatted with indented styling for readability. If <paramref
+        /// name="hideSecrets"/>  is set to <see langword="true"/>, a custom contract resolver is used to mask sensitive
+        /// fields.</remarks>
+        /// <param name="configuration">The configuration object to serialize.</param>
+        /// <param name="hideSecrets">A value indicating whether sensitive information in the configuration should be hidden. If <see
+        /// langword="true"/>, sensitive fields are masked in the output; otherwise, all fields are included.</param>
+        /// <returns>A JSON-formatted string representation of the <paramref name="configuration"/> object.</returns>
         private string GetConfigurationJson(EnhancerConfiguration configuration, bool hideSecrets = true)
         {
             var settings = new JsonSerializerSettings

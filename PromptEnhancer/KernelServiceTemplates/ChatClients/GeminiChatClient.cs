@@ -4,6 +4,9 @@ using Microsoft.SemanticKernel.Connectors.Google;
 
 namespace PromptEnhancer.KernelServiceTemplates.ChatClients
 {
+    /// <summary>
+    /// Service template for adding Gemini Chat Client to the kernel's service collection.
+    /// </summary>
     public class GeminiChatClient : KernelServiceTemplate
     {
         public string ModelId { get; }
@@ -17,6 +20,7 @@ namespace PromptEnhancer.KernelServiceTemplates.ChatClients
             ServiceId = serviceId;
         }
 
+        /// <inheritdoc/>
         public override IServiceCollection AddToServices(IServiceCollection services)
         {
             var chatClient = new GoogleAIGeminiChatCompletionService(ModelId, ApiKey).AsChatClient();

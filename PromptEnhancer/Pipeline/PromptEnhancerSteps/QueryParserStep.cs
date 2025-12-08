@@ -5,8 +5,19 @@ using PromptEnhancer.Models.Pipeline;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
+    /// <summary>
+    /// Represents a pipeline step that processes a user query to extract meaningful and distinct search queries.
+    /// </summary>
+    /// <remarks>This step uses a language model to analyze the user query and generate up to a specified
+    /// number of distinct search queries.  If the query cannot be improved or split, a predefined failure response is
+    /// returned. The step ensures that the generated  queries are relevant to the original user query and do not exceed
+    /// the maximum allowed response length.</remarks>
     public class QueryParserStep : PipelineStep
     {
+        /// <summary>
+        /// A template string used to generate a prompt for extracting meaningful and distinct search queries from a
+        /// user query.
+        /// </summary>
         public const string PromptTemplate =
             """
             Given the user query "{0}", extract up to "{1}" meaningful and distinct search queries, separated by ';'.
@@ -29,6 +40,12 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             _maxSplit = maxSplit;
             _options = options;
         }
+
+        /// <inheritdoc/>
+        /// <remarks>This method interacts with a chat client to process the input query and generate a
+        /// response. It validates  the input prompt and response to ensure they meet the configured constraints, such
+        /// as maximum length and  formatting rules. If the input or response violates these constraints, the step fails
+        /// with an appropriate error.</remarks>
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default)
         {
             //TODO maybe more checks for the llm response?
@@ -50,6 +67,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             return true;
         }
 
+        /// <inheritdoc/>
         protected override ErrorOr<bool> CheckExecutionConditions(PipelineRun context)
         {
             if (!string.IsNullOrEmpty(context.QueryString))

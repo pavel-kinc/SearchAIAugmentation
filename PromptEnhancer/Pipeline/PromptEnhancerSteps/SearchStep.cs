@@ -6,7 +6,18 @@ using PromptEnhancer.Models.Pipeline;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
-    //TODO maybe make convenience classes for less generics without required generics (like filters and settings)
+    /// <summary>
+    /// Represents a pipeline step that performs a knowledge base search using the specified search request, filter, and
+    /// settings. For more control, multiple search KBs use other step: MultipleSearchStep.
+    /// </summary>
+    /// <remarks>This step executes a search operation against a knowledge base and retrieves a specified
+    /// maximum number of records. The search can be customized using the provided search request, filter, and settings.
+    /// The retrieved records are added to the pipeline run context for further processing.</remarks>
+    /// <typeparam name="TRecord">The type of the knowledge record being retrieved.</typeparam>
+    /// <typeparam name="TSearchFilter">The type of the search filter used to refine the search.</typeparam>
+    /// <typeparam name="TSearchSettings">The type of the search settings used to configure the search operation.</typeparam>
+    /// <typeparam name="TFilter">The type of the model filter applied to the search results.</typeparam>
+    /// <typeparam name="T">The type of the model being filtered.</typeparam>
     public class SearchStep<TRecord, TSearchFilter, TSearchSettings, TFilter, T> : PipelineStep
         where TRecord : class, IKnowledgeRecord
         where TSearchFilter : class, IKnowledgeBaseSearchFilter
@@ -21,29 +32,27 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 
         public SearchStep(KnowledgeSearchRequest<TSearchFilter, TSearchSettings> request, TFilter? filter = null, int maxRecords = 50, string? knowledgeBaseKey = null, bool isRequired = false) : base(isRequired)
         {
-            // is key needed here? should i put knowledge base here directly?
             _knowledgeBaseKey = knowledgeBaseKey;
             _request = request;
             _filter = filter;
             _maxRecords = maxRecords;
         }
 
+        /// <inheritdoc/>
+        /// <remarks>This method retrieves records from a knowledge base based on the provided query
+        /// strings and filter criteria, and adds the retrieved records to the pipeline context. The maximum number of
+        /// records retrieved is limited by the step's configuration.</remarks>
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default)
         {
             try
             {
                 List<IKnowledgeRecord> recordsToAdd = [];
                 var kernel = settings.Kernel;
-                //TODO plugins in each step? how to choose, how to setup needed ones
                 var kb = settings.GetService<IKnowledgeBase<TRecord, TSearchFilter, TSearchSettings, TFilter, T>>(_knowledgeBaseKey);
-                //TODO make the search accept more queryStrings, probably inside Search, here if it is not expensive to create the connection each time
-                // aka now user can implement paralel async searches easily, so its prolly better to keep it this way
-                //TODO more query strings
                 var res = await kb!.SearchAsync(_request, context.QueryStrings.Any() ? context.QueryStrings : [context.QueryString!], _filter, cancellationToken);
                 recordsToAdd.AddRange(res.Take(_maxRecords));
 
                 context.RetrievedRecords.AddRange(recordsToAdd);
-                //TODO work with knowledge bases and processor
                 return true;
             }
             catch (Exception ex)
@@ -52,6 +61,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             }
         }
 
+        /// <inheritdoc/>
         protected override ErrorOr<bool> CheckExecutionConditions(PipelineRun context)
         {
             if (!string.IsNullOrEmpty(context.QueryString))

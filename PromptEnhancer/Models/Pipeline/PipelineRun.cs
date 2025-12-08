@@ -3,10 +3,16 @@ using PromptEnhancer.KnowledgeRecord.Interfaces;
 
 namespace PromptEnhancer.Models.Pipeline
 {
-    //TODO maybe implement locks for this class? (now there is no concurrency)
+    /// <summary>
+    /// Represents the state and data associated with a single pipeline execution, including input, output, and
+    /// intermediate processing details.
+    /// </summary>
+    /// <remarks>The <see cref="PipelineRun"/> class is designed to encapsulate the data flow and context for
+    /// a pipeline execution.  It provides properties to track input data, intermediate results, metadata, and final
+    /// outputs.  This class is flexible and can be used to process various steps of a pipeline as data becomes
+    /// available.</remarks>
     public class PipelineRun
     {
-        //TODO not required (pipeline can be used from any point to do any step, when the needed data is there)
         public PipelineRun(Entry? entry = null)
         {
             Entry = entry;
@@ -32,7 +38,6 @@ namespace PromptEnhancer.Models.Pipeline
 
         public ChatResponse? FinalResponse { get; set; }
 
-        // TODO maybe make this required and take its ID/Name as the main identifier? (since pipeline can parallelly process multiple contexts/entries)
         public Entry? Entry { get; init; }
 
         public long InputTokenUsage { get; set; } = 0;

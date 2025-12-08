@@ -2,6 +2,10 @@
 
 namespace PromptEnhancer.ChunkService
 {
+
+    /// <summary>
+    /// Provides functionality to generate text chunks from raw input data using semantic slicing options and SemanticSlicer package.
+    /// </summary>
     public class SemanticSlicerChunkService : IChunkGeneratorService
     {
         private readonly SlicerOptions _slicerOptions;
@@ -16,11 +20,12 @@ namespace PromptEnhancer.ChunkService
             };
         }
 
-        public IList<string> GenerateChunksFromData(string rawText, int? chunkSize)
+        /// <inheritdoc/>
+        public IList<string> GenerateChunksFromData(string rawText, int? chunkTokenSize)
         {
             var _slicerInstance = new Slicer(new SlicerOptions
             {
-                MaxChunkTokenCount = chunkSize ?? _slicerOptions.MaxChunkTokenCount,
+                MaxChunkTokenCount = chunkTokenSize ?? _slicerOptions.MaxChunkTokenCount,
                 Separators = _slicerOptions.Separators,
                 StripHtml = _slicerOptions.StripHtml
             });

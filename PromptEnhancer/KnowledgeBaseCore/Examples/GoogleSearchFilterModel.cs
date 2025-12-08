@@ -3,7 +3,10 @@ using PromptEnhancer.KnowledgeBaseCore.Interfaces;
 
 namespace PromptEnhancer.KnowledgeBaseCore
 {
-    // for info about properties look at https://developers.google.com/custom-search/v1/reference/rest/v1/cse/list
+    /// <summary>
+    /// Represents a model for filtering Google Custom Search results.
+    /// </summary>
+    /// <remarks>for info about properties look at https://developers.google.com/custom-search/v1/reference/rest/v1/cse/list</remarks>
     public class GoogleSearchFilterModel : IKnowledgeBaseSearchFilter
     {
         public string? CountryCode { get; init; }
@@ -26,6 +29,11 @@ namespace PromptEnhancer.KnowledgeBaseCore
         public int Top { get; init; } = 3;
 
 #pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+        /// <summary>
+        /// Builds and returns a <see cref="TextSearchOptions"/> object configured with the current search parameters.
+        /// </summary>
+        /// <returns>A <see cref="TextSearchOptions"/> object containing the configured search parameters. If no parameters are
+        /// set, the <see cref="TextSearchOptions.Filter"/> property will be <c>null</c>.</returns>
         public TextSearchOptions BuildParameters()
         {
             TextSearchFilter? filter = null;

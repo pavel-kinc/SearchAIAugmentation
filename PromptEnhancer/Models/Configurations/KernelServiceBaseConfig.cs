@@ -2,6 +2,12 @@
 
 namespace PromptEnhancer.Models.Configurations
 {
+    /// <summary>
+    /// Represents the configuration settings required to initialize a kernel service.
+    /// </summary>
+    /// <remarks>This class encapsulates the necessary parameters for configuring a kernel service,  including
+    /// the service provider, model details, authentication key, and optional deployment  and service identifiers. It is
+    /// used to define the setup for various AI-related services.</remarks>
     public class KernelServiceBaseConfig
     {
         public AIProviderEnum KernelServiceProvider { get; set; }

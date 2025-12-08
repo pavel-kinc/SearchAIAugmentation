@@ -4,8 +4,10 @@ using PromptEnhancer.Pipeline.Interfaces;
 
 namespace PromptEnhancer.Pipeline
 {
+    /// <inheritdoc/>
     public class PipelineOrchestrator : IPipelineOrchestrator
     {
+        /// <inheritdoc/>
         public virtual async Task<ErrorOr<bool>> RunPipelineAsync(PipelineModel pipeline, PipelineRun context, CancellationToken ct = default)
         {
             var steps = pipeline.Steps;

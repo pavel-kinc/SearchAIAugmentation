@@ -1,4 +1,5 @@
-﻿using Microsoft.SemanticKernel.Data;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.SemanticKernel.Data;
 using PromptEnhancer.ChunkService;
 using PromptEnhancer.KnowledgeRecord;
 using PromptEnhancer.KnowledgeSearchRequest.Examples;
@@ -10,17 +11,31 @@ using System.Collections.Concurrent;
 
 namespace PromptEnhancer.KnowledgeBaseCore.Examples
 {
+
+    /// <summary>
+    /// Represents a knowledge base that utilizes Google Search to retrieve up-to-date data. This class can be used for
+    /// various queries that require data from web searches.
+    /// </summary>
+    /// <remarks>The <see cref="GoogleKnowledgeBase"/> class extends the functionality of <see
+    /// cref="KnowledgeBaseUrl{TRecord, TFilterModel, TSettings, TFilter, TUrlRecord}"/> by integrating with Google
+    /// Search through a search provider manager. It supports asynchronous search operations and can handle multiple
+    /// queries concurrently.</remarks>
     public class GoogleKnowledgeBase : KnowledgeBaseUrl<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>
     {
         private readonly ISearchProviderManager _searchProviderManager;
-        public GoogleKnowledgeBase(ISearchWebScraper searchWebScraper, IChunkGeneratorService chunkGenerator, ISearchProviderManager searchProviderManager)
+        private readonly ILogger<GoogleKnowledgeBase> _logger;
+
+        public GoogleKnowledgeBase(ISearchWebScraper searchWebScraper, IChunkGeneratorService chunkGenerator, ISearchProviderManager searchProviderManager, ILogger<GoogleKnowledgeBase> logger)
             : base(searchWebScraper, chunkGenerator)
         {
             _searchProviderManager = searchProviderManager;
+            _logger = logger;
         }
 
+        /// <inheritdoc/>
         public override string Description => $"This knowledge base uses Google Search to retrieve up-to-date data. Can be used for various queries that could use data from web search.";
 
+        /// <inheritdoc/>
         public async override Task<IEnumerable<KnowledgeUrlRecord>> SearchAsync(
             IKnowledgeSearchRequest<GoogleSearchFilterModel, GoogleSettings> request, IEnumerable<string> queriesToSearch, UrlRecordFilter? filter = null, CancellationToken ct = default)
         {
@@ -62,7 +77,20 @@ namespace PromptEnhancer.KnowledgeBaseCore.Examples
             return [.. cb];
         }
 
-        private async Task<IEnumerable<UrlRecord>> GetDataFromGoogle(string queryString, ITextSearch textSearch, TextSearchOptions? options, GoogleSettings settings)
+        /// <summary>
+        /// Retrieves data from Google based on the specified query string and search options.
+        /// </summary>
+        /// <remarks>If <paramref name="settings"/> specifies to use a web scraper, the method scrapes
+        /// data from the URLs obtained from the search results. Otherwise, it constructs <see cref="UrlRecord"/>
+        /// objects using the search result snippets.</remarks>
+        /// <param name="queryString">The search query string used to retrieve data from Google. Cannot be null or empty.</param>
+        /// <param name="textSearch">The text search service used to perform the search. Cannot be null.</param>
+        /// <param name="options">Optional search options that can modify the search behavior. Can be null.</param>
+        /// <param name="settings">The settings that configure the search, including the number of top results to retrieve and whether to use a
+        /// web scraper.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains an enumerable collection of <see
+        /// cref="UrlRecord"/> objects representing the search results.</returns>
+        protected async Task<IEnumerable<UrlRecord>> GetDataFromGoogle(string queryString, ITextSearch textSearch, TextSearchOptions? options, GoogleSettings settings)
         {
             var res = await _searchProviderManager.GetSearchResults(textSearch!, queryString!, settings.TopN, options);
 

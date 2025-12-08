@@ -4,22 +4,26 @@ using PromptEnhancer.Services.RecordRankerService;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
+    /// <summary>
+    /// Represents a pipeline step that processes and ranks retrieved records based on their similarity to a query.
+    /// </summary>
     public class ProcessRankStep : PipelineStep
     {
-        private readonly string? _recordRankerServiceKey;
-
-        public ProcessRankStep(string? recordRankerServiceKey = null, bool isRequired = false) : base(isRequired)
+        public ProcessRankStep(bool isRequired = false) : base(isRequired)
         {
-            _recordRankerServiceKey = recordRankerServiceKey;
         }
 
+        /// <inheritdoc/>
+        /// <remarks>This method uses the <see cref="IRecordRankerService"/> to calculate the similarity
+        /// score for the retrieved records based on the provided query string and kernel settings.</remarks>
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default)
         {
-            var rankerService = settings.GetService<IRecordRankerService>(_recordRankerServiceKey);
+            var rankerService = settings.GetService<IRecordRankerService>();
             //TODO is it okay to send context? I would like to make it unmodifiable maybe?
-            return await rankerService!.GetSimilarityScoreForRecordsAsync(settings.Kernel, context.RetrievedRecords, context.QueryString, settings.Settings.GeneratorKey);
+            return await rankerService!.AssignSimilarityScoreToRecordsAsync(settings.Kernel, context.RetrievedRecords, context.QueryString, settings.Settings.GeneratorKey);
         }
 
+        /// <inheritdoc/>
         protected override ErrorOr<bool> CheckExecutionConditions(PipelineRun context)
         {
             if (context.RetrievedRecords.Any())

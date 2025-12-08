@@ -2,6 +2,12 @@
 
 namespace PromptEnhancer.KnowledgeSearchRequest.Examples
 {
+    /// <summary>
+    /// Represents the configuration settings for integrating with Google's search APIs or scraping services.
+    /// </summary>
+    /// <remarks>This class provides options for configuring API keys, search engine identifiers, and behavior
+    /// for chunking and scraping. It is designed to be used in scenarios where Google's search capabilities are
+    /// leveraged for knowledge base searches.</remarks>
     public class GoogleSettings : IKnowledgeBaseSearchSettings
     {
         public required string SearchApiKey { get; set; }

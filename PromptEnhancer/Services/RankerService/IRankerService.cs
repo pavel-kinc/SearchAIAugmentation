@@ -2,10 +2,13 @@
 
 namespace PromptEnhancer.Services.RankerService
 {
-    //TODO dont forget IChunkRankerService, delete or move to some demo
+
+    /// <summary>
+    /// Defines a service for calculating the similarity score between two embeddings.
+    /// </summary>
     public interface IRankerService
     {
-        //TODO this expects same length vectors!
+        /// <inheritdoc/>
         float? GetSimilarityScore(Embedding<float> queryEmbed, Embedding<float> recordEmbed);
     }
 }

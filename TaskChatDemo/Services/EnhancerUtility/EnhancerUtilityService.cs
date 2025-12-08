@@ -91,7 +91,7 @@ namespace TaskChatDemo.Services.EnhancerUtility
             else
             {
                 var pipeline = GetPipeline(settings, settings.Kernel);
-                var pipelineRes = await _enhancerService.ProcessPipelineAsync(pipeline, [new PipelineRun(entry)]);
+                var pipelineRes = await _enhancerService.ExecutePipelineAsync(pipeline, [new PipelineRun(entry)]);
                 if (pipelineRes.IsError || pipelineRes.Value.FirstOrDefault()?.Result is null)
                 {
                     throw new InvalidOperationException($"Pipeline failed: {pipelineRes.ErrorsOrEmptyList.Select(x => x.ToString())}");

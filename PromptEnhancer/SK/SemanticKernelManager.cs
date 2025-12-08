@@ -8,8 +8,17 @@ using PromptEnhancer.SK.Interfaces;
 
 namespace PromptEnhancer.SK
 {
+    /// <summary>
+    /// Manages the creation and configuration of semantic kernels, including the addition of plugins and conversion of
+    /// kernel configurations.
+    /// </summary>
+    /// <remarks>This class provides methods to create and configure semantic kernels using specified services
+    /// and plugins. It also supports converting kernel configuration data into a format suitable for kernel
+    /// initialization. The manager relies on an <see cref="IKernelServiceFactory"/> to create kernel services and can
+    /// optionally add internal services and context plugins during kernel creation.</remarks>
     public class SemanticKernelManager : ISemanticKernelManager
     {
+        // context plugins for semantic kernel creation (for later usage in steps)
         private readonly IEnumerable<ISemanticKernelContextPlugin> _contextPlugins;
 
         public IKernelServiceFactory KernelServiceFactory { get; }
@@ -20,11 +29,13 @@ namespace PromptEnhancer.SK
             _contextPlugins = contextPlugins;
         }
 
+        /// <inheritdoc/>
         public void AddPluginToSemanticKernel<Plugin>(Kernel kernel) where Plugin : class
         {
             kernel.Plugins.AddFromType<Plugin>(typeof(Plugin).Name);
         }
 
+        /// <inheritdoc/>
         public ErrorOr<Kernel> CreateKernel(IEnumerable<KernelServiceBaseConfig> kernelServiceConfigs, bool addInternalServices = false, bool addContextPlugins = true)
         {
             try
@@ -54,31 +65,7 @@ namespace PromptEnhancer.SK
 
         }
 
-        //public async Task<ChatCompletionResult> GetAICompletionResult(Kernel kernel, string prompt, int? maxPromptLength = null)
-        //{
-        //    if (prompt.Length > (maxPromptLength ?? MaxPromptLength))
-        //    {
-        //        throw new Exception("Prompt length exceeds limit.");
-        //    }
-        //    PromptExecutionSettings promptExecutionSettings = new()
-        //    {
-        //        FunctionChoiceBehavior = FunctionChoiceBehavior.None()
-        //    };
-        //    var chatCompletionService = kernel.Services.GetRequiredService<IChatCompletionService>();
-        //    var result = await chatCompletionService.GetChatMessageContentAsync(
-        //        prompt,
-        //        promptExecutionSettings,
-        //        kernel
-        //        );
-        //    //TODO: handle other providers - response is specifig to openai - no built in abstraction from .net it seems
-        //    var replyInnerContent = result.InnerContent as OpenAI.Chat.ChatCompletion;
-        //    return new ChatCompletionResult
-        //    {
-        //        AIOutput = result?.Content,
-        //        TokensUsed = replyInnerContent?.Usage.TotalTokenCount ?? 0,
-        //    };
-        //}
-
+        /// <inheritdoc/>
         public ErrorOr<IEnumerable<KernelServiceBaseConfig>> ConvertConfig(KernelConfiguration kernelData)
         {
             try
