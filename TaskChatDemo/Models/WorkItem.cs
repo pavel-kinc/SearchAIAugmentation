@@ -1,5 +1,8 @@
 ﻿namespace TaskChatDemo.Models
 {
+    /// <summary>
+    /// Represents a work item with details such as title, description, type, and associated metadata.
+    /// </summary>
     public class WorkItem
     {
         public required string Id { get; init; }

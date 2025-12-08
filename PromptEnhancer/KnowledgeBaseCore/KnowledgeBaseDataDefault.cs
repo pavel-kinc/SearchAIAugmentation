@@ -17,6 +17,7 @@ namespace PromptEnhancer.KnowledgeBaseCore
     /// <typeparam name="TRecord">The type of the knowledge record, which must inherit from <see cref="KnowledgeRecord{TModel}"/> and have a
     /// parameterless constructor.</typeparam>
     /// <typeparam name="TModel">The type of the model associated with the knowledge record.</typeparam>
+    // [Experimental("This class is experimental and may change in future releases.")]
     public class KnowledgeBaseDataDefault<TRecord, TModel> : KnowledgeBase<TRecord, EmptySearchFilter, EmptySearchSettings, EmptyModelFilter<TModel>, TModel>
         where TRecord : KnowledgeRecord<TModel>, new()
         where TModel : class
@@ -27,7 +28,7 @@ namespace PromptEnhancer.KnowledgeBaseCore
         }
 
         /// <summary>
-        /// This method should not be used for data based containers. It always returns an empty list.
+        /// This method should not be used for data based knowledge bases. It always returns an empty list.
         /// Use only GetRecords or define full fledged KnowledgeBase with proper SearchFilter and SearchSettings.
         /// </summary>
         /// <returns>Empty list</returns>
@@ -46,7 +47,7 @@ namespace PromptEnhancer.KnowledgeBaseCore
         /// <param name="queryForEmbed">The query string used to filter or process the data.</param>
         /// <param name="ct">An optional <see cref="CancellationToken"/> to observe while waiting for the operation to complete.</param>
         /// <returns>An <see cref="IEnumerable{T}"/> containing the processed records.</returns>
-        public IEnumerable<TRecord> GetRecords(IEnumerable<TModel> data, string queryForEmbed, CancellationToken ct = default)
+        public virtual IEnumerable<TRecord> GetRecords(IEnumerable<TModel> data, string queryForEmbed, CancellationToken ct = default)
         {
             return GetKnowledgeRecords(data, null, queryForEmbed, true);
         }

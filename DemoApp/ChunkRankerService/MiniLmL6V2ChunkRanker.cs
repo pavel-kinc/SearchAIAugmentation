@@ -4,10 +4,18 @@ using System.Reflection;
 
 namespace ConfigurableGoogleSearchDemo.ChunkRankerService
 {
-    internal class MiniLmL6V2ChunkRanker : IChunkRankerService
+    /// <summary>
+    /// Provides functionality to rank and extract the most relevant text chunks based on their semantic similarity to a
+    /// target string. Testing purposes.
+    /// </summary>
+    /// <remarks>This class uses a pre-trained MiniLM-L6-V2 model to generate embeddings for the target string
+    /// and the provided text chunks. It calculates the cosine similarity between the embeddings to determine the
+    /// relevance of each chunk.</remarks>
+    public class MiniLmL6V2ChunkRanker : IChunkRankerService
     {
         private readonly AllMiniLmL6V2Embedder _embedder;
 
+        // requires model files in /model folder based on the executing assembly location
         public MiniLmL6V2ChunkRanker()
         {
             _embedder = new(
@@ -15,6 +23,7 @@ namespace ConfigurableGoogleSearchDemo.ChunkRankerService
             new BertTokenizer(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/model/vocab.txt"));
         }
 
+        /// <inheritdoc/>
         public string ExtractRelevantDataFromChunks(
         IList<string> chunks,
         string targetString,

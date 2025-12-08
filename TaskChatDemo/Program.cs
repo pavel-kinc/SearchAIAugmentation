@@ -16,12 +16,14 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         builder.AddServiceDefaults();
 
+        // add secrets configuration
         builder.Configuration.AddJsonFile("appsettings.secrets.json", optional: false, reloadOnChange: true);
 
         // Add services to the container.
         builder.Services.AddControllersWithViews();
         builder.Services.AddInMemoryVectorStore();
 
+        // Register the TaskItemModel collection
         builder.Services.AddSingleton(sp =>
         {
             var vectorStore = sp.GetRequiredService<VectorStore>();
@@ -44,12 +46,15 @@ public class Program
         builder.Services.AddSingleton<IVectorStoreService, VectorStoreService>();
         builder.Services.AddSingleton<IWorkItemApiService, WorkItemApiService>();
 
+        // add library
         builder.Services.AddPromptEnhancer();
         builder.Services.AddSingleton<TaskDataKnowledgeBase, TaskDataKnowledgeBase>();
         builder.Services.AddSingleton<WorkItemKnowledgeBase, WorkItemKnowledgeBase>();
         builder.Services.AddSingleton<IEnhancerUtilityService, EnhancerUtilityService>();
 
         var app = builder.Build();
+
+        // Seed the vector store with task models from JSON file
         var path = Path.Combine(builder.Environment.ContentRootPath, "Data", "task_models.json");
         var taskModels = TaskItemModelUtility.LoadFromJson(path);
 

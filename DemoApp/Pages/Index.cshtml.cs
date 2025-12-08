@@ -16,6 +16,15 @@ using System.Text;
 
 namespace DemoApp.Pages
 {
+    /// <summary>
+    /// Represents the page model for the Index page, providing functionality for managing configurations, entries, and
+    /// processing results within the application.
+    /// </summary>
+    /// <remarks>This class handles various operations such as retrieving and updating configurations,
+    /// managing entries, and processing results using the enhancer service. It also provides methods for uploading and
+    /// downloading configuration files, as well as clearing session data. The page model interacts with multiple
+    /// services to perform these operations, including logging, configuration setup, entry setup, and enhancement
+    /// services.</remarks>
     public class IndexModel : PageModel
     {
         private readonly ILogger<IndexModel> _logger;
@@ -129,6 +138,15 @@ namespace DemoApp.Pages
             return Page();
         }
 
+        /// <summary>
+        /// Executes the pipeline based on the current configuration and entry setup.
+        /// </summary>
+        /// <remarks>This method validates the entries to ensure that none of them have an empty query
+        /// string.  If validation fails, error messages are added to the view model and the page is returned. If
+        /// validation succeeds, the method processes the configuration and entries using the enhancer service. The
+        /// results or any processing errors are then added to the view model.</remarks>
+        /// <returns>A <see cref="Task{IActionResult}"/> representing the asynchronous operation.  Returns the current page with
+        /// updated view model data, including results or error messages.</returns>
         public async Task<IActionResult> OnPostProcessResultModel()
         {
             var appConfig = _configurationService.GetConfiguration(true);
@@ -169,6 +187,12 @@ namespace DemoApp.Pages
             return Page();
         }
 
+        /// <summary>
+        /// Executes after a page handler method has been invoked.
+        /// </summary>
+        /// <remarks>This method updates the <c>ViewModel.ConfigurationSetup</c> with the current
+        /// configuration and populates the <c>Entries</c> collection with the latest entries.</remarks>
+        /// <param name="context">The <see cref="PageHandlerExecutedContext"/> containing information about the current request and response.</param>
         public override void OnPageHandlerExecuted(PageHandlerExecutedContext context)
         {
             base.OnPageHandlerExecuted(context);
@@ -176,6 +200,14 @@ namespace DemoApp.Pages
             Entries = _entrySetupService.GetEntries().ToList();
         }
 
+        /// <summary>
+        /// Retrieves the enhancer configuration based on the provided application configuration.
+        /// </summary>
+        /// <remarks>This method adapts the provided <paramref name="appConfig"/> to an <see
+        /// cref="EnhancerConfiguration"/> and initializes it with default pipeline steps for Google Search using the
+        /// specified API key, engine, and search filter.</remarks>
+        /// <param name="appConfig">The application configuration containing settings for search and generation.</param>
+        /// <returns>An <see cref="EnhancerConfiguration"/> object configured with the necessary pipeline steps and settings.</returns>
         private EnhancerConfiguration GetEnhancerConfiguration(ConfigurationSetup appConfig)
         {
             var enhancerConfig = appConfig.Adapt<EnhancerConfiguration>();
@@ -190,6 +222,14 @@ namespace DemoApp.Pages
             return enhancerConfig;
         }
 
+        /// <summary>
+        /// Assigns execution settings and options to a <see cref="PipelineAdditionalSettings"/> instance based on the
+        /// provided configuration.
+        /// </summary>
+        /// <param name="pipelineAdditionalSettings">The existing settings to which execution settings and options will be assigned. Must not be null.</param>
+        /// <param name="generationConfiguration">The configuration containing parameters for generation, such as temperature and token limits. Must not be
+        /// null.</param>
+        /// <returns>A new <see cref="PipelineAdditionalSettings"/> instance with updated execution settings and options.</returns>
         private static PipelineAdditionalSettings AssignExecutionSettingsAndOptions(PipelineAdditionalSettings pipelineAdditionalSettings, GenerationConfiguration generationConfiguration)
         {
             var chatOptions = new ChatOptions
@@ -212,6 +252,13 @@ namespace DemoApp.Pages
             };
         }
 
+        /// <summary>
+        /// Configures and returns the execution settings for a prompt based on the specified generation configuration.
+        /// </summary>
+        /// <param name="generationConfiguration">The configuration settings that influence prompt execution, including token limits and behavioral
+        /// parameters.</param>
+        /// <returns>A <see cref="PromptExecutionSettings"/> object containing the execution parameters derived from the provided
+        /// configuration.</returns>
         private static PromptExecutionSettings GetExecutionSettings(GenerationConfiguration generationConfiguration)
         {
             var promptSettings = new PromptExecutionSettings();
@@ -241,6 +288,13 @@ namespace DemoApp.Pages
             return promptSettings;
         }
 
+        /// <summary>
+        /// Serializes the specified configuration object to a JSON string.
+        /// </summary>
+        /// <param name="configuration">The configuration object to serialize.</param>
+        /// <param name="hideSecrets">A value indicating whether sensitive information should be hidden in the serialized JSON. true to hide
+        /// sensitive information; otherwise, false.</param>
+        /// <returns>A JSON string representation of the configuration object.</returns>
         private string GetConfigurationJson(ConfigurationSetup configuration, bool hideSecrets = true)
         {
             var settings = new JsonSerializerSettings

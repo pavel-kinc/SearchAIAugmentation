@@ -2,6 +2,9 @@
 
 namespace TaskChatDemo.Models.TaskItem
 {
+    /// <summary>
+    /// Represents a task item with details such as title, description, status, and assignee.
+    /// </summary>
     public class TaskItemData
     {
         public Guid Id { get; set; }

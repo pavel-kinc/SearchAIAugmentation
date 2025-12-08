@@ -10,6 +10,15 @@ using PromptEnhancer.Services.EnhancerService;
 
 namespace DemoApp.Services
 {
+    /// <summary>
+    /// Provides functionality for managing and configuring application settings, including kernel, search, prompt, 
+    /// generation, and demo application configurations. This service ensures that default configurations are set  and
+    /// allows for updates to individual configuration components.
+    /// </summary>
+    /// <remarks>The <see cref="ConfigurationSetupService"/> interacts with the session state to persist
+    /// configuration data  across requests. It initializes default configurations if none are present in the session
+    /// and provides methods  to retrieve, update, and clear configurations. This service also supports handling
+    /// sensitive data by optionally  excluding secrets when retrieving configurations.</remarks>
     public class ConfigurationSetupService : IConfigurationSetupService
     {
         private readonly IEnhancerService _enhancerService;
@@ -33,6 +42,7 @@ namespace DemoApp.Services
             }
         }
 
+        /// <inheritdoc/>
         public ConfigurationSetup GetConfiguration(bool withSecrets = false)
         {
             var config = new ConfigurationSetup
@@ -112,6 +122,17 @@ namespace DemoApp.Services
             SetConfigurationSetup(config);
         }
 
+        /// <summary>
+        /// Sets the session configuration for a specified configuration name and optionally updates the demo
+        /// application configuration.
+        /// </summary>
+        /// <remarks>This method stores the provided <paramref name="partialConfig"/> in the session under
+        /// a key derived from the specified <paramref name="configName"/>. If <paramref name="demoAppConfig"/> is
+        /// provided, it is stored in the session under a predefined key.</remarks>
+        /// <param name="configName">The name of the configuration to be stored in the session.</param>
+        /// <param name="partialConfig">An object representing the partial configuration to be stored. This parameter cannot be null.</param>
+        /// <param name="demoAppConfig">An optional object representing the demo application configuration. If null, no demo application
+        /// configuration is updated.</param>
         public void SetSessionPartialConfigAndDemoAppConfig(string configName, object partialConfig, object? demoAppConfig)
         {
             _session.SetObjectAsJson(SessionPrefix + configName, partialConfig);
@@ -121,6 +142,10 @@ namespace DemoApp.Services
             }
         }
 
+        /// <summary>
+        /// Creates and returns the default configuration setup for the application.
+        /// </summary>
+        /// <returns>A <see cref="ConfigurationSetup"/> object containing the default configuration settings.</returns>
         private ConfigurationSetup GetDefaultConfiguration()
         {
             var enhancerConfig = _enhancerService.CreateDefaultConfiguration(aiApiKey: _configuration["AIServices:OpenAI:ApiKey"]);
@@ -145,6 +170,11 @@ namespace DemoApp.Services
             return configSetup;
         }
 
+        /// <summary>
+        /// Configures the default settings for the demo application based on the provided configuration setup.
+        /// </summary>
+        /// <param name="configSetup">The configuration setup object containing the necessary settings for the kernel, search provider, and demo
+        /// application.</param>
         private void SetDefaultDemoAppConfig(ConfigurationSetup configSetup)
         {
             var searchProvider = configSetup.SearchConfiguration.SearchProviderSettings.Provider.ToString();
@@ -153,6 +183,14 @@ namespace DemoApp.Services
             configSetup.DemoAppConfigSetup.SearchEngineFromInput = GetLoadedFromString(configSetup.SearchConfiguration.SearchProviderSettings.Engine is not null ? false : null, searchProvider);
         }
 
+        /// <summary>
+        /// Configures the session with the specified setup values.
+        /// </summary>
+        /// <remarks>This method serializes the configuration properties of the provided <paramref
+        /// name="configSetup"/> object  and stores them in the session using predefined keys. Each configuration
+        /// property is stored as JSON.</remarks>
+        /// <param name="configSetup">An instance of <see cref="ConfigurationSetup"/> containing the configuration values to be stored in the
+        /// session.</param>
         private void SetConfigurationSetup(ConfigurationSetup configSetup)
         {
             _session.SetObjectAsJson(SessionPrefix + nameof(KernelConfiguration), configSetup.KernelConfiguration);
@@ -162,6 +200,16 @@ namespace DemoApp.Services
             _session.SetObjectAsJson(SessionPrefix + nameof(DemoAppConfigSetup), configSetup.DemoAppConfigSetup);
         }
 
+        /// <summary>
+        /// Generates a descriptive string indicating the source of the key's loaded state and the associated provider.
+        /// </summary>
+        /// <param name="loadedFromInput">A nullable boolean indicating the source of the key's loaded state.  <see langword="true"/> if the key was
+        /// loaded from input, <see langword="false"/> if loaded from configuration,  or <see langword="null"/> if the
+        /// key is not loaded.</param>
+        /// <param name="provider">The name of the provider associated with the key's loaded state.  If <see langword="null"/>, "No Provider
+        /// was chosen" will be used in the output.</param>
+        /// <returns>A string describing the key's loaded state and the associated provider.  For example: "This key is currently
+        /// loaded from input for provider ProviderName."</returns>
         private string GetLoadedFromString(bool? loadedFromInput, string? provider)
         {
             var loadedText = loadedFromInput is null ? "not loaded" : (((bool)loadedFromInput ? "loaded from input" : "loaded from configuration") + $" for provider {provider ?? "No Provider was chosen"}");

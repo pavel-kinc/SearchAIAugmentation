@@ -14,6 +14,7 @@ namespace PromptEnhancer.KnowledgeBaseCore
     /// <typeparam name="TRecord">The type of the knowledge record, which must inherit from <see cref="KnowledgeRecord{TModel}"/> and have a
     /// parameterless constructor.</typeparam>
     /// <typeparam name="TModel">The type of the model associated with the knowledge record, which must be a reference type.</typeparam>
+    // [Experimental("This is an experimental container for knowledge bases that simply hold data and utilize the default knowledge base implementation to work with it.")]
     public class KnowledgeBaseDataContainer<TRecord, TModel> : IKnowledgeBaseContainer
         where TRecord : KnowledgeRecord<TModel>, new()
         where TModel : class

@@ -2,7 +2,12 @@
 
 namespace DemoApp.Models
 {
-    //TODO for now only for google (should i keep things that point to multiple options?)
+    /// <summary>
+    /// Represents the configuration settings for a search operation, including provider-specific settings and search
+    /// filters.
+    /// </summary>
+    /// <remarks>This class is currently tailored for Google search configurations. It includes settings for
+    /// the search provider  and filters to refine search results.</remarks>
     public class SearchConfiguration
     {
         public SearchProviderSettings SearchProviderSettings { get; set; } = new();

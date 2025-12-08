@@ -2,6 +2,9 @@
 
 namespace TaskChatDemo.Models.TaskItem
 {
+    /// <summary>
+    /// Represents a task item with vector store properties with properties for identification, description, status, and other metadata.
+    /// </summary>
     public class TaskItemModel
     {
         [VectorStoreKey]

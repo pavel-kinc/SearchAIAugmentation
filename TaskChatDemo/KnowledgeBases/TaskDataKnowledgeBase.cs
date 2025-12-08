@@ -10,6 +10,13 @@ using TaskChatDemo.Services.VectorStore;
 
 namespace TaskChatDemo.KnowledgeBases
 {
+    /// <summary>
+    /// Represents a specialized knowledge base for managing and searching development task data.
+    /// </summary>
+    /// <remarks>This knowledge base is designed to handle information about development tasks, such as who
+    /// performed specific tasks.  It supports searching for relevant task data using vector-based similarity matching.
+    /// Queries that are not explicitly  tied to other knowledge bases are likely referencing this knowledge
+    /// base.</remarks>
     public class TaskDataKnowledgeBase : KnowledgeBase<KnowledgeRecord<TaskItemData>, SearchItemFilterModel, ItemDataSearchSettings, EmptyModelFilter<TaskItemData>, TaskItemData>
     {
         public IVectorStoreService _vectorStoreService;

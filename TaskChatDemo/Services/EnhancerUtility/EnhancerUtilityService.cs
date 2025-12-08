@@ -26,6 +26,12 @@ using TaskChatDemo.Models.TaskItem;
 
 namespace TaskChatDemo.Services.EnhancerUtility
 {
+    /// <summary>
+    /// Provides utility services for enhancing software development tasks and work item management.
+    /// </summary>
+    /// <remarks>The <see cref="EnhancerUtilityService"/> class integrates various services to facilitate the
+    /// creation and execution of AI-driven pipelines for task and work item management. It utilizes different AI
+    /// providers and knowledge bases to generate context and insights for software development teams.</remarks>
     public class EnhancerUtilityService : IEnhancerUtilityService
     {
         public const string GeminiServiceId = "gemini";
@@ -49,6 +55,7 @@ namespace TaskChatDemo.Services.EnhancerUtility
             _promptBuildingService = promptBuildingService;
         }
 
+        /// <inheritdoc/>
         public ErrorOr<PipelineSettings> GetPipelineSettings()
         {
             var kernel = CreateKernel(_configuration["AIServices:OpenAI:ApiKey"]!, _configuration["AIServices:Gemini:ApiKey"]!);
@@ -77,6 +84,7 @@ namespace TaskChatDemo.Services.EnhancerUtility
             return settingsResult;
         }
 
+        /// <inheritdoc/>
         public async Task<PipelineRun> GetContextFromPipeline(string q, bool skipPipeline, Entry entry, PipelineSettings settings)
         {
             PipelineRun context;
@@ -106,6 +114,18 @@ namespace TaskChatDemo.Services.EnhancerUtility
 
             return context;
         }
+
+        /// <summary>
+        /// Constructs and returns a <see cref="PipelineModel"/> configured with a series of processing steps and
+        /// knowledge base containers based on the provided settings and kernel.
+        /// </summary>
+        /// <remarks>The pipeline includes steps for preprocessing, multiple searches, embedding
+        /// processing, ranking, filtering, and prompt building. It integrates with task and work item knowledge bases
+        /// and can optionally include a Google knowledge base if defined.</remarks>
+        /// <param name="settings">The settings used to configure the pipeline, including any specific options for processing steps.</param>
+        /// <param name="kernel">The kernel instance used to resolve services required by the pipeline, such as embedding generators.</param>
+        /// <returns>A <see cref="PipelineModel"/> instance containing the configured processing steps and knowledge base
+        /// containers.</returns>
         private PipelineModel GetPipeline(PipelineSettings settings, Kernel kernel)
         {
             var taskItemRequest = new KnowledgeSearchRequest<SearchItemFilterModel, ItemDataSearchSettings>()
@@ -141,6 +161,16 @@ namespace TaskChatDemo.Services.EnhancerUtility
             var pipeline = new PipelineModel(settings, steps);
             return pipeline;
         }
+
+        /// <summary>
+        /// Creates a new instance of a <see cref="Kernel"/> configured with specified API keys for OpenAI and Google
+        /// Gemini services.
+        /// </summary>
+        /// <param name="openAiApiKey">The API key for accessing OpenAI services. Cannot be null or empty.</param>
+        /// <param name="geminiApiKey">The API key for accessing Google Gemini services. Cannot be null or empty.</param>
+        /// <returns>A configured <see cref="Kernel"/> instance ready for use.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="openAiApiKey"/> or <paramref name="geminiApiKey"/> is null or empty.</exception>
+        /// <exception cref="Exception">Thrown if the kernel creation process fails.</exception>
         private Kernel CreateKernel(string openAiApiKey, string geminiApiKey)
         {
             if (string.IsNullOrEmpty(openAiApiKey) || string.IsNullOrEmpty(geminiApiKey))
@@ -162,6 +192,14 @@ namespace TaskChatDemo.Services.EnhancerUtility
             return kernel.Value;
         }
 
+        /// <summary>
+        /// Adds a Google knowledge base container to the specified list if the Google API key and search engine ID are
+        /// defined in the configuration.
+        /// </summary>
+        /// <remarks>This method checks the configuration for the presence of a Google API key and search
+        /// engine ID. If both are available, it creates a <see cref="KnowledgeBaseContainer{TRecord, TFilterModel,
+        /// TSettings, TFilter, TBaseRecord}"/> configured for Google search and adds it to the provided list.</remarks>
+        /// <param name="containers">The list of knowledge base containers to which the Google knowledge base will be added if applicable.</param>
         private void AddGoogleKnowledgeBaseIfDefined(List<IKnowledgeBaseContainer> containers)
         {
             var googleApiKey = _configuration["SearchConfigurations:Google:ApiKey"];
