@@ -6,9 +6,9 @@ It includes **two demonstration applications** built on the library to showcase 
 This repository contains several projects: 
 | Project Name | Role & Description |
 | :--- | :--- |
-| **[`PromptEnhancer`](#i-the-library-core)** | The **library PromptEnhancer** containing all core logic, generic interfaces, kernel management, and extension methods for prompt augmentation. |
-| **[`ConfigurableGoogleSearchDemo`](#i-the-library-core)** | Configurable **Google Demo** showcasing usage of the library by leveraging Google Search Engine for relevant context and subsequent augmentation. |
-| **[`TaskChatDemo`](#i-the-library-core)** | **Chat demo** focusing on using multiple AI providers, getting context from multiple Knowledge Bases working with development tasks. Uses other project **TaskDemoAPI** |
+| **[`PromptEnhancer`](#the-library---promptenhancer)** | The **library PromptEnhancer** containing all core logic, generic interfaces, kernel management, and extension methods for prompt augmentation. |
+| **[`ConfigurableGoogleSearchDemo`](#the-google-demo)** | Configurable **Google Demo** showcasing usage of the library by leveraging Google Search Engine for relevant context and subsequent augmentation. |
+| **[`TaskChatDemo`](#the-task-chat-demo)** | **Chat demo** focusing on using multiple AI providers, getting context from multiple Knowledge Bases working with development tasks. Uses other project **TaskDemoAPI** |
 | **`AppHost`** | The **.NET Aspire Orchestrator** responsible for defining, configuring, and launching all application projects in the solution.|
 **`ServiceDefaults`** | The **Shared Configuration Project** that centralizes common service configurations, such as logging, tracing, and health checks, used by all demo apps.
 | **`PromptEnhancer.Tests`** | The **Test** project, ensuring the core library's functionality and interactions with services are robust and correct. |
@@ -30,7 +30,7 @@ Please be aware of the functionality within the solution (as it is highly config
 
 **Legal Compliance and Terms of Service:** Users are solely responsible for ensuring that any enabled external integration complies fully with the **Terms of Service, Acceptable Use Policies (AUPs), and all applicable laws and regulations** of the respective external service providers (e.g., Google, LLM APIs, etc.). We strongly advise users to exercise caution, respect service terms and conditions, and adhere to rate limits when activating any external search or scraping functionality. Use of such tools is done at your own risk.
 
-### I. The Library - PromptEnhancer
+### The Library - PromptEnhancer
 <a href="[Your External URL]" target="_blank">[The Link Text You Want to Display]</a>
 ## Overview
 
@@ -57,3 +57,7 @@ public class ProductService
 }
 ```
 wqewqeqeqwwqeqwewqeqe
+
+### The Google Demo
+
+### The Task Chat Demo
