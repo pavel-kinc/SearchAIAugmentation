@@ -8,7 +8,15 @@ using System.Collections.Concurrent;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
-    //TODO maybe make convenience classes for less generics without required generics (like filters and settings)
+    /// <summary>
+    /// Represents a pipeline step that performs a multi-source search operation to retrieve relevant knowledge records
+    /// based on a user query.
+    /// </summary>
+    /// <remarks>This step interacts with multiple knowledge base containers to search for records that match
+    /// the user query.  It allows for automatic selection of knowledge bases or manual selection based on user-defined
+    /// criteria.  The retrieved records are added to the pipeline context for further processing.  The step ensures
+    /// that a minimum number of records are retrieved and supports parallel execution for improved performance. If the
+    /// number of retrieved records is below the specified threshold, the step fails.</remarks>
     public class MultipleSearchStep : PipelineStep
     {
         public const char Separator = ';';
@@ -42,6 +50,11 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             _maxRecords = maxRecordsPerKB;
         }
 
+        /// <inheritdoc/>
+        /// <remarks>This method selects knowledge bases based on the provided settings and performs
+        /// parallel searches  using the query strings from the pipeline context. The retrieved records are added to the
+        /// context  if the minimum required number of records is met. If the operation fails due to insufficient
+        /// records  or other conditions, an error is returned.</remarks>
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default)
         {
             try
@@ -59,7 +72,6 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 
                 await Parallel.ForEachAsync(pickedBases, async (kb, _) =>
                 {
-                    //TODO if search fails for 1, catch exception and continue?
                     var results = (await kb.SearchAsync(context.QueryStrings.Any() ? context.QueryStrings : [context.QueryString!], cancellationToken)).Take(_maxRecords);
                     foreach (var item in results)
                     {
@@ -67,9 +79,13 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
                     }
 
                 });
+                if (cb.Count <= _minimumRecordsToRetrieve)
+                {
+                    return FailExecution($"Error: {GetType().Name}, retrieved record count - {cb.Count} was smaller than minimum - {_minimumRecordsToRetrieve}");
+                }
                 context.RetrievedRecords.AddRange(cb);
 
-                return cb.Count >= _minimumRecordsToRetrieve;
+                return true;
             }
             catch (Exception ex)
             {
@@ -77,6 +93,21 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             }
         }
 
+        /// <summary>
+        /// Allows the user to select a subset of knowledge bases from the provided collection based on a generated
+        /// prompt.
+        /// </summary>
+        /// <remarks>This method generates a prompt based on the provided knowledge bases and user query,
+        /// then uses a chat client to obtain a response. The response is parsed to determine the indices of the
+        /// selected knowledge bases. The caller is responsible for handling any exceptions that may occur during the
+        /// deserialization of indices.</remarks>
+        /// <param name="knowledgeBases">The collection of knowledge bases available for selection.</param>
+        /// <param name="settings">The pipeline settings that provide configuration and dependencies for the operation.</param>
+        /// <param name="context">The current pipeline run context, which includes query information and token usage tracking.</param>
+        /// <param name="ct">A cancellation token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the selected knowledge bases  as
+        /// an enumerable collection, or <see langword="null"/> if the prompt exceeds the maximum input length or  no
+        /// valid selection is made.</returns>
         protected virtual async Task<IEnumerable<IKnowledgeBaseContainer>?> PickKnowledgeBases(IEnumerable<IKnowledgeBaseContainer> knowledgeBases, PipelineSettings settings, PipelineRun context, CancellationToken ct)
         {
             var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.Settings.ChatClientKey);
@@ -92,7 +123,6 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             context.OutputTokenUsage += res.Usage?.OutputTokenCount ?? 0;
 
             // Filter the list by the deserialized indices; caller handles any exceptions.
-            //var ids = res.Text.Trim().Split(';').Select(x => int.Parse(x));
             var resultText = res.Text.Trim();
             var ids = resultText.All(x => char.IsDigit(x) || x == Separator) ? resultText.Split(Separator).Select(x => int.Parse(x)) : [];
             IEnumerable<IKnowledgeBaseContainer> picked = ids!
@@ -101,7 +131,8 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             return picked;
         }
 
-        protected override ErrorOr<bool> CheckExecuteConditions(PipelineRun context)
+        /// <inheritdoc/>
+        protected override ErrorOr<bool> CheckExecutionConditions(PipelineRun context)
         {
             if (!string.IsNullOrEmpty(context.QueryString))
             {
@@ -110,18 +141,5 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 
             return FailCondition();
         }
-
-
-        //private DateTimePlugin? GetDateTimePlugin(Microsoft.SemanticKernel.Kernel kernel)
-        //{
-        //    var plugin = kernel.Plugins.TryGetPlugin<DateTimePlugin>(nameof(DateTimePlugin));
-        //    return plugin;
-        //}
     }
-
-    //TODO replace interfaces with "empty" base classes if needed
-    //public class SearchStep<TRecord, T> : SearchStep<TRecord, IKnowledgeBaseSearchFilter, IKnowledgeBaseSearchSettings, IRecordFilter<T>, T>
-    //where TRecord : class, IKnowledgeRecord
-    //where T : class
-    //{ }
 }

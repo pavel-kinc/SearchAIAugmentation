@@ -2,6 +2,12 @@
 
 namespace TaskChatDemo.Models.SearchFilterModels
 {
+    /// <summary>
+    /// Represents a filter model for searching work items in a knowledge base.
+    /// </summary>
+    /// <remarks>This model allows specifying various criteria to filter work items, such as title, type,
+    /// description, assigned user, and date range. It can be used to construct a query string for searching work items
+    /// based on the provided filter criteria.</remarks>
     public class SearchWorkItemFilterModel : IKnowledgeBaseSearchFilter
     {
         public string? Title { get; set; }

@@ -2,6 +2,9 @@
 
 namespace PromptEnhancer.KernelServiceTemplates.EmbeddingGenerators
 {
+    /// <summary>
+    /// Service template for adding an Onnx Embedding Generator to the kernel's service collection.
+    /// </summary>
     public class OnnxEmbeddingGenerator : KernelServiceTemplate
     {
         public string OnnxModelPath { get; }
@@ -15,6 +18,7 @@ namespace PromptEnhancer.KernelServiceTemplates.EmbeddingGenerators
             ServiceId = serviceId;
         }
 
+        /// <inheritdoc/>
         public override IServiceCollection AddToServices(IServiceCollection services)
         {
             services.AddBertOnnxEmbeddingGenerator(OnnxModelPath, VocabPath, serviceId: ServiceId);

@@ -6,6 +6,9 @@ using System.Text.RegularExpressions;
 
 namespace PromptEnhancer.Services.PromptBuildingService
 {
+    /// <summary>
+    /// Provides functionality for building system and user prompts based on specified configurations and context.
+    /// </summary>
     public partial class PromptBuildingService : IPromptBuildingService
     {
         public const string NewLinesReplacement = "\n";
@@ -16,6 +19,7 @@ namespace PromptEnhancer.Services.PromptBuildingService
         [GeneratedRegex(@"[ \t]{2,}", RegexOptions.Compiled)]
         private static partial Regex CollapseWhiteSpaces();
 
+        /// <inheritdoc/>
         public string BuildSystemPrompt(PromptConfiguration? promptConfiguration)
         {
             promptConfiguration ??= new PromptConfiguration();
@@ -39,6 +43,7 @@ namespace PromptEnhancer.Services.PromptBuildingService
             return ApplyRegexReplacement(sb);
         }
 
+        /// <inheritdoc/>
         public string BuildUserPrompt(string queryString, IEnumerable<IKnowledgeRecord> pickedRecords, IEnumerable<string> additionalContext, Entry? entry)
         {
             var sb = new StringBuilder();
@@ -46,7 +51,7 @@ namespace PromptEnhancer.Services.PromptBuildingService
 
             if (pickedRecords.Any())
             {
-                sb.AppendLine("Augmented data:");
+                sb.AppendLine("Augmented data (context):");
                 foreach (var record in pickedRecords)
                 {
                     sb.AppendLine(record.LLMRepresentationString);
@@ -65,12 +70,18 @@ namespace PromptEnhancer.Services.PromptBuildingService
             if (entry is not null)
             {
                 _ = entry.EntryOriginalText is not null ? sb.AppendLine($"Original text (for query): {entry.EntryOriginalText}") : sb;
-                _ = entry.EntryAdditionalData is not null ? sb.AppendLine($"Original text (for query): {entry.EntryAdditionalData}") : sb;
+                _ = entry.EntryAdditionalData is not null ? sb.AppendLine($"Additional data (for query): {entry.EntryAdditionalData}") : sb;
             }
 
             return ApplyRegexReplacement(sb);
         }
 
+        /// <summary>
+        /// Applies a series of regular expression replacements to the provided string.
+        /// </summary>
+        /// <param name="sb">The <see cref="StringBuilder"/> containing the input string to process.</param>
+        /// <returns>A new string with consecutive newlines replaced by a predefined replacement string,  and consecutive
+        /// whitespace characters replaced by another predefined replacement string.</returns>
         private static string ApplyRegexReplacement(StringBuilder sb)
         {
             return CollapseWhiteSpaces().Replace(CollapseNewLines().Replace(sb.ToString(), NewLinesReplacement), WhiteSpacesReplacement);

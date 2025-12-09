@@ -1,5 +1,12 @@
 ﻿namespace TaskDemoAPI.Models
 {
+    /// <summary>
+    /// Represents a unit of work or task, typically used in project management or tracking systems.
+    /// </summary>
+    /// <remarks>A <see cref="WorkItem"/> contains details such as its unique identifier, title, description,
+    /// type,  assigned user, creation date, associated tags, estimated effort, and an optional URL for additional
+    /// context. This class is immutable after initialization, with all properties being set at object
+    /// creation.</remarks>
     public class WorkItem
     {
         public required string Id { get; init; }

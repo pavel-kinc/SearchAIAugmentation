@@ -10,6 +10,13 @@ using TaskChatDemo.Services.EnhancerUtility;
 
 namespace TaskChatDemo.Controllers;
 
+/// <summary>
+/// Represents the main controller for handling requests related to the application's home page, chat
+/// functionality, and session management.
+/// </summary>
+/// <remarks>This controller provides endpoints for rendering the home and privacy views, managing user sessions,
+/// and handling chat-related operations, including streaming responses. It relies on dependency-injected services for
+/// logging, configuration, and enhancing chat functionality.</remarks>
 public class HomeController : Controller
 {
     private const string ChatHistory = "EntryKey";
@@ -46,7 +53,18 @@ public class HomeController : Controller
     }
 
 
-
+    /// <summary>
+    /// Handles a streaming chat interaction, processing the query and returning the result asynchronously.
+    /// </summary>
+    /// <remarks>This method processes the chat query by retrieving and updating the chat history stored in
+    /// the session.  It integrates with a pipeline to enhance the query context and handles streaming messages.  If an
+    /// error occurs during processing, the method logs the error and returns a bad request response.</remarks>
+    /// <param name="q">The query string representing the user's input to the chat.</param>
+    /// <param name="skipPipeline">A boolean value indicating whether to bypass the pipeline processing.  <see langword="true"/> to skip the
+    /// pipeline; otherwise, <see langword="false"/>.</param>
+    /// <param name="ct">A <see cref="CancellationToken"/> used to cancel the operation if needed.</param>
+    /// <returns>An <see cref="IActionResult"/> representing the result of the chat operation.  Returns an empty result on
+    /// success, or a <see cref="BadRequestObjectResult"/> if an error occurs.</returns>
     [HttpGet("/chat/stream")]
     public async Task<IActionResult> Chat(string q, bool skipPipeline = false, CancellationToken ct = default)
     {
@@ -61,7 +79,7 @@ public class HomeController : Controller
             var settingsResult = _enhancerUtilityService.GetPipelineSettings();
             if (settingsResult.IsError)
             {
-                //return RedirectToAction("Error");
+                return BadRequest(settingsResult.FirstError);
             }
             var settings = settingsResult.Value;
 
@@ -80,6 +98,19 @@ public class HomeController : Controller
 
     }
 
+    /// <summary>
+    /// Processes a streaming chat message, updates the chat history, and sends real-time updates to the client.
+    /// </summary>
+    /// <remarks>This method streams real-time updates to the client using the Server-Sent Events (SSE)
+    /// protocol. Each update is sent as a data event, and a final "done" event is sent to indicate the end of the
+    /// stream. The method aggregates the updates into a chat response and appends the resulting messages to the chat
+    /// history.</remarks>
+    /// <param name="chatHistory">The existing chat history. Can be <see langword="null"/> if no prior history exists.</param>
+    /// <param name="settings">The pipeline settings used to configure the streaming response behavior.</param>
+    /// <param name="context">The pipeline run context, which includes state and metadata for the current operation.</param>
+    /// <param name="ct">A <see cref="CancellationToken"/> to observe while waiting for the operation to complete.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the updated chat history as a list
+    /// of <see cref="ChatMessage"/> objects.</returns>
     private async Task<List<ChatMessage>> HandleStreamingMessage(List<ChatMessage>? chatHistory, PipelineSettings settings, PipelineRun context, CancellationToken ct)
     {
         var res = _enhancerService.GetStreamingResponse(settings, context, ct);

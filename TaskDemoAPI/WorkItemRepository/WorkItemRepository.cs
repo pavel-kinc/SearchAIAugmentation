@@ -2,6 +2,12 @@
 
 namespace TaskDemoAPI.WorkItemRepository
 {
+    /// <summary>
+    /// Provides a repository for querying and retrieving work items based on specified filters.
+    /// </summary>
+    /// <remarks>This repository allows filtering work items by various criteria such as title, type,
+    /// description,  assigned user, and creation date range. It is designed to work with a read-only collection of work
+    /// items.</remarks>
     public class WorkItemRepository : IWorkItemRepository
     {
         private readonly IReadOnlyList<WorkItem> _workItems;

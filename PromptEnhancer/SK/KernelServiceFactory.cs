@@ -3,9 +3,16 @@ using PromptEnhancer.KernelServiceTemplates.ChatClients;
 using PromptEnhancer.KernelServiceTemplates.EmbeddingGenerators;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
+using PromptEnhancer.SK.Interfaces;
 
-namespace PromptEnhancer.Extensions
+namespace PromptEnhancer.SK
 {
+    /// <summary>
+    /// Provides a factory for creating kernel service instances based on specified configurations.
+    /// </summary>
+    /// <remarks>This factory supports multiple AI providers and kernel service types, including OpenAI, Azure
+    /// OpenAI,  Google Gemini, Ollama, and ONNX. It uses a predefined mapping of AI providers and service types to 
+    /// corresponding factory methods for creating instances of <see cref="IKernelServiceTemplate"/>.</remarks>
     public class KernelServiceFactory : IKernelServiceFactory
     {
         private static readonly Dictionary<(AIProviderEnum, KernelServiceEnum), Func<KernelServiceBaseConfig, IKernelServiceTemplate>> Factories = new()
@@ -46,6 +53,7 @@ namespace PromptEnhancer.Extensions
             cfg => new OnnxEmbeddingGenerator(cfg.Model, cfg.Key, cfg.ServiceId),
         };
 
+        /// <inheritdoc/>
         public virtual IEnumerable<IKernelServiceTemplate> CreateKernelServicesConfig(IEnumerable<KernelServiceBaseConfig> configs)
         {
             var serviceTemplates = new List<IKernelServiceTemplate>();
@@ -56,6 +64,11 @@ namespace PromptEnhancer.Extensions
             return serviceTemplates;
         }
 
+        /// <summary>
+        /// Adds a service template to the specified collection if the provided configuration is valid.
+        /// </summary>
+        /// <param name="config">The configuration object containing the service provider, service type, and key information.</param>
+        /// <param name="serviceTemplates">The collection to which the service template will be added if the configuration is valid.</param>
         private void AddToServiceTemplatesIfValid(KernelServiceBaseConfig config, List<IKernelServiceTemplate> serviceTemplates)
         {
             var key = (config.KernelServiceProvider, config.KernelServiceType);

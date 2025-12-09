@@ -9,6 +9,13 @@ using TaskChatDemo.Services.ApiConsumer;
 
 namespace TaskChatDemo.KnowledgeBases
 {
+    /// <summary>
+    /// Represents a knowledge base for managing and searching work items, which contain information about development
+    /// work, such as task assignments and contributions.
+    /// </summary>
+    /// <remarks>This knowledge base is designed to handle queries related to work items. It provides
+    /// functionality to search for work items based on specific filters and settings. Any standalone or out-of-context
+    /// part of a query is likely referencing this knowledge base.</remarks>
     public class WorkItemKnowledgeBase : KnowledgeBase<KnowledgeRecord<WorkItem>, SearchWorkItemFilterModel, WorkItemSearchSettings, EmptyModelFilter<WorkItem>, WorkItem>
     {
         private readonly IWorkItemApiService _workItemApiService;

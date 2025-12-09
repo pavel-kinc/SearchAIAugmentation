@@ -5,17 +5,25 @@ using PromptEnhancer.Services.RankerService;
 
 namespace PromptEnhancer.Services.RecordRankerService
 {
+    /// <summary>
+    /// Provides functionality to assign similarity scores to knowledge records based on embeddings and a query string.
+    /// </summary>
+    /// <remarks>This service uses an embedding generator and a ranker service to calculate similarity scores
+    /// for knowledge records. It supports assigning scores based on a provided query string and optionally allows
+    /// specifying a generator key to resolve the appropriate embedding generator. Records with existing embeddings or
+    /// null similarity scores are recalculated.</remarks>
     public class RecordRankerService : IRecordRankerService
     {
         private readonly IRankerService _rankerService;
 
-        // maybe resolve here by key?
         public RecordRankerService(IRankerService rankerService)
         {
             _rankerService = rankerService;
         }
 
-        public async Task<bool> GetSimilarityScoreForRecordsAsync(Kernel kernel, IEnumerable<IKnowledgeRecord> records, string? queryString, string? generatorKey = null)
+        // TODO add smth to embed together with queryString - for example if user searches only ean, it is compared to only ean embeddings (number)
+        /// <inheritdoc/>
+        public async Task<bool> AssignSimilarityScoreToRecordsAsync(Kernel kernel, IEnumerable<IKnowledgeRecord> records, string? queryString, string? generatorKey = null)
         {
             var dict = new Dictionary<string, Embedding<float>>();
             var generator = kernel.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>(generatorKey);
@@ -35,6 +43,23 @@ namespace PromptEnhancer.Services.RecordRankerService
             return true;
         }
 
+        /// <summary>
+        /// Attempts to assign a similarity score to the specified knowledge record based on the provided embeddings.
+        /// </summary>
+        /// <remarks>This method calculates the similarity score between the embedding of the record's
+        /// search query and the embedding of the record itself. If the record does not have a valid search query or
+        /// embeddings, or if the similarity score cannot be computed, the method returns <see langword="false"/>. The
+        /// method uses the provided dictionary to cache embeddings for search queries, reducing redundant
+        /// computations.</remarks>
+        /// <param name="record">The knowledge record to which the similarity score will be assigned. Must not be null.</param>
+        /// <param name="generator">The embedding generator used to create embeddings for the search query if not already cached. Must not be
+        /// null.</param>
+        /// <param name="dict">A dictionary that caches embeddings for search queries. The method will add new entries if necessary. Must
+        /// not be null.</param>
+        /// <param name="embed">An optional embedding to use for the record. If null, the method will attempt to use the record's existing
+        /// embeddings.</param>
+        /// <returns><see langword="true"/> if a similarity score was successfully assigned to the record; otherwise, <see
+        /// langword="false"/>.</returns>
         private async Task<bool> TryAssignScoreToRecord(IKnowledgeRecord record, IEmbeddingGenerator<string, Embedding<float>> generator, Dictionary<string, Embedding<float>> dict, Embedding<float>? embed = null)
         {
             //TODO maybe just give it the basic query from context? but that could lead to some random data

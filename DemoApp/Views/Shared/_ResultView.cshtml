@@ -1,10 +1,10 @@
-﻿@model List<PromptEnhancer.Models.ResultModel>
+﻿@model List<PromptEnhancer.Models.PipelineResultModel>
 @using System.Text.Json
 @using System.Text.Json.Serialization
 @using System.Linq
 
 @{
-    var results = Model ?? new List<PromptEnhancer.Models.ResultModel>();
+    var results = Model ?? new List<PromptEnhancer.Models.PipelineResultModel>();
     var total = results.Count;
     var jsonOpts = new JsonSerializerOptions
     {

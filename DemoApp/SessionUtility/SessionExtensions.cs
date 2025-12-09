@@ -3,6 +3,13 @@ using System.Text.Json;
 
 namespace DemoApp.SessionUtility
 {
+    /// <summary>
+    /// Provides extension methods for storing and retrieving objects in an <see cref="ISession"/> as JSON strings with
+    /// data protection.
+    /// </summary>
+    /// <remarks>These methods use JSON serialization to convert objects to and from strings, and apply data
+    /// protection to ensure the stored data is encrypted. This is useful for securely persisting complex objects in
+    /// session storage.</remarks>
     public static class SessionExtensions
     {
         private static readonly IDataProtectionProvider _provider = DataProtectionProvider.Create("ConfigSession");

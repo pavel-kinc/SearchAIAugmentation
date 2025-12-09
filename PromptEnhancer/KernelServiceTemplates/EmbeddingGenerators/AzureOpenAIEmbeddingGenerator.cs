@@ -2,6 +2,9 @@
 
 namespace PromptEnhancer.KernelServiceTemplates.EmbeddingGenerators
 {
+    /// <summary>
+    /// Service template for adding an Azure OpenAI Embedding Generator to the kernel's service collection.
+    /// </summary>
     public class AzureOpenAIEmbeddingGenerator : KernelServiceTemplate
     {
         public string DeploymentName { get; }
@@ -17,6 +20,7 @@ namespace PromptEnhancer.KernelServiceTemplates.EmbeddingGenerators
             ServiceId = serviceId;
         }
 
+        /// <inheritdoc/>
         public override IServiceCollection AddToServices(IServiceCollection services)
         {
             return services.AddAzureOpenAIEmbeddingGenerator(DeploymentName, Endpoint, ApiKey, serviceId: ServiceId);

@@ -2,10 +2,17 @@
 
 namespace PromptEnhancer.Models.Configurations
 {
+    /// <summary>
+    /// Represents the configuration settings for generating a prompt, including system instructions, optional macros,
+    /// and output preferences.
+    /// </summary>
+    /// <remarks>This class provides properties to define the behavior and structure of a prompt generation
+    /// process.  It includes settings for system instructions, optional macro definitions, additional instructions, 
+    /// the desired output length, and the target language for the output.</remarks>
     public class PromptConfiguration
     {
         [Display(Name = "System Instructions:")]
-        public string SystemInstructions { get; set; } = "React to the given prompt: ";//= "Create SEO description of product with the help of Used Search Query and Augmented Data";
+        public string SystemInstructions { get; set; } = "React to the given prompt: ";
         [Display(Name = "Macro definition (optional):")]
         public string? MacroDefinition { get; set; }
         [Display(Name = "Additional Instructions (optional):")]

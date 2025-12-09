@@ -12,7 +12,7 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         builder.AddServiceDefaults();
 
-        //Demo purposes
+        //Demo purposes - streaming issues
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("AllowAll", policy =>
@@ -22,9 +22,12 @@ public class Program
                       .AllowAnyMethod();
             });
         });
-        // Add services to the container.
+
+        // Load WorkItems from JSON file
         var path = Path.Combine(builder.Environment.ContentRootPath, "Data", "workitems.json");
         var workItems = WorkItemSeedLoader.LoadFromJson(path);
+
+        // Add services to the container.
         builder.Services.AddSingleton<IReadOnlyList<WorkItem>>(workItems);
         builder.Services.AddSingleton<IWorkItemRepository, WorkItemRepository.WorkItemRepository>();
 

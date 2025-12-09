@@ -4,15 +4,20 @@ using PromptEnhancer.Services.PromptBuildingService;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
-    //TODO FINISH
+    /// <summary>
+    /// Represents a pipeline step responsible for building prompts for a language model (LLM) based on the provided
+    /// query string and context.
+    /// </summary>
     public class PromptBuilderStep : PipelineStep
     {
-        private readonly string? _promptBuildingServiceKey;
-
-        public PromptBuilderStep(string? promptBuildingServiceKey = null, bool isRequired = false) : base(isRequired)
+        public PromptBuilderStep(bool isRequired = false) : base(isRequired)
         {
-            _promptBuildingServiceKey = promptBuildingServiceKey;
         }
+
+        /// <inheritdoc/>
+        /// <remarks>This method uses the <see cref="IPromptBuildingService"/> to generate prompts for the
+        /// system and user based on the provided pipeline settings and context. The system prompt is initialized if it
+        /// is not already set in the context.</remarks>
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(context.QueryString))
@@ -20,14 +25,15 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
                 return false;
             }
 
-            var promptBuildingService = settings.GetService<IPromptBuildingService>(_promptBuildingServiceKey);
+            var promptBuildingService = settings.GetService<IPromptBuildingService>();
             context.SystemPromptToLLM ??= promptBuildingService.BuildSystemPrompt(settings.PromptConfiguration);
             context.UserPromptToLLM = promptBuildingService.BuildUserPrompt(context.QueryString, context.PickedRecords, context.AdditionalContext, context.Entry);
 
             return true;
         }
 
-        protected override ErrorOr<bool> CheckExecuteConditions(PipelineRun context)
+        /// <inheritdoc/>
+        protected override ErrorOr<bool> CheckExecutionConditions(PipelineRun context)
         {
             if (!string.IsNullOrEmpty(context.QueryString))
             {

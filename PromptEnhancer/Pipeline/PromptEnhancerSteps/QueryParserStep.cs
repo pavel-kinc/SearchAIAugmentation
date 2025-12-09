@@ -5,14 +5,27 @@ using PromptEnhancer.Models.Pipeline;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
+    /// <summary>
+    /// Represents a pipeline step that processes a user query to extract meaningful and distinct search queries.
+    /// </summary>
+    /// <remarks>This step uses a language model to analyze the user query and generate up to a specified
+    /// number of distinct search queries.  If the query cannot be improved or split, a predefined failure response is
+    /// returned. The step ensures that the generated  queries are relevant to the original user query and do not exceed
+    /// the maximum allowed response length.</remarks>
     public class QueryParserStep : PipelineStep
     {
+        /// <summary>
+        /// A template string used to generate a prompt for extracting meaningful and distinct search queries from a
+        /// user query.
+        /// </summary>
         public const string PromptTemplate =
             """
             Given the user query "{0}", extract up to "{1}" meaningful and distinct search queries, separated by ';'.
 
-            Keep only parts that are useful for search. Context for each part must be clear (you can repeat some words from query, but the parts must be distinct).
-            Remove filler or irrelevant parts. If the query can’t be improved or split, return "{2}".
+            From the provided user query, keep only the parts that are useful for search.  
+            Each retained part must have a clear relationship to the user’s query (you can repeat some query keywords if needed), but the parts must remain distinct from each other.  
+            Do not include any extraneous information that is not directly relevant to search.
+            If the query can’t be improved or split, return "{2}".
             """;
 
         public const string FailResponseLLM = "NaN";
@@ -27,6 +40,12 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             _maxSplit = maxSplit;
             _options = options;
         }
+
+        /// <inheritdoc/>
+        /// <remarks>This method interacts with a chat client to process the input query and generate a
+        /// response. It validates  the input prompt and response to ensure they meet the configured constraints, such
+        /// as maximum length and  formatting rules. If the input or response violates these constraints, the step fails
+        /// with an appropriate error.</remarks>
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default)
         {
             //TODO maybe more checks for the llm response?
@@ -37,7 +56,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
                 return FailExecution(ChatHistoryUtility.GetInputSizeExceededLimitMessage(GetType().Name));
             }
             var res = await chatClient.GetResponseAsync(inputPrompt, _options ?? settings.Settings.ChatOptions, cancellationToken: cancellationToken);
-            if (res.Text == FailResponseLLM || res.Text.Length > MaxResponseLength || res.Text.Count(c => c == ';') > _maxSplit)
+            if (res.Text == FailResponseLLM || res.Text.Length > MaxResponseLength || res.Text.Count(c => c == ';') >= _maxSplit)
             {
                 return FailExecution();
             }
@@ -48,7 +67,8 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
             return true;
         }
 
-        protected override ErrorOr<bool> CheckExecuteConditions(PipelineRun context)
+        /// <inheritdoc/>
+        protected override ErrorOr<bool> CheckExecutionConditions(PipelineRun context)
         {
             if (!string.IsNullOrEmpty(context.QueryString))
             {

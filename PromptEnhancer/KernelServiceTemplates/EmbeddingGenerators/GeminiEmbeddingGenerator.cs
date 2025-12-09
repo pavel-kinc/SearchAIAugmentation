@@ -2,6 +2,9 @@
 
 namespace PromptEnhancer.KernelServiceTemplates.EmbeddingGenerators
 {
+    /// <summary>
+    /// Service template for adding Gemini Embedding Generator to the kernel's service collection.
+    /// </summary>
     public class GeminiEmbeddingGenerator : KernelServiceTemplate
     {
         public string ModelId { get; }
@@ -15,6 +18,7 @@ namespace PromptEnhancer.KernelServiceTemplates.EmbeddingGenerators
             ServiceId = serviceId;
         }
 
+        /// <inheritdoc/>
         public override IServiceCollection AddToServices(IServiceCollection services)
         {
             return services.AddGoogleAIEmbeddingGenerator(ModelId, ApiKey, serviceId: ServiceId);

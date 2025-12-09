@@ -4,14 +4,11 @@ using Microsoft.SemanticKernel;
 using PromptEnhancer.KnowledgeBaseCore;
 using PromptEnhancer.KnowledgeBaseCore.Examples;
 using PromptEnhancer.KnowledgeBaseCore.Interfaces;
-using PromptEnhancer.KnowledgeRecord;
-using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.KnowledgeSearchRequest;
 using PromptEnhancer.KnowledgeSearchRequest.Examples;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
-using PromptEnhancer.Models.Examples;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Pipeline;
 using PromptEnhancer.Pipeline.PromptEnhancerSteps;
@@ -19,13 +16,17 @@ using PromptEnhancer.Services.EnhancerService;
 using PromptEnhancer.Services.PromptBuildingService;
 using PromptEnhancer.SK.Interfaces;
 using TaskChatDemo.KnowledgeBases;
-using TaskChatDemo.Models;
 using TaskChatDemo.Models.SearchFilterModels;
 using TaskChatDemo.Models.Settings;
-using TaskChatDemo.Models.TaskItem;
 
 namespace TaskChatDemo.Services.EnhancerUtility
 {
+    /// <summary>
+    /// Provides utility services for enhancing software development tasks and work item management.
+    /// </summary>
+    /// <remarks>The <see cref="EnhancerUtilityService"/> class integrates various services to facilitate the
+    /// creation and execution of AI-driven pipelines for task and work item management. It utilizes different AI
+    /// providers and knowledge bases to generate context and insights for software development teams.</remarks>
     public class EnhancerUtilityService : IEnhancerUtilityService
     {
         public const string GeminiServiceId = "gemini";
@@ -49,6 +50,7 @@ namespace TaskChatDemo.Services.EnhancerUtility
             _promptBuildingService = promptBuildingService;
         }
 
+        /// <inheritdoc/>
         public ErrorOr<PipelineSettings> GetPipelineSettings()
         {
             var kernel = CreateKernel(_configuration["AIServices:OpenAI:ApiKey"]!, _configuration["AIServices:Gemini:ApiKey"]!);
@@ -58,7 +60,7 @@ namespace TaskChatDemo.Services.EnhancerUtility
             {
                 //here to change client and generator for pipeline
                 ChatClientKey = GeminiServiceId,
-                GeneratorKey = GeminiServiceId,
+                GeneratorKey = OpenAiServiceId,
                 KernelRequestSettings = new PromptExecutionSettings()
                 {
                     FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
@@ -66,25 +68,33 @@ namespace TaskChatDemo.Services.EnhancerUtility
                 },
             };
 
+            enhancerConfig.PromptConfiguration.AdditionalInstructions =
+                """
+                You are an AI assistant helping a software development team manage their tasks and work items effectively.
+                Provide clear, concise, and relevant information based on the context provided from their task and work item data.
+                Do not use any formatting or newlines in your response. Use whole sentences.
+                """;
+
             var settingsResult = _enhancerService.CreatePipelineSettingsFromConfig(enhancerConfig.PromptConfiguration, enhancerConfig.PipelineAdditionalSettings, enhancerConfig.KernelConfiguration, kernel);
             return settingsResult;
         }
 
-        public async Task<PipelineRun> GetContextFromPipeline(string q, bool skipPipeline, Entry entry, PipelineSettings settings)
+        /// <inheritdoc/>
+        public async Task<PipelineRun> GetContextFromPipeline(string userInput, bool skipPipeline, Entry entry, PipelineSettings settings)
         {
             PipelineRun context;
             if (skipPipeline)
             {
                 context = new PipelineRun(entry)
                 {
-                    UserPromptToLLM = q,
+                    UserPromptToLLM = userInput,
                     SystemPromptToLLM = _promptBuildingService.BuildSystemPrompt(settings.PromptConfiguration),
                 };
             }
             else
             {
                 var pipeline = GetPipeline(settings, settings.Kernel);
-                var pipelineRes = await _enhancerService.ProcessPipelineAsync(pipeline, [new PipelineRun(entry)]);
+                var pipelineRes = await _enhancerService.ExecutePipelineAsync(pipeline, [new PipelineRun(entry)]);
                 if (pipelineRes.IsError || pipelineRes.Value.FirstOrDefault()?.Result is null)
                 {
                     throw new InvalidOperationException($"Pipeline failed: {pipelineRes.ErrorsOrEmptyList.Select(x => x.ToString())}");
@@ -99,6 +109,18 @@ namespace TaskChatDemo.Services.EnhancerUtility
 
             return context;
         }
+
+        /// <summary>
+        /// Constructs and returns a <see cref="PipelineModel"/> configured with a series of processing steps and
+        /// knowledge base containers based on the provided settings and kernel.
+        /// </summary>
+        /// <remarks>The pipeline includes steps for preprocessing, multiple searches, embedding
+        /// processing, ranking, filtering, and prompt building. It integrates with task and work item knowledge bases
+        /// and can optionally include a Google knowledge base if defined.</remarks>
+        /// <param name="settings">The settings used to configure the pipeline, including any specific options for processing steps.</param>
+        /// <param name="kernel">The kernel instance used to resolve services required by the pipeline, such as embedding generators.</param>
+        /// <returns>A <see cref="PipelineModel"/> instance containing the configured processing steps and knowledge base
+        /// containers.</returns>
         private PipelineModel GetPipeline(PipelineSettings settings, Kernel kernel)
         {
             var taskItemRequest = new KnowledgeSearchRequest<SearchItemFilterModel, ItemDataSearchSettings>()
@@ -111,11 +133,10 @@ namespace TaskChatDemo.Services.EnhancerUtility
                 Filter = new SearchWorkItemFilterModel(),
                 Settings = new WorkItemSearchSettings(),
             };
-
             var containers = new List<IKnowledgeBaseContainer>()
             {
-            new KnowledgeBaseContainer<KnowledgeRecord<TaskItemData>, SearchItemFilterModel, ItemDataSearchSettings, EmptyModelFilter<TaskItemData>, TaskItemData>(_taskDataKnowledgeBase, taskItemRequest, null),
-            new KnowledgeBaseContainer<KnowledgeRecord<WorkItem>, SearchWorkItemFilterModel, WorkItemSearchSettings, EmptyModelFilter<WorkItem>, WorkItem>(_workItemKnowledgeBase, workItemRequest, null),
+                _enhancerService.CreateContainer(_taskDataKnowledgeBase, taskItemRequest, null),
+                _enhancerService.CreateContainer(_workItemKnowledgeBase, workItemRequest, null),
             };
             AddGoogleKnowledgeBaseIfDefined(containers);
 
@@ -123,16 +144,27 @@ namespace TaskChatDemo.Services.EnhancerUtility
             {
                 new PreprocessStep(),
                 new KernelContextPluginsStep(),
+                // new QueryParserStep(maxSplit: 2),
                 new MultipleSearchStep(containers, isRequired: true),
                 new ProcessEmbeddingStep(skipGenerationForEmbData: true, isRequired: true),
                 new ProcessRankStep(isRequired: true),
-                new ProcessFilterStep(new RecordPickerOptions(){MinScoreSimilarity = 0.4d, Take = 10, OrderByScoreDescending = true}, isRequired: true),
+                new ProcessFilterStep(new RecordPickerOptions(){MinScoreSimilarity = 0.3d, Take = 10, OrderByScoreDescending = true}, isRequired: true),
                 new PostProcessCheckStep(),
                 new PromptBuilderStep(isRequired: true)
             };
             var pipeline = new PipelineModel(settings, steps);
             return pipeline;
         }
+
+        /// <summary>
+        /// Creates a new instance of a <see cref="Kernel"/> configured with specified API keys for OpenAI and Google
+        /// Gemini services.
+        /// </summary>
+        /// <param name="openAiApiKey">The API key for accessing OpenAI services. Cannot be null or empty.</param>
+        /// <param name="geminiApiKey">The API key for accessing Google Gemini services. Cannot be null or empty.</param>
+        /// <returns>A configured <see cref="Kernel"/> instance ready for use.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="openAiApiKey"/> or <paramref name="geminiApiKey"/> is null or empty.</exception>
+        /// <exception cref="Exception">Thrown if the kernel creation process fails.</exception>
         private Kernel CreateKernel(string openAiApiKey, string geminiApiKey)
         {
             if (string.IsNullOrEmpty(openAiApiKey) || string.IsNullOrEmpty(geminiApiKey))
@@ -154,6 +186,14 @@ namespace TaskChatDemo.Services.EnhancerUtility
             return kernel.Value;
         }
 
+        /// <summary>
+        /// Adds a Google knowledge base container to the specified list if the Google API key and search engine ID are
+        /// defined in the configuration.
+        /// </summary>
+        /// <remarks>This method checks the configuration for the presence of a Google API key and search
+        /// engine ID. If both are available, it creates a <see cref="KnowledgeBaseContainer{TRecord, TFilterModel,
+        /// TSettings, TFilter, TBaseRecord}"/> configured for Google search and adds it to the provided list.</remarks>
+        /// <param name="containers">The list of knowledge base containers to which the Google knowledge base will be added if applicable.</param>
         private void AddGoogleKnowledgeBaseIfDefined(List<IKnowledgeBaseContainer> containers)
         {
             var googleApiKey = _configuration["SearchConfigurations:Google:ApiKey"];
@@ -171,7 +211,7 @@ namespace TaskChatDemo.Services.EnhancerUtility
                     },
                     Filter = new GoogleSearchFilterModel(),
                 };
-                containers.Add(new KnowledgeBaseContainer<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>(_googleKB, request, null));
+                containers.Add(_enhancerService.CreateContainer(_googleKB, request, null));
             }
         }
     }
