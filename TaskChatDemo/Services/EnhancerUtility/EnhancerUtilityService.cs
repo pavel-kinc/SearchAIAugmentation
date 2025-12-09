@@ -80,14 +80,14 @@ namespace TaskChatDemo.Services.EnhancerUtility
         }
 
         /// <inheritdoc/>
-        public async Task<PipelineRun> GetContextFromPipeline(string q, bool skipPipeline, Entry entry, PipelineSettings settings)
+        public async Task<PipelineRun> GetContextFromPipeline(string userInput, bool skipPipeline, Entry entry, PipelineSettings settings)
         {
             PipelineRun context;
             if (skipPipeline)
             {
                 context = new PipelineRun(entry)
                 {
-                    UserPromptToLLM = q,
+                    UserPromptToLLM = userInput,
                     SystemPromptToLLM = _promptBuildingService.BuildSystemPrompt(settings.PromptConfiguration),
                 };
             }
