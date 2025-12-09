@@ -43,6 +43,7 @@ namespace PromptEnhancer.KnowledgeBaseCore
         public virtual string Description => $"Knowledge base with name {GetType().Name} and data {typeof(TModel).Name} and record {typeof(TRecord).Name}";
 
         /// <inheritdoc/>
+        // perhaps add optional Data of TModel to this method and allow user to set it up with their data?
         public abstract Task<IEnumerable<TRecord>> SearchAsync(IKnowledgeSearchRequest<TSearchFilter, TSearchSettings> request, IEnumerable<string> queriesToSearch, TFilter? filter = null, CancellationToken ct = default);
 
         /// <summary>

@@ -4,14 +4,11 @@ using Microsoft.SemanticKernel;
 using PromptEnhancer.KnowledgeBaseCore;
 using PromptEnhancer.KnowledgeBaseCore.Examples;
 using PromptEnhancer.KnowledgeBaseCore.Interfaces;
-using PromptEnhancer.KnowledgeRecord;
-using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.KnowledgeSearchRequest;
 using PromptEnhancer.KnowledgeSearchRequest.Examples;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
-using PromptEnhancer.Models.Examples;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Pipeline;
 using PromptEnhancer.Pipeline.PromptEnhancerSteps;
@@ -19,10 +16,8 @@ using PromptEnhancer.Services.EnhancerService;
 using PromptEnhancer.Services.PromptBuildingService;
 using PromptEnhancer.SK.Interfaces;
 using TaskChatDemo.KnowledgeBases;
-using TaskChatDemo.Models;
 using TaskChatDemo.Models.SearchFilterModels;
 using TaskChatDemo.Models.Settings;
-using TaskChatDemo.Models.TaskItem;
 
 namespace TaskChatDemo.Services.EnhancerUtility
 {
@@ -138,11 +133,10 @@ namespace TaskChatDemo.Services.EnhancerUtility
                 Filter = new SearchWorkItemFilterModel(),
                 Settings = new WorkItemSearchSettings(),
             };
-
             var containers = new List<IKnowledgeBaseContainer>()
             {
-            new KnowledgeBaseContainer<KnowledgeRecord<TaskItemData>, SearchItemFilterModel, ItemDataSearchSettings, EmptyModelFilter<TaskItemData>, TaskItemData>(_taskDataKnowledgeBase, taskItemRequest, null),
-            new KnowledgeBaseContainer<KnowledgeRecord<WorkItem>, SearchWorkItemFilterModel, WorkItemSearchSettings, EmptyModelFilter<WorkItem>, WorkItem>(_workItemKnowledgeBase, workItemRequest, null),
+                _enhancerService.CreateContainer(_taskDataKnowledgeBase, taskItemRequest, null),
+                _enhancerService.CreateContainer(_workItemKnowledgeBase, workItemRequest, null),
             };
             AddGoogleKnowledgeBaseIfDefined(containers);
 
@@ -217,7 +211,7 @@ namespace TaskChatDemo.Services.EnhancerUtility
                     },
                     Filter = new GoogleSearchFilterModel(),
                 };
-                containers.Add(new KnowledgeBaseContainer<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>(_googleKB, request, null));
+                containers.Add(_enhancerService.CreateContainer(_googleKB, request, null));
             }
         }
     }

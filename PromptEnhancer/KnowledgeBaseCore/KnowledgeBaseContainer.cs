@@ -5,6 +5,7 @@ using PromptEnhancer.KnowledgeSearchRequest.Interfaces;
 namespace PromptEnhancer.KnowledgeBaseCore
 {
     /// <summary>
+    /// Contains knowledge base along with search request and optional filter to perform searches on the knowledge base. <br/>
     /// Represents a container for managing and interacting with a knowledge base, including performing searches and
     /// applying filters to the search results.
     /// </summary>

@@ -15,14 +15,14 @@ namespace PromptEnhancer.KnowledgeBaseCore
     /// parameterless constructor.</typeparam>
     /// <typeparam name="TModel">The type of the model associated with the knowledge record, which must be a reference type.</typeparam>
     // [Experimental("This is an experimental container for knowledge bases that simply hold data and utilize the default knowledge base implementation to work with it.")]
-    public class KnowledgeBaseDataContainer<TRecord, TModel> : IKnowledgeBaseContainer
+    internal class KnowledgeBaseDataContainer<TRecord, TModel> : IKnowledgeBaseContainer
         where TRecord : KnowledgeRecord<TModel>, new()
         where TModel : class
     {
         private readonly KnowledgeBaseDataDefault<TRecord, TModel> _knowledgeBase;
         private readonly IEnumerable<TModel> _data;
 
-        public KnowledgeBaseDataContainer(KnowledgeBaseDataDefault<TRecord, TModel> knowledgeBaseDefault, IEnumerable<TModel> data)
+        internal KnowledgeBaseDataContainer(KnowledgeBaseDataDefault<TRecord, TModel> knowledgeBaseDefault, IEnumerable<TModel> data)
         {
             _knowledgeBase = knowledgeBaseDefault;
             _data = data;

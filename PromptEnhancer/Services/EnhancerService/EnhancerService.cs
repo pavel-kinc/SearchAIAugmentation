@@ -10,11 +10,12 @@ using PromptEnhancer.KnowledgeBaseCore;
 using PromptEnhancer.KnowledgeBaseCore.Examples;
 using PromptEnhancer.KnowledgeBaseCore.Interfaces;
 using PromptEnhancer.KnowledgeRecord;
+using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.KnowledgeSearchRequest.Examples;
+using PromptEnhancer.KnowledgeSearchRequest.Interfaces;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
-using PromptEnhancer.Models.Examples;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Pipeline.Interfaces;
 using PromptEnhancer.Pipeline.PromptEnhancerSteps;
@@ -223,7 +224,7 @@ namespace PromptEnhancer.Services.EnhancerService
                 Filter = searchFilter
             };
 
-            var container = new KnowledgeBaseContainer<KnowledgeUrlRecord, GoogleSearchFilterModel, GoogleSettings, UrlRecordFilter, UrlRecord>(_googleKB, request, filter);
+            var container = CreateContainer(_googleKB, request, filter);
             return
                 [
                     new PreprocessStep(),
@@ -237,6 +238,24 @@ namespace PromptEnhancer.Services.EnhancerService
                     new PromptBuilderStep(isRequired: true),
                     new GenerationStep(isRequired: true),
                 ];
+        }
+
+        /// <inheritdoc/>
+        public IKnowledgeBaseContainer CreateContainer<TRecord, TSearchFilter, TSearchSettings, TFilter, T>(
+                IKnowledgeBase<TRecord, TSearchFilter, TSearchSettings, TFilter, T> knowledgeBase,
+                IKnowledgeSearchRequest<TSearchFilter, TSearchSettings> knowledgeSearchRequest,
+                TFilter? filter)
+            where TRecord : class, IKnowledgeRecord
+            where TSearchFilter : class, IKnowledgeBaseSearchFilter
+            where TSearchSettings : class, IKnowledgeBaseSearchSettings
+            where TFilter : class, IModelFilter<T>
+            where T : class
+        {
+            return new KnowledgeBaseContainer<TRecord, TSearchFilter, TSearchSettings, TFilter, T>(
+                knowledgeBase,
+                knowledgeSearchRequest,
+                filter
+            );
         }
 
         /// <summary>

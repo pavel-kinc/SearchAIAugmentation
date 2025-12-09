@@ -4,7 +4,9 @@ using Microsoft.SemanticKernel;
 using PromptEnhancer.KnowledgeBaseCore;
 using PromptEnhancer.KnowledgeBaseCore.Interfaces;
 using PromptEnhancer.KnowledgeRecord;
+using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.KnowledgeSearchRequest.Examples;
+using PromptEnhancer.KnowledgeSearchRequest.Interfaces;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
@@ -112,6 +114,26 @@ namespace PromptEnhancer.Services.EnhancerService
         /// <param name="data">The collection of model instances to initialize the data container with. Cannot be null.</param>
         /// <returns>An instance of <see cref="IKnowledgeBaseContainer"/> initialized with the provided data.</returns>
         public IKnowledgeBaseContainer CreateDefaultDataContainer<TRecord, TModel>(IEnumerable<TModel> data) where TModel : class where TRecord : KnowledgeRecord<TModel>, new();
+
+        /// <summary>
+        /// Creates a new instance of a knowledge base container using the specified knowledge base, search request, and
+        /// filter.
+        /// </summary>
+        /// <typeparam name="TRecord">The type of the knowledge record contained in the knowledge base.</typeparam>
+        /// <typeparam name="TSearchFilter">The type of the search filter used in the knowledge base.</typeparam>
+        /// <typeparam name="TSearchSettings">The type of the search settings used in the knowledge base.</typeparam>
+        /// <typeparam name="TFilter">The type of the model filter applied to the knowledge base.</typeparam>
+        /// <typeparam name="T">The type of the model that the filter applies to.</typeparam>
+        /// <param name="knowledgeBase">The knowledge base from which the container is created. Cannot be null.</param>
+        /// <param name="knowledgeSearchRequest">The search request containing the filter and settings for the search. Cannot be null.</param>
+        /// <param name="filter">The filter to apply to the knowledge base. Can be null if no filtering is required.</param>
+        /// <returns>A new instance of <see cref="IKnowledgeBaseContainer"/> configured with the specified parameters.</returns>
+        public IKnowledgeBaseContainer CreateContainer<TRecord, TSearchFilter, TSearchSettings, TFilter, T>(IKnowledgeBase<TRecord, TSearchFilter, TSearchSettings, TFilter, T> knowledgeBase, IKnowledgeSearchRequest<TSearchFilter, TSearchSettings> knowledgeSearchRequest, TFilter? filter)
+            where TRecord : class, IKnowledgeRecord
+            where TSearchFilter : class, IKnowledgeBaseSearchFilter
+            where TSearchSettings : class, IKnowledgeBaseSearchSettings
+            where TFilter : class, IModelFilter<T>
+            where T : class;
 
         /// <summary>
         /// Creates a default search pipeline using the specified knowledge base containers and optional configurations.

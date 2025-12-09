@@ -18,7 +18,7 @@ namespace PromptEnhancer.KnowledgeBaseCore
     /// parameterless constructor.</typeparam>
     /// <typeparam name="TModel">The type of the model associated with the knowledge record.</typeparam>
     // [Experimental("This class is experimental and may change in future releases.")]
-    public class KnowledgeBaseDataDefault<TRecord, TModel> : KnowledgeBase<TRecord, EmptySearchFilter, EmptySearchSettings, EmptyModelFilter<TModel>, TModel>
+    internal class KnowledgeBaseDataDefault<TRecord, TModel> : KnowledgeBase<TRecord, EmptySearchFilter, EmptySearchSettings, EmptyModelFilter<TModel>, TModel>
         where TRecord : KnowledgeRecord<TModel>, new()
         where TModel : class
     {
