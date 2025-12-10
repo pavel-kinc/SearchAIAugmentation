@@ -59,7 +59,7 @@ namespace TaskChatDemo.Services.EnhancerUtility
             enhancerConfig.PipelineAdditionalSettings = new PipelineAdditionalSettings()
             {
                 //here to change client and generator for pipeline
-                ChatClientKey = GeminiServiceId,
+                ChatClientKey = GeminiServiceId, //OpenAiServiceId,
                 GeneratorKey = OpenAiServiceId,
                 KernelRequestSettings = new PromptExecutionSettings()
                 {
@@ -97,12 +97,12 @@ namespace TaskChatDemo.Services.EnhancerUtility
                 var pipelineRes = await _enhancerService.ExecutePipelineAsync(pipeline, [new PipelineRun(entry)]);
                 if (pipelineRes.IsError || pipelineRes.Value.FirstOrDefault()?.Result is null)
                 {
-                    throw new InvalidOperationException($"Pipeline failed: {pipelineRes.ErrorsOrEmptyList.Select(x => x.ToString())}");
+                    throw new InvalidOperationException($"Pipeline failed: {string.Join(';', pipelineRes.ErrorsOrEmptyList.Select(x => x.ToString()).ToList())}");
                 }
                 var firstResponse = pipelineRes.Value.FirstOrDefault();
                 if (firstResponse is null || !firstResponse.PipelineSuccess)
                 {
-                    throw new InvalidOperationException($"Pipeline failed for query: {firstResponse?.Errors.Select(x => x.Code)}");
+                    throw new InvalidOperationException($"Pipeline failed for query: {string.Join(';', firstResponse?.Errors.Select(x => x.Code) ?? [])})");
                 }
                 context = pipelineRes.Value.FirstOrDefault()!.Result!;
             }
