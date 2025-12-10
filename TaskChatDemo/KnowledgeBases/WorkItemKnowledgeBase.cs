@@ -19,9 +19,12 @@ namespace TaskChatDemo.KnowledgeBases
     public class WorkItemKnowledgeBase : KnowledgeBase<KnowledgeRecord<WorkItem>, SearchWorkItemFilterModel, WorkItemSearchSettings, EmptyModelFilter<WorkItem>, WorkItem>
     {
         private readonly IWorkItemApiService _workItemApiService;
-        public WorkItemKnowledgeBase(IWorkItemApiService workItemApiService)
+        private readonly ILogger<WorkItemKnowledgeBase> _logger;
+
+        public WorkItemKnowledgeBase(IWorkItemApiService workItemApiService, ILogger<WorkItemKnowledgeBase> logger)
         {
             _workItemApiService = workItemApiService;
+            _logger = logger;
         }
 
         public override string Description => "This knowledge base uses WorkItem, that contain information about development work (who did what). Any standalone (out of place) part of the query is probably referencing this base.";
@@ -34,6 +37,7 @@ namespace TaskChatDemo.KnowledgeBases
             }
             var workItems = await _workItemApiService.GetWorkItemsAsync(request.Filter, request.Settings.ApiUrl);
             var res = GetKnowledgeRecords(workItems, filter, query, false, ct: ct);
+            _logger.LogInformation("WorkItemKnowledgeBase returned {Count} records for query: {Query}", res.Count(), query);
             return res;
         }
     }

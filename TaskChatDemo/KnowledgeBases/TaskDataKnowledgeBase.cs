@@ -20,9 +20,12 @@ namespace TaskChatDemo.KnowledgeBases
     public class TaskDataKnowledgeBase : KnowledgeBase<KnowledgeRecord<TaskItemData>, SearchItemFilterModel, ItemDataSearchSettings, EmptyModelFilter<TaskItemData>, TaskItemData>
     {
         public IVectorStoreService _vectorStoreService;
-        public TaskDataKnowledgeBase(IVectorStoreService vectorStoreService)
+        private readonly ILogger<TaskDataKnowledgeBase> _logger;
+
+        public TaskDataKnowledgeBase(IVectorStoreService vectorStoreService, ILogger<TaskDataKnowledgeBase> logger)
         {
             _vectorStoreService = vectorStoreService;
+            _logger = logger;
         }
         public override string Description => "This knowledge base uses TaskData, that contain information about development tasks (who did what). Any standalone (out of place) part of the query is probably referencing this base.";
         public async override Task<IEnumerable<KnowledgeRecord<TaskItemData>>> SearchAsync(IKnowledgeSearchRequest<SearchItemFilterModel, ItemDataSearchSettings> request, IEnumerable<string> queriesToSearch, EmptyModelFilter<TaskItemData>? filter = null, CancellationToken ct = default)
@@ -35,6 +38,7 @@ namespace TaskChatDemo.KnowledgeBases
             var queryVector = await request.Settings.Generator.GenerateVectorAsync(query, cancellationToken: ct);
             var data = await _vectorStoreService.GetDataWithScoresAsync(queryVector, request.Filter);
             var res = GetKnowledgeRecords(data, filter, query, false, ct: ct);
+            _logger.LogInformation("TaskDataKnowledgeBase returned {Count} records for query: {Query}", res.Count(), query);
             return res;
         }
         protected override KnowledgeRecord<TaskItemData> CreateRecord(TaskItemData o, string queryString)

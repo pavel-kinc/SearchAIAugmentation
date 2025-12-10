@@ -48,7 +48,7 @@ public class HomeController : Controller
     public IActionResult ClearSession()
     {
         HttpContext.Session.Clear();
-
+        _logger.LogInformation("Session cleared");
         return Json(new { success = true });
     }
 
@@ -79,13 +79,14 @@ public class HomeController : Controller
             var settingsResult = _enhancerUtilityService.GetPipelineSettings();
             if (settingsResult.IsError)
             {
+                _logger.LogInformation("Failed to get pipeline settings: {Error}", settingsResult.FirstError);
                 return BadRequest(settingsResult.FirstError);
             }
             var settings = settingsResult.Value;
 
             var context = await _enhancerUtilityService.GetContextFromPipeline(q, skipPipeline, entry, settings);
             context.ChatHistory ??= chatHistory;
-            //TODO handle errors?
+            _logger.LogInformation("Starting streaming response for query: {Query}", q);
             chatHistory = await HandleStreamingMessage(chatHistory, settings, context, ct);
             HttpContext.Session.SetString(ChatHistory, JsonSerializer.Serialize(chatHistory));
             return new EmptyResult();
