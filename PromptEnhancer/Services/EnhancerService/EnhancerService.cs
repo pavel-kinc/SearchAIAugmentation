@@ -180,7 +180,7 @@ namespace PromptEnhancer.Services.EnhancerService
 
         public async Task<ErrorOr<PipelineResultModel>> ProcessConfiguration(EnhancerConfiguration config, Entry entry, Kernel? kernel = null, CancellationToken cancellationToken = default)
         {
-            var res =  await ProcessConfiguration(config, [entry], kernel, cancellationToken);
+            var res = await ProcessConfiguration(config, [entry], kernel, cancellationToken);
             return res.IsError ? res.Errors : res.Value.FirstOrDefault()!;
         }
 
