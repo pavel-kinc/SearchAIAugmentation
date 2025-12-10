@@ -10,10 +10,12 @@ namespace TaskDemoAPI.Controllers;
 public class WorkItemController : ControllerBase
 {
     private readonly IWorkItemRepository _workItemRepository;
+    private readonly ILogger<WorkItemController> _logger;
 
-    public WorkItemController(IWorkItemRepository workItemRepo)
+    public WorkItemController(IWorkItemRepository workItemRepo, ILogger<WorkItemController> logger)
     {
         _workItemRepository = workItemRepo;
+        _logger = logger;
     }
 
     /// <summary>
@@ -28,6 +30,7 @@ public class WorkItemController : ControllerBase
     public IActionResult GetWorkItems([FromQuery] WorkItemFilter filter)
     {
         var workItems = _workItemRepository.GetTasks(filter);
+        _logger.LogInformation("Retrieved {Count} work items based on the provided filter.", workItems.Count());
         return Ok(workItems);
     }
 }

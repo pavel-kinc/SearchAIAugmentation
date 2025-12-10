@@ -60,6 +60,7 @@ namespace DemoApp.Pages
         {
             if (ModelState.IsValid)
             {
+                _logger.LogInformation("Updating Kernel Configuration");
                 _configurationService.UpdateKernelConfig(ViewModel.ConfigurationSetup.KernelConfiguration);
                 ViewModel.FloatingAlertMessage = "Kernel Configuration Saved";
             }
@@ -69,7 +70,8 @@ namespace DemoApp.Pages
         public IActionResult OnPostUpdateSearchConf()
         {
             if (ModelState.IsValid)
-            {
+            { 
+                _logger.LogInformation("Updating Search Configuration");
                 _configurationService.UpdateSearchConfig(ViewModel.ConfigurationSetup.SearchConfiguration);
                 ViewModel.FloatingAlertMessage = "Search Configuration Saved";
             }
@@ -80,6 +82,7 @@ namespace DemoApp.Pages
         {
             if (ModelState.IsValid)
             {
+                _logger.LogInformation("Updating Prompt Configuration");
                 _configurationService.UpdatePromptConfig(ViewModel.ConfigurationSetup.PromptConfiguration);
                 ViewModel.FloatingAlertMessage = "Prompt Configuration Saved";
             }
@@ -89,6 +92,7 @@ namespace DemoApp.Pages
         {
             if (ModelState.IsValid)
             {
+                _logger.LogInformation("Updating Generation Configuration");
                 _configurationService.UpdateGenerationConfig(ViewModel.ConfigurationSetup.GenerationConfiguration);
                 ViewModel.FloatingAlertMessage = "Generation Configuration Saved";
             }
@@ -99,6 +103,7 @@ namespace DemoApp.Pages
         {
             if (ModelState.IsValid)
             {
+                _logger.LogInformation("Updating Entries");
                 _entrySetupService.UpdateEntries(Entries);
                 ViewModel.FloatingAlertMessage = "Entries Updated";
             }
@@ -109,6 +114,7 @@ namespace DemoApp.Pages
         {
             if (ModelState.IsValid)
             {
+                _logger.LogInformation("Adding Entry");
                 _entrySetupService.AddEntry(new Entry());
             }
             return Page();
@@ -116,6 +122,7 @@ namespace DemoApp.Pages
 
         public IActionResult OnPostDownloadConfiguration()
         {
+            _logger.LogInformation("Downloading Configuration");
             var config = _configurationService.GetConfiguration();
             var json = GetConfigurationJson(config, true);
             var bytes = Encoding.UTF8.GetBytes(json);
@@ -124,6 +131,7 @@ namespace DemoApp.Pages
 
         public async Task<IActionResult> OnPostUpload(IFormFile configFile)
         {
+            _logger.LogInformation("Uploading Configuration");
             await using var ms = new MemoryStream();
             await configFile.CopyToAsync(ms);
 
@@ -149,6 +157,7 @@ namespace DemoApp.Pages
         /// updated view model data, including results or error messages.</returns>
         public async Task<IActionResult> OnPostProcessResultModel()
         {
+            _logger.LogInformation("Processing Result Model");
             var appConfig = _configurationService.GetConfiguration(true);
             var entries = _entrySetupService.GetEntries();
             if (entries.Any(x => string.IsNullOrWhiteSpace(x.QueryString)))
@@ -160,6 +169,7 @@ namespace DemoApp.Pages
                         ViewModel.Errors.Add($"{i + 1}. entry has empty query.");
                     }
                 }
+                _logger.LogWarning("Processing aborted due to empty query strings in entries.");
                 return Page();
             }
 
@@ -167,14 +177,17 @@ namespace DemoApp.Pages
             var res = await _enhancerService.ProcessConfiguration(enhancerConfig, entries);
             if (!res.IsError && res.Value.Any())
             {
+                _logger.LogInformation("Processing completed successfully with {Count} results.", res.Value.Count);
                 ViewModel.ResultModelList = res.Value;
             }
             else if (!res.IsError && !res.Value.Any())
             {
+                _logger.LogWarning("Processing completed but returned no results.");
                 ViewModel.Errors.Add("Error: No results returned from the processing!");
             }
             else
             {
+                _logger.LogError("Processing failed with errors: {Errors}", string.Join(", ", res.Errors.Select(x => x.Code)));
                 ViewModel.Errors = [.. res.Errors.Select(x => x.Code)];
             }
             return Page();
@@ -184,6 +197,7 @@ namespace DemoApp.Pages
         {
             _configurationService.ClearSession();
             _entrySetupService.AddEntry(new Entry());
+            _logger.LogInformation("Session Cleared");
             return Page();
         }
 

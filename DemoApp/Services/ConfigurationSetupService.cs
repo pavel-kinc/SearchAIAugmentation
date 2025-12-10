@@ -22,18 +22,19 @@ namespace DemoApp.Services
     public class ConfigurationSetupService : IConfigurationSetupService
     {
         private readonly IEnhancerService _enhancerService;
-
+        private readonly ILogger<ConfigurationSetupService> _logger;
         private readonly IConfiguration _configuration;
 
         private readonly ISession _session;
 
         private const string SessionPrefix = "Config.";
 
-        public ConfigurationSetupService(IConfiguration configuration, IEnhancerService enhancerService, IHttpContextAccessor ctx)
+        public ConfigurationSetupService(IConfiguration configuration, IEnhancerService enhancerService, IHttpContextAccessor ctx, ILogger<ConfigurationSetupService> logger)
         {
 
             _configuration = configuration;
             _enhancerService = enhancerService;
+            _logger = logger;
             _session = ctx.HttpContext!.Session;
             if (!_session.Keys.Any(k => k.StartsWith(SessionPrefix)))
             {
@@ -63,7 +64,7 @@ namespace DemoApp.Services
                 config = JsonConvert.DeserializeObject<ConfigurationSetup>(serialized);
 
             }
-
+            _logger.LogInformation("Configuration retrieved from session");
             return config!;
         }
 
@@ -167,6 +168,7 @@ namespace DemoApp.Services
             };
 
             SetDefaultDemoAppConfig(configSetup);
+            _logger.LogInformation("Default configuration created");
             return configSetup;
         }
 
