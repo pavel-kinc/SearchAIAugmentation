@@ -5,22 +5,21 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <WarningsNotAsErrors>SKEXP0010</WarningsNotAsErrors>
-    <PackageId>$(AssemblyName)TEST</PackageId>
-    <Version>1.1.0-alpha</Version>
-    <Title>PromptEnhancerTEST</Title>
+    <PackageId>$(AssemblyName)</PackageId>
+    <Version>0.1.0-beta</Version>
+    <Title>PromptEnhancer</Title>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Description>Library with AI utilities, like RAG-based execution pipeline, prompt augmentation, and LLM utilities.</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <RepositoryUrl>https://github.com/pavel-kinc/SearchAIAugmentation</RepositoryUrl>
+    <Copyright>Copyright © 2025 Pavel Kinc</Copyright>
+    <PackageTags>LLM;AI;RAG;Pipeline;Semantic Kernel</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
@@ -42,6 +41,13 @@
     <PackageReference Include="Microsoft.SemanticKernel.Plugins.Web" Version="1.66.0-alpha" />
     <PackageReference Include="SharpToken" Version="2.0.4" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

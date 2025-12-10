@@ -175,7 +175,7 @@ namespace TaskChatDemo.Services.EnhancerUtility
             {
                 new (AIProviderEnum.OpenAI, "gpt-4o-mini", openAiApiKey, serviceId: OpenAiServiceId),
                 new (AIProviderEnum.OpenAI, "text-embedding-3-small", openAiApiKey, serviceId: OpenAiServiceId, serviceType: KernelServiceEnum.EmbeddingGenerator),
-                new (AIProviderEnum.GoogleGemini, "gemini-2.0-flash", geminiApiKey, serviceId: GeminiServiceId),
+                new (AIProviderEnum.GoogleGemini, "gemini-2.5-flash", geminiApiKey, serviceId: GeminiServiceId),
                 new (AIProviderEnum.GoogleGemini, "gemini-embedding-001", geminiApiKey, serviceId: GeminiServiceId, serviceType: KernelServiceEnum.EmbeddingGenerator)
             };
             var kernel = _semanticKernelManager.CreateKernel(configs);

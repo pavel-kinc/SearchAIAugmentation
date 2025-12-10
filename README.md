@@ -440,7 +440,7 @@ The central configuration class for working with the library is *EnhancerConfigu
 *ChatOptions* and *PromptExecutionSettings*. ChatOptions contains general settings related to communication with the LLM. *PromptExecutionSettings* used to define all parameters and specific behaviors that affect how the LLM model executes the final prompt (e.g., temperature, max tokens, stop sequences).
 * **Steps (*IEnumerable\<IPipelineStep>*)**: A collection of the individual IPipelineStep components that explicitly define the entire sequential execution flow and logic of the RAG-based Pipeline.
 * ***PipelineSettings***: Created settings for given pipeline, that are present in *PipelineModel* along with steps. These settings contain before mentioned *PipelineAdditionalSettings*, Kernel, ServiceProvider and *PromptConfiguration*
-* **More settings, configurations and filters** can defined by user for certain operations in pipeline or for Knowledge Bases
+* **More settings, configurations and filters** can be defined by user for certain operations in pipeline or for Knowledge Bases
 
 ### License
 The PromptEnhancer library is released using the LGPL-2.1 license.
