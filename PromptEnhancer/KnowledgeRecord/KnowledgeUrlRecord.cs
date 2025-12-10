@@ -10,6 +10,7 @@ namespace PromptEnhancer.KnowledgeRecord
     /// default token chunking size, content selection, and embedding representation.</remarks>
     public class KnowledgeUrlRecord : KnowledgeRecord<UrlRecord>
     {
+        // optional
         public static int DefaultChunkTokenSize => 300;
         public override Expression<Func<UrlRecord, string?>>? ChunkSelector => x => x.Content;
         public override string EmbeddingRepresentationString => SourceObject!.Content;

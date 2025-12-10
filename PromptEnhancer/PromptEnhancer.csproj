@@ -5,7 +5,26 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <WarningsNotAsErrors>SKEXP0010</WarningsNotAsErrors>
+    <PackageId>$(AssemblyName)TEST</PackageId>
+    <Version>1.1.0-alpha</Version>
+    <Title>PromptEnhancerTEST</Title>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Description>Library with AI utilities, like RAG-based execution pipeline, prompt augmentation, and LLM utilities.</Description>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AllMiniLmL6V2Sharp" Version="0.0.3" />

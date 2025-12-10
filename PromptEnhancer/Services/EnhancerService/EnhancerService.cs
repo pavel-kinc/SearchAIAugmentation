@@ -178,6 +178,12 @@ namespace PromptEnhancer.Services.EnhancerService
             return await ExecutePipelineAsync(pipeline, entries.Select(x => new PipelineRun(x)), cancellationToken);
         }
 
+        public async Task<ErrorOr<PipelineResultModel>> ProcessConfiguration(EnhancerConfiguration config, Entry entry, Kernel? kernel = null, CancellationToken cancellationToken = default)
+        {
+            var res = await ProcessConfiguration(config, [entry], kernel, cancellationToken);
+            return res.IsError ? res.Errors : res.Value.FirstOrDefault()!;
+        }
+
         /// <inheritdoc/>
         // only for not search and KB normal functionality (when you want to give data without defining knowledge base), for greater control setup normal knowledge base
         public IKnowledgeBaseContainer CreateDefaultDataContainer<TModel>(IEnumerable<TModel> data)
@@ -202,15 +208,15 @@ namespace PromptEnhancer.Services.EnhancerService
         }
 
         /// <inheritdoc/>
-        public ErrorOr<PipelineModel> CreateDefaultSearchPipeline(IEnumerable<IKnowledgeBaseContainer> containers, PromptConfiguration? promptConf = null, PipelineAdditionalSettings? pipelineSettings = null, KernelConfiguration? kernelData = null, Kernel? kernel = null)
+        public IEnumerable<IPipelineStep> CreateDefaultSearchPipelineSteps(IEnumerable<IKnowledgeBaseContainer> containers)
         {
-            return CreateDefaultSearchPipelineCommon(containers, promptConf, pipelineSettings, kernelData, kernel, true);
+            return CreateDefaultSearchPipelineStepsCommon(containers, true);
         }
 
         /// <inheritdoc/>
-        public ErrorOr<PipelineModel> CreateDefaultSearchPipelineWithoutGenerationStep(IEnumerable<IKnowledgeBaseContainer> containers, PromptConfiguration? promptConf = null, PipelineAdditionalSettings? pipelineSettings = null, KernelConfiguration? kernelData = null, Kernel? kernel = null)
+        public IEnumerable<IPipelineStep> CreateDefaultSearchPipelineStepsWithoutGenerationStep(IEnumerable<IKnowledgeBaseContainer> containers)
         {
-            return CreateDefaultSearchPipelineCommon(containers, promptConf, pipelineSettings, kernelData, kernel, false);
+            return CreateDefaultSearchPipelineStepsCommon(containers, false);
         }
 
         /// <inheritdoc/>
@@ -259,29 +265,16 @@ namespace PromptEnhancer.Services.EnhancerService
         }
 
         /// <summary>
-        /// Creates a default search pipeline model with the specified configuration and settings.
+        /// Creates a default sequence of search pipeline steps with optional generation step inclusion.
         /// </summary>
-        /// <remarks>This method constructs a pipeline model with a predefined sequence of steps,
-        /// including preprocessing, multiple search,  embedding processing, ranking, filtering, and prompt building. If
-        /// <paramref name="addGenerationStep"/> is set to  <see langword="true"/>, a generation step is appended to the
-        /// pipeline.</remarks>
-        /// <param name="containers">A collection of knowledge base containers used for the search pipeline.</param>
-        /// <param name="promptConf">The prompt configuration to use for the pipeline. If null, a default configuration is applied.</param>
-        /// <param name="pipelineSettings">Additional settings for the pipeline. If null, default settings are applied.</param>
-        /// <param name="kernelData">The kernel configuration to use for the pipeline. Can be null if not required.</param>
-        /// <param name="kernel">The kernel instance to use for the pipeline. Can be null if not required.</param>
-        /// <param name="addGenerationStep">A boolean value indicating whether to include a generation step in the pipeline.  <see langword="true"/> to
-        /// include the generation step; otherwise, <see langword="false"/>.</param>
-        /// <returns>An <see cref="ErrorOr{T}"/> containing the created <see cref="PipelineModel"/> if successful, or an error if
-        /// the pipeline configuration is invalid.</returns>
-        private ErrorOr<PipelineModel> CreateDefaultSearchPipelineCommon(IEnumerable<IKnowledgeBaseContainer> containers, PromptConfiguration? promptConf, PipelineAdditionalSettings? pipelineSettings, KernelConfiguration? kernelData, Kernel? kernel, bool addGenerationStep)
+        /// <remarks>The pipeline includes preprocessing, multiple search, embedding processing, ranking,
+        /// filtering, post-processing checks, and prompt building steps. If <paramref name="addGenerationStep"/> is
+        /// <see langword="true"/>, a generation step is also included.</remarks>
+        /// <param name="containers">A collection of knowledge base containers used in the search process.</param>
+        /// <param name="addGenerationStep">A boolean value indicating whether to include a generation step in the pipeline.</param>
+        /// <returns>An enumerable collection of pipeline steps configured for the search process.</returns>
+        private IEnumerable<IPipelineStep> CreateDefaultSearchPipelineStepsCommon(IEnumerable<IKnowledgeBaseContainer> containers, bool addGenerationStep)
         {
-            var defaultConfig = new EnhancerConfiguration();
-            var settings = CreatePipelineSettingsFromConfig(promptConf ?? defaultConfig.PromptConfiguration, pipelineSettings ?? defaultConfig.PipelineAdditionalSettings, kernelData, kernel);
-            if (settings.IsError)
-            {
-                return settings.Errors;
-            }
             var steps = new List<IPipelineStep>
             {
                 new PreprocessStep(),
@@ -298,7 +291,7 @@ namespace PromptEnhancer.Services.EnhancerService
                 steps.Add(new GenerationStep(isRequired: true));
             }
 
-            return new PipelineModel(settings.Value, steps);
+            return steps;
         }
 
         /// <summary>

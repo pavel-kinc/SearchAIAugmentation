@@ -74,10 +74,12 @@ namespace PromptEnhancer.SK
                 {
                     new(kernelData.Provider, kernelData.Model!, kernelData.AIApiKey!, kernelData.DeploymentName, serviceId: kernelData.ClientServiceId)
                 };
+                // create embedding with same LLM config
                 if (!string.IsNullOrWhiteSpace(kernelData.EmbeddingModel) && kernelData.UseLLMConfigForEmbeddings)
                 {
                     configs.Add(new KernelServiceBaseConfig(kernelData.Provider, kernelData.EmbeddingModel!, kernelData.AIApiKey!, serviceId: kernelData.GeneratorServiceId, serviceType: KernelServiceEnum.EmbeddingGenerator));
                 }
+                // create embedding with its own config
                 if (!string.IsNullOrWhiteSpace(kernelData.EmbeddingModel) && !kernelData.UseLLMConfigForEmbeddings && kernelData.EmbeddingProvider is not null)
                 {
                     configs.Add(new KernelServiceBaseConfig((AIProviderEnum)kernelData.EmbeddingProvider, kernelData.EmbeddingModel!, kernelData.EmbeddingKey!, serviceId: kernelData.GeneratorServiceId, serviceType: KernelServiceEnum.EmbeddingGenerator));

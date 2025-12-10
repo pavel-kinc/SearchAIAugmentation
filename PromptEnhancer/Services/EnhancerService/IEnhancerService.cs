@@ -40,6 +40,17 @@ namespace PromptEnhancer.Services.EnhancerService
         public Task<ErrorOr<IList<PipelineResultModel>>> ProcessConfiguration(EnhancerConfiguration config, IEnumerable<Entry> entries, Kernel? kernel = null, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Processes the given configuration and entry to produce a pipeline result.
+        /// </summary>
+        /// <param name="config">The configuration settings used to enhance the processing pipeline.</param>
+        /// <param name="entry">The entry data to be processed by the pipeline.</param>
+        /// <param name="kernel">An optional kernel instance to be used during processing. If not provided, a default kernel is used.</param>
+        /// <param name="cancellationToken">A token to monitor for cancellation requests, allowing the operation to be cancelled.</param>
+        /// <returns>A task representing the asynchronous operation, containing an <see cref="ErrorOr{T}"/> of <see
+        /// cref="PipelineResultModel"/>. The result indicates the success or failure of the processing operation.</returns>
+        public Task<ErrorOr<PipelineResultModel>> ProcessConfiguration(EnhancerConfiguration config, Entry entry, Kernel? kernel = null, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Executes the specified pipeline asynchronously and processes the provided entries.
         /// </summary>
         /// <remarks>This method processes the provided entries using the specified pipeline
@@ -136,37 +147,19 @@ namespace PromptEnhancer.Services.EnhancerService
             where T : class;
 
         /// <summary>
-        /// Creates a default search pipeline using the specified knowledge base containers and optional configurations.
+        /// Creates a default sequence of search pipeline steps using the specified knowledge base containers.
         /// </summary>
-        /// <remarks>This method provides a convenient way to create a search pipeline with default
-        /// behavior, while allowing optional customization through the provided parameters. The pipeline integrates the
-        /// specified knowledge base containers and can be tailored using the optional configurations.</remarks>
-        /// <param name="containers">A collection of knowledge base containers that provide the data sources for the pipeline.</param>
-        /// <param name="promptConf">An optional configuration for customizing the prompt behavior. If null, a default configuration is used.</param>
-        /// <param name="pipelineSettings">Optional additional settings for the pipeline. If null, default settings are applied.</param>
-        /// <param name="kernelData">Optional kernel configuration data used to initialize the pipeline. If null, the kernel is initialized with
-        /// default values.</param>
-        /// <param name="kernel">An optional kernel instance to be used by the pipeline. If null, a new kernel instance is created.</param>
-        /// <returns>An <see cref="ErrorOr{T}"/> containing the created <see cref="PipelineModel"/> if successful, or an error if
-        /// the pipeline creation fails.</returns>
-        public ErrorOr<PipelineModel> CreateDefaultSearchPipeline(IEnumerable<IKnowledgeBaseContainer> containers, PromptConfiguration? promptConf = null, PipelineAdditionalSettings? pipelineSettings = null, KernelConfiguration? kernelData = null, Kernel? kernel = null);
+        /// <param name="containers">A collection of knowledge base containers to be used in the pipeline steps.</param>
+        /// <returns>An enumerable collection of pipeline steps configured for search operations.</returns>
+        public IEnumerable<IPipelineStep> CreateDefaultSearchPipelineSteps(IEnumerable<IKnowledgeBaseContainer> containers);
 
 
         /// <summary>
-        /// Creates a default search pipeline model without a generation step.
+        /// Creates a default sequence of search pipeline steps, excluding the generation step.
         /// </summary>
-        /// <remarks>This method is designed to create a search pipeline that excludes any generation
-        /// steps, focusing solely on search-related functionality.</remarks>
-        /// <param name="containers">A collection of knowledge base containers that provide the context for the search pipeline.</param>
-        /// <param name="promptConf">An optional prompt configuration to customize the behavior of the pipeline. If null, a default configuration
-        /// is used.</param>
-        /// <param name="pipelineSettings">Optional additional settings for the pipeline. If null, default settings are applied.</param>
-        /// <param name="kernelData">Optional kernel configuration data to initialize the pipeline. If null, the pipeline uses default kernel
-        /// settings.</param>
-        /// <param name="kernel">An optional kernel instance to be used by the pipeline. If null, a new kernel instance is created.</param>
-        /// <returns>An <see cref="ErrorOr{T}"/> containing the created <see cref="PipelineModel"/> if successful, or an error if
-        /// the pipeline creation fails.</returns>
-        public ErrorOr<PipelineModel> CreateDefaultSearchPipelineWithoutGenerationStep(IEnumerable<IKnowledgeBaseContainer> containers, PromptConfiguration? promptConf = null, PipelineAdditionalSettings? pipelineSettings = null, KernelConfiguration? kernelData = null, Kernel? kernel = null);
+        /// <param name="containers">A collection of knowledge base containers that provide the context and data for the search pipeline.</param>
+        /// <returns>An enumerable collection of pipeline steps configured for search operations, excluding any generation steps.</returns>
+        public IEnumerable<IPipelineStep> CreateDefaultSearchPipelineStepsWithoutGenerationStep(IEnumerable<IKnowledgeBaseContainer> containers);
 
         /// <summary>
         /// Creates the default pipeline steps for performing a Google search using the specified API key and engine.
