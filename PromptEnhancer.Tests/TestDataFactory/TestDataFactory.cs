@@ -2,6 +2,7 @@
 using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
+using PromptEnhancer.Models.Enums;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Tests.TestClasses;
 
@@ -42,9 +43,6 @@ namespace PromptEnhancer.Tests.TestDataFactory
             TargetOutputLength = 100,
             TargetLanguageCultureCode = "fr-FR"
         };
-
-
-        // --- 2. User Prompt Data Instances ---
 
         /// <summary>
         /// Returns a list of Knowledge Records for testing.
@@ -102,6 +100,18 @@ namespace PromptEnhancer.Tests.TestDataFactory
             QueryString = "What is the main topic?",
             EntryOriginalText = "Only the original text is here.",
         };
+
+        public static IEnumerable<KernelServiceBaseConfig> GetDefaultKernelConfigs()
+        {
+            // This method returns the actual configuration data used in production
+            return new List<KernelServiceBaseConfig>
+            {
+                // Example: A valid OpenAI chat client config
+                new(AIProviderEnum.OpenAI, "gpt-4", "test-openai-key", serviceId: "openai", serviceType: KernelServiceEnum.ChatClient),
+                // Example: An Azure embedding generator config
+                new(AIProviderEnum.AzureOpenAI, "text-embedding", "test-azure-key", "emb-deploy", "azure", KernelServiceEnum.EmbeddingGenerator)
+            };
+        }
 
         /// <summary>
         /// Returns a query string with bad internal formatting (for regex tests).
