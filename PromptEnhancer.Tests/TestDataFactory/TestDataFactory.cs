@@ -61,10 +61,10 @@ namespace PromptEnhancer.Tests.TestDataFactory
 
         public static IEnumerable<IKnowledgeRecord> GetTestRecords() =>
         [
-            new DummyKnowledgeRecord { SimilarityScore = 0.8, Embeddings = EmbeddingMocksUtilities.CreateEmbeddings("AlphaSource"), Source = "Alpha" },
-            new DummyKnowledgeRecord { SimilarityScore = 0.9, Embeddings = EmbeddingMocksUtilities.CreateEmbeddings("BetaSource"), Source = "Beta" },
-            new DummyKnowledgeRecord { SimilarityScore = 0.6, Embeddings = EmbeddingMocksUtilities.CreateEmbeddings("AlphaSource"), Source = "Alpha" },
-            new DummyKnowledgeRecord { SimilarityScore = null, Embeddings = EmbeddingMocksUtilities.CreateEmbeddings("GammaSource"), Source = "Gamma" }, // Score is null
+            new DummyKnowledgeRecord { SimilarityScore = 0.8, Embeddings = EmbeddingMocksUtilities.CreateEmbeddings("AlphaSource"), Source = "Alpha", SourceObject = "dummy1" },
+            new DummyKnowledgeRecord { SimilarityScore = 0.9, Embeddings = EmbeddingMocksUtilities.CreateEmbeddings("BetaSource"), Source = "Beta" , SourceObject = "dummy2"},
+            new DummyKnowledgeRecord { SimilarityScore = 0.6, Embeddings = EmbeddingMocksUtilities.CreateEmbeddings("AlphaSource"), Source = "Alpha" , SourceObject = "dummy3"},
+            new DummyKnowledgeRecord { SimilarityScore = null, Embeddings = EmbeddingMocksUtilities.CreateEmbeddings("GammaSource"), Source = "Gamma" , SourceObject = "dummy4"}, // Score is null
             new DummyKnowledgeRecord { SimilarityScore = 0.7, Embeddings = null, Source = "Delta" } // Embeddings is null
         ];
 
