@@ -38,7 +38,7 @@ namespace PromptEnhancer.Services.PromptBuildingService.Tests
 
             // Assertions based on default PromptConfiguration() values
             Assert.Contains("Aim for maximum of", result);
-            Assert.Contains("The output culture must be in en-US.", result); 
+            Assert.Contains("The output culture must be in en-US.", result);
 
             Assert.DoesNotContain("Macros:", result);
             Assert.DoesNotContain("Additional Instructions:", result);

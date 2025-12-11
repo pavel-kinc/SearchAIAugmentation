@@ -1,5 +1,4 @@
 ﻿using ErrorOr;
-using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
@@ -14,7 +13,6 @@ using PromptEnhancer.KnowledgeSearchRequest.Examples;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using PromptEnhancer.Models.Enums;
-using PromptEnhancer.Models.Examples;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Pipeline.Interfaces;
 using PromptEnhancer.Pipeline.PromptEnhancerSteps;
@@ -57,7 +55,7 @@ namespace PromptEnhancer.Services.EnhancerService.Tests
                 _mockGoogleKB.Object,
                 _mockLogger.Object
             );
-            
+
         }
 
         // Since file operations are involved, use a temporary file path
@@ -230,7 +228,7 @@ namespace PromptEnhancer.Services.EnhancerService.Tests
         public async Task Execution_3_ProcessConfiguration_ReturnsErrorOnSettingsFailure()
         {
             var config = new EnhancerConfiguration();
-            var entry = new Entry{ QueryString = "test" };
+            var entry = new Entry { QueryString = "test" };
             var error = Error.Failure("Settings creation failed");
 
             // Mock failure in CreatePipelineSettingsFromConfig
@@ -251,7 +249,7 @@ namespace PromptEnhancer.Services.EnhancerService.Tests
                 PromptConfiguration = new PromptConfiguration(),
                 Steps = []
             };
-            var entry = new Entry{ QueryString = "single entry" };
+            var entry = new Entry { QueryString = "single entry" };
             var kernel = _mockKernel;
 
 
@@ -284,7 +282,7 @@ namespace PromptEnhancer.Services.EnhancerService.Tests
             var kernelMock = KernelMocks.GetRealKernelWithMocks(chatClient: chatClientMock);
 
             var settings = new PipelineSettings(kernelMock, _mockServiceProvider.Object, new PipelineAdditionalSettings(), new PromptConfiguration());
-            var context = new PipelineRun(new Entry{ QueryString = "User query" });
+            var context = new PipelineRun(new Entry { QueryString = "User query" });
 
             var result = _service.GetStreamingResponse(settings, context);
             var firstChunk = await result.FirstAsync();

@@ -2,11 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PromptEnhancer.Tests.TestDataFactory
 {
@@ -16,15 +11,15 @@ namespace PromptEnhancer.Tests.TestDataFactory
         {
             var services = new ServiceCollection();
 
-            if(generatorMock is not null)
+            if (generatorMock is not null)
             {
                 services.AddSingleton(generatorMock.Object);
             }
-            if(chatClient is not null)
+            if (chatClient is not null)
             {
                 services.AddSingleton(chatClient.Object);
             }
-                
+
             var serviceProvider = services.BuildServiceProvider();
 
             var kernel = new Kernel(serviceProvider);

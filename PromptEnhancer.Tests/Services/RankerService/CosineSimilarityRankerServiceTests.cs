@@ -1,11 +1,4 @@
 ﻿using Microsoft.Extensions.AI;
-using PromptEnhancer.Services.RankerService;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace PromptEnhancer.Services.RankerService.Tests
 {
