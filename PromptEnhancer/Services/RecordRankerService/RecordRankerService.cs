@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.Services.RankerService;
@@ -15,18 +16,22 @@ namespace PromptEnhancer.Services.RecordRankerService
     public class RecordRankerService : IRecordRankerService
     {
         private readonly IRankerService _rankerService;
+        private readonly ILogger<RecordRankerService> _logger;
 
-        public RecordRankerService(IRankerService rankerService)
+        public RecordRankerService(IRankerService rankerService, ILogger<RecordRankerService> logger)
         {
             _rankerService = rankerService;
+            _logger = logger;
         }
 
         // TODO add smth to embed together with queryString - for example if user searches only ean, it is compared to only ean embeddings (number)
         /// <inheritdoc/>
         public async Task<bool> AssignSimilarityScoreToRecordsAsync(Kernel kernel, IEnumerable<IKnowledgeRecord> records, string? queryString, string? generatorKey = null)
         {
+            _logger.LogInformation("Assigning similarity scores to {RecordCount} records using query: {QueryString}", records.Count(), queryString ?? "null");
             var dict = new Dictionary<string, Embedding<float>>();
             var generator = kernel.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>(generatorKey);
+            _logger.LogInformation("Using embedding generator with key: {GeneratorKey}", generatorKey ?? "default");
             if (queryString is not null)
             {
                 var query = await generator.GenerateAsync(queryString);
@@ -85,6 +90,7 @@ namespace PromptEnhancer.Services.RecordRankerService
 
             if (recordEmbed is null)
             {
+                _logger.LogWarning("RecordRankerService could not assign score to record with ID {RecordId} due to missing embeddings. Source: {Source}", record.Id ?? "null", record.Source ?? "unknown");
                 return false;
             }
 
@@ -92,6 +98,7 @@ namespace PromptEnhancer.Services.RecordRankerService
 
             if (score is null)
             {
+                _logger.LogWarning("RecordRankerService could not compute similarity score for record with ID {RecordId}. Source: {Source}", record.Id ?? "null", record.Source ?? "unknown");
                 return false;
             }
 

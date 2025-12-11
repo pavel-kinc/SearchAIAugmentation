@@ -32,6 +32,7 @@ namespace TaskChatDemo.Services.EnhancerUtility
         public const string GeminiServiceId = "gemini";
         public const string OpenAiServiceId = "openai";
         private readonly IPromptBuildingService _promptBuildingService;
+        private readonly ILogger<EnhancerUtilityService> _logger;
         private readonly IEnhancerService _enhancerService;
         private readonly IConfiguration _configuration;
         private readonly ISemanticKernelManager _semanticKernelManager;
@@ -39,7 +40,7 @@ namespace TaskChatDemo.Services.EnhancerUtility
         private readonly WorkItemKnowledgeBase _workItemKnowledgeBase;
         private readonly GoogleKnowledgeBase _googleKB;
 
-        public EnhancerUtilityService(IEnhancerService enhancerService, IConfiguration configuration, ISemanticKernelManager skManager, TaskDataKnowledgeBase taskDataKnowledgeBase, WorkItemKnowledgeBase workItemKnowledgeBase, GoogleKnowledgeBase googleKB, IPromptBuildingService promptBuildingService)
+        public EnhancerUtilityService(IEnhancerService enhancerService, IConfiguration configuration, ISemanticKernelManager skManager, TaskDataKnowledgeBase taskDataKnowledgeBase, WorkItemKnowledgeBase workItemKnowledgeBase, GoogleKnowledgeBase googleKB, IPromptBuildingService promptBuildingService, ILogger<EnhancerUtilityService> logger)
         {
             _enhancerService = enhancerService;
             _configuration = configuration;
@@ -48,6 +49,7 @@ namespace TaskChatDemo.Services.EnhancerUtility
             _workItemKnowledgeBase = workItemKnowledgeBase;
             _googleKB = googleKB;
             _promptBuildingService = promptBuildingService;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
@@ -59,7 +61,7 @@ namespace TaskChatDemo.Services.EnhancerUtility
             enhancerConfig.PipelineAdditionalSettings = new PipelineAdditionalSettings()
             {
                 //here to change client and generator for pipeline
-                ChatClientKey = GeminiServiceId,
+                ChatClientKey = GeminiServiceId, //OpenAiServiceId,
                 GeneratorKey = OpenAiServiceId,
                 KernelRequestSettings = new PromptExecutionSettings()
                 {
@@ -76,6 +78,7 @@ namespace TaskChatDemo.Services.EnhancerUtility
                 """;
 
             var settingsResult = _enhancerService.CreatePipelineSettingsFromConfig(enhancerConfig.PromptConfiguration, enhancerConfig.PipelineAdditionalSettings, enhancerConfig.KernelConfiguration, kernel);
+            _logger.LogInformation("Pipeline settings created.");
             return settingsResult;
         }
 
@@ -97,16 +100,18 @@ namespace TaskChatDemo.Services.EnhancerUtility
                 var pipelineRes = await _enhancerService.ExecutePipelineAsync(pipeline, [new PipelineRun(entry)]);
                 if (pipelineRes.IsError || pipelineRes.Value.FirstOrDefault()?.Result is null)
                 {
-                    throw new InvalidOperationException($"Pipeline failed: {pipelineRes.ErrorsOrEmptyList.Select(x => x.ToString())}");
+                    _logger.LogError("Pipeline execution failed: {Errors}", string.Join(';', pipelineRes.ErrorsOrEmptyList.Select(x => x.ToString()).ToList()));
+                    throw new InvalidOperationException($"Pipeline failed: {string.Join(';', pipelineRes.ErrorsOrEmptyList.Select(x => x.ToString()).ToList())}");
                 }
                 var firstResponse = pipelineRes.Value.FirstOrDefault();
                 if (firstResponse is null || !firstResponse.PipelineSuccess)
                 {
-                    throw new InvalidOperationException($"Pipeline failed for query: {firstResponse?.Errors.Select(x => x.Code)}");
+                    _logger.LogError("Pipeline execution failed for query: {Errors}", string.Join(';', firstResponse?.Errors.Select(x => x.Code) ?? []));
+                    throw new InvalidOperationException($"Pipeline failed for query: {string.Join(';', firstResponse?.Errors.Select(x => x.Code) ?? [])})");
                 }
                 context = pipelineRes.Value.FirstOrDefault()!.Result!;
             }
-
+            _logger.LogInformation("Pipeline context retrieved.");
             return context;
         }
 
@@ -169,18 +174,20 @@ namespace TaskChatDemo.Services.EnhancerUtility
         {
             if (string.IsNullOrEmpty(openAiApiKey) || string.IsNullOrEmpty(geminiApiKey))
             {
+                _logger.LogError("API keys for OpenAI or Gemini are not provided.");
                 throw new ArgumentNullException(nameof(openAiApiKey));
             }
             var configs = new List<KernelServiceBaseConfig>
             {
                 new (AIProviderEnum.OpenAI, "gpt-4o-mini", openAiApiKey, serviceId: OpenAiServiceId),
                 new (AIProviderEnum.OpenAI, "text-embedding-3-small", openAiApiKey, serviceId: OpenAiServiceId, serviceType: KernelServiceEnum.EmbeddingGenerator),
-                new (AIProviderEnum.GoogleGemini, "gemini-2.0-flash", geminiApiKey, serviceId: GeminiServiceId),
+                new (AIProviderEnum.GoogleGemini, "gemini-2.5-flash", geminiApiKey, serviceId: GeminiServiceId),
                 new (AIProviderEnum.GoogleGemini, "gemini-embedding-001", geminiApiKey, serviceId: GeminiServiceId, serviceType: KernelServiceEnum.EmbeddingGenerator)
             };
             var kernel = _semanticKernelManager.CreateKernel(configs);
             if (kernel.IsError)
             {
+                _logger.LogError("Kernel creation failed: {Errors}", string.Join(';', kernel.Errors.Select(x => x.ToString()).ToList()));
                 throw new Exception("Kernel creation failed");
             }
             return kernel.Value;

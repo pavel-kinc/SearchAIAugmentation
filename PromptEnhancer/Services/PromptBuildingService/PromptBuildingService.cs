@@ -1,4 +1,5 @@
-﻿using PromptEnhancer.KnowledgeRecord.Interfaces;
+﻿using Microsoft.Extensions.Logging;
+using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Configurations;
 using System.Text;
@@ -13,15 +14,23 @@ namespace PromptEnhancer.Services.PromptBuildingService
     {
         public const string NewLinesReplacement = "\n";
         public const string WhiteSpacesReplacement = " ";
+        private readonly ILogger<PromptBuildingService> _logger;
+
         [GeneratedRegex(@"(\r?\n){2,}", RegexOptions.Compiled)]
         private static partial Regex CollapseNewLines();
 
         [GeneratedRegex(@"[ \t]{2,}", RegexOptions.Compiled)]
         private static partial Regex CollapseWhiteSpaces();
 
+        public PromptBuildingService(ILogger<PromptBuildingService> logger)
+        {
+            _logger = logger;
+        }
+
         /// <inheritdoc/>
         public string BuildSystemPrompt(PromptConfiguration? promptConfiguration)
         {
+            _logger.LogInformation("Building system prompt.");
             promptConfiguration ??= new PromptConfiguration();
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(@$"{promptConfiguration.SystemInstructions}");
@@ -46,6 +55,7 @@ namespace PromptEnhancer.Services.PromptBuildingService
         /// <inheritdoc/>
         public string BuildUserPrompt(string queryString, IEnumerable<IKnowledgeRecord> pickedRecords, IEnumerable<string> additionalContext, Entry? entry)
         {
+            _logger.LogInformation("Building user prompt for {RecordCount} picked records and {ContextCount}", pickedRecords.Count(), additionalContext.Count());
             var sb = new StringBuilder();
             sb.AppendLine($"User Query: {queryString}");
 

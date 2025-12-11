@@ -1,4 +1,5 @@
-﻿using PromptEnhancer.KernelServiceTemplates;
+﻿using Microsoft.Extensions.Logging;
+using PromptEnhancer.KernelServiceTemplates;
 using PromptEnhancer.KernelServiceTemplates.ChatClients;
 using PromptEnhancer.KernelServiceTemplates.EmbeddingGenerators;
 using PromptEnhancer.Models.Configurations;
@@ -15,6 +16,10 @@ namespace PromptEnhancer.SK
     /// corresponding factory methods for creating instances of <see cref="IKernelServiceTemplate"/>.</remarks>
     public class KernelServiceFactory : IKernelServiceFactory
     {
+        public KernelServiceFactory(ILogger<KernelServiceFactory> logger)
+        {
+            _logger = logger;
+        }
         private static readonly Dictionary<(AIProviderEnum, KernelServiceEnum), Func<KernelServiceBaseConfig, IKernelServiceTemplate>> Factories = new()
         {
             // OpenAI
@@ -52,6 +57,7 @@ namespace PromptEnhancer.SK
             [(AIProviderEnum.Onnx, KernelServiceEnum.EmbeddingGenerator)] =
             cfg => new OnnxEmbeddingGenerator(cfg.Model, cfg.Key, cfg.ServiceId),
         };
+        private readonly ILogger<KernelServiceFactory> _logger;
 
         /// <inheritdoc/>
         public virtual IEnumerable<IKernelServiceTemplate> CreateKernelServicesConfig(IEnumerable<KernelServiceBaseConfig> configs)
@@ -61,6 +67,7 @@ namespace PromptEnhancer.SK
             {
                 AddToServiceTemplatesIfValid(config, serviceTemplates);
             }
+            _logger.LogInformation("Created {ServiceCount} kernel service templates from {ConfigCount} configurations.", serviceTemplates.Count, configs.Count());
             return serviceTemplates;
         }
 
@@ -74,7 +81,12 @@ namespace PromptEnhancer.SK
             var key = (config.KernelServiceProvider, config.KernelServiceType);
             if (Factories.TryGetValue(key, out var factory) && !string.IsNullOrWhiteSpace(config.Key))
             {
+                _logger.LogInformation("Creating kernel service template for provider: {Provider}, service type: {ServiceType}.", config.KernelServiceProvider, config.KernelServiceType);
                 serviceTemplates.Add(factory(config));
+            }
+            else
+            {
+                _logger.LogWarning("No factory found for provider: {Provider}, service type: {ServiceType}, or the API key is missing.", config.KernelServiceProvider, config.KernelServiceType);
             }
         }
     }

@@ -64,12 +64,14 @@ namespace PromptEnhancer.Services.EnhancerService
                 EmbeddingModel = embeddingModel,
                 UseLLMConfigForEmbeddings = embeddingModel is not null && aiProvider == AIProviderEnum.OpenAI,
             };
+            _logger.LogInformation("Created default EnhancerConfiguration with AI Provider: {AIProvider}, Model: {AIModel}, Embedding Model: {EmbeddingModel}", aiProvider, aiModel, embeddingModel);
             return enhancerConfiguration;
         }
 
         /// <inheritdoc/>
         public async Task DownloadConfiguration(EnhancerConfiguration configuration, string filePath = "config.json", bool hideSecrets = true)
         {
+            _logger.LogInformation("Downloading configuration");
             var json = GetConfigurationJson(configuration, hideSecrets);
             await File.WriteAllTextAsync(filePath, json);
         }
@@ -77,6 +79,7 @@ namespace PromptEnhancer.Services.EnhancerService
         /// <inheritdoc/>
         public byte[] ExportConfigurationToBytes(EnhancerConfiguration configuration, bool hideSecrets = true)
         {
+            _logger.LogInformation("Exporting configuration to bytes");
             var json = GetConfigurationJson(configuration, hideSecrets);
             return Encoding.UTF8.GetBytes(json);
         }
@@ -84,6 +87,7 @@ namespace PromptEnhancer.Services.EnhancerService
         /// <inheritdoc/>
         public async Task<EnhancerConfiguration?> ImportConfigurationFromFile(string filePath)
         {
+            _logger.LogInformation("Importing configuration from file: {FilePath}", filePath);
             var json = await File.ReadAllTextAsync(filePath);
             return JsonConvert.DeserializeObject<EnhancerConfiguration>(json);
         }
@@ -91,6 +95,7 @@ namespace PromptEnhancer.Services.EnhancerService
         /// <inheritdoc/>
         public EnhancerConfiguration? ImportConfigurationFromBytes(byte[] jsonBytes)
         {
+            _logger.LogInformation("Importing configuration from bytes");
             var json = Encoding.UTF8.GetString(jsonBytes);
             return JsonConvert.DeserializeObject<EnhancerConfiguration>(json);
         }
@@ -98,11 +103,13 @@ namespace PromptEnhancer.Services.EnhancerService
         /// <inheritdoc/>
         public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponse(PipelineSettings settings, PipelineRun context, CancellationToken ct = default)
         {
+            _logger.LogInformation("Getting streaming response from chat client");
             var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.Settings.ChatClientKey);
             List<ChatMessage> history = ChatHistoryUtility.AddToChatHistoryPipeline(context);
             context.ChatHistory = history;
             if (ChatHistoryUtility.GetHistoryLength(history) > settings.Settings.MaximumInputLength)
             {
+                _logger.LogError("Input size exceeded limit for GetStreamingResponse");
                 throw new ArgumentOutOfRangeException(nameof(context), ChatHistoryUtility.GetInputSizeExceededLimitMessage(nameof(GetStreamingResponse)));
             }
 
@@ -114,6 +121,7 @@ namespace PromptEnhancer.Services.EnhancerService
         {
             try
             {
+                _logger.LogInformation("Executing pipeline with {EntryCount} entries", entries.Count());
                 if (!entries.Any())
                 {
                     return Error.Unexpected("No input specified, nothing to proccess");
@@ -133,6 +141,7 @@ namespace PromptEnhancer.Services.EnhancerService
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "ExecutePipelineAsync failed with exception");
                 return Error.Failure($"{nameof(ExecutePipelineAsync)} failed", ex.Message);
             }
         }
@@ -140,17 +149,20 @@ namespace PromptEnhancer.Services.EnhancerService
         /// <inheritdoc/>
         public ErrorOr<PipelineSettings> CreatePipelineSettingsFromConfig(PromptConfiguration promptConf, PipelineAdditionalSettings pipelineSettings, KernelConfiguration? kernelData = null, Kernel? kernel = null)
         {
+            _logger.LogInformation("Creating pipeline settings from configuration");
             var sk = kernel ?? _kernel;
             if (sk is null && kernelData is not null)
             {
                 var configs = _semanticKernelManager.ConvertConfig(kernelData);
                 if (configs.IsError)
                 {
+                    _logger.LogError("Failed to convert kernel configuration: {Errors}", string.Join(", ", configs.Errors.Select(e => e.Description)));
                     return configs.Errors;
                 }
                 var createdKernel = _semanticKernelManager.CreateKernel(configs.Value);
                 if (createdKernel.IsError)
                 {
+                    _logger.LogError("Failed to create kernel: {Errors}", string.Join(", ", createdKernel.Errors.Select(e => e.Description)));
                     return createdKernel.Errors;
                 }
                 sk = createdKernel.Value;
@@ -158,6 +170,7 @@ namespace PromptEnhancer.Services.EnhancerService
 
             if (sk is null)
             {
+                _logger.LogError("No kernel could be created or resolved");
                 return Error.Failure("No kernel could be created or resolved.");
             }
             return new PipelineSettings(sk, _serviceProvider, pipelineSettings, promptConf);
@@ -166,10 +179,12 @@ namespace PromptEnhancer.Services.EnhancerService
         /// <inheritdoc/>
         public async Task<ErrorOr<IList<PipelineResultModel>>> ProcessConfiguration(EnhancerConfiguration config, IEnumerable<Entry> entries, Kernel? kernel = null, CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("Processing configuration");
             var settings = CreatePipelineSettingsFromConfig(config.PromptConfiguration, config.PipelineAdditionalSettings, config.KernelConfiguration, kernel);
 
             if (settings.IsError)
             {
+                _logger.LogError("Failed to create pipeline settings: {Errors}", string.Join(", ", settings.Errors.Select(e => e.Description)));
                 return settings.Errors;
             }
 
@@ -180,6 +195,7 @@ namespace PromptEnhancer.Services.EnhancerService
 
         public async Task<ErrorOr<PipelineResultModel>> ProcessConfiguration(EnhancerConfiguration config, Entry entry, Kernel? kernel = null, CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("Processing single entry configuration");
             var res = await ProcessConfiguration(config, [entry], kernel, cancellationToken);
             return res.IsError ? res.Errors : res.Value.FirstOrDefault()!;
         }
@@ -189,6 +205,7 @@ namespace PromptEnhancer.Services.EnhancerService
         public IKnowledgeBaseContainer CreateDefaultDataContainer<TModel>(IEnumerable<TModel> data)
             where TModel : class
         {
+            _logger.LogInformation("Creating default data container for model type: {ModelType} with {Count} items", typeof(TModel).Name, data.Count());
             Type recordType = typeof(KnowledgeRecord<>).MakeGenericType(typeof(TModel));
             Type kbType = typeof(KnowledgeBaseDataDefault<,>).MakeGenericType(recordType, typeof(TModel));
             var kb = (KnowledgeBaseDataDefault<KnowledgeRecord<TModel>, TModel>)ActivatorUtilities.CreateInstance(_serviceProvider, kbType);
@@ -201,6 +218,7 @@ namespace PromptEnhancer.Services.EnhancerService
             where TModel : class
             where TRecord : KnowledgeRecord<TModel>, new()
         {
+            _logger.LogInformation("Creating default data container for record type: {RecordType} and model type: {ModelType} with {Count} items", typeof(TRecord).Name, typeof(TModel).Name, data.Count());
             Type recordType = typeof(TRecord);
             Type kbType = typeof(KnowledgeBaseDataDefault<,>).MakeGenericType(recordType, typeof(TModel));
             var kb = (KnowledgeBaseDataDefault<TRecord, TModel>)ActivatorUtilities.CreateInstance(_serviceProvider, kbType);
@@ -210,18 +228,21 @@ namespace PromptEnhancer.Services.EnhancerService
         /// <inheritdoc/>
         public IEnumerable<IPipelineStep> CreateDefaultSearchPipelineSteps(IEnumerable<IKnowledgeBaseContainer> containers)
         {
+            _logger.LogInformation("Creating default search pipeline steps with generation step included");
             return CreateDefaultSearchPipelineStepsCommon(containers, true);
         }
 
         /// <inheritdoc/>
         public IEnumerable<IPipelineStep> CreateDefaultSearchPipelineStepsWithoutGenerationStep(IEnumerable<IKnowledgeBaseContainer> containers)
         {
+            _logger.LogInformation("Creating default search pipeline steps without generation step");
             return CreateDefaultSearchPipelineStepsCommon(containers, false);
         }
 
         /// <inheritdoc/>
         public IEnumerable<IPipelineStep> CreateDefaultGoogleSearchPipelineSteps(string googleApiKey, string googleEngine, GoogleSearchFilterModel? searchFilter = null, GoogleSettings? googleSettings = null, UrlRecordFilter? filter = null, bool useScraper = false)
         {
+            _logger.LogInformation("Creating default Google search pipeline steps");
             searchFilter ??= new GoogleSearchFilterModel();
             googleSettings ??= new GoogleSettings() { SearchApiKey = googleApiKey, Engine = googleEngine, UseScraper = useScraper };
             var request = new GoogleSearchRequest
@@ -257,6 +278,7 @@ namespace PromptEnhancer.Services.EnhancerService
             where TFilter : class, IModelFilter<T>
             where T : class
         {
+            _logger.LogInformation("Creating knowledge base container for record type: {RecordType}, model type: {ModelType}", typeof(TRecord).Name, typeof(T).Name);
             return new KnowledgeBaseContainer<TRecord, TSearchFilter, TSearchSettings, TFilter, T>(
                 knowledgeBase,
                 knowledgeSearchRequest,

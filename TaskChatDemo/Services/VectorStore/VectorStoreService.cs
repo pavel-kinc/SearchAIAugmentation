@@ -12,6 +12,7 @@ namespace TaskChatDemo.Services.VectorStore
     public class VectorStoreService : IVectorStoreService
     {
         private readonly VectorStoreCollection<Guid, TaskItemModel> _taskCollection;
+
         public VectorStoreService(VectorStoreCollection<Guid, TaskItemModel> taskCollection)
         {
             _taskCollection = taskCollection;

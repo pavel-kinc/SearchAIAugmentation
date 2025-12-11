@@ -41,6 +41,7 @@ namespace PromptEnhancer.KnowledgeBaseCore.Examples
         {
             if (!queriesToSearch.Any())
             {
+                _logger.LogWarning("GoogleKnowledgeBase received no queries to search.");
                 return [];
             }
             var settings = request.Settings;
@@ -59,10 +60,10 @@ namespace PromptEnhancer.KnowledgeBaseCore.Examples
             }
             if (textSearch is null)
             {
-                //TODO maybe exception?
+                _logger.LogError("GoogleKnowledgeBase could not create a text search instance.");
                 return [];
             }
-
+            _logger.LogInformation("GoogleKnowledgeBase starting search for {QueryCount} queries.", queriesToSearch.Count());
             var cb = new ConcurrentBag<KnowledgeUrlRecord>();
             await Parallel.ForEachAsync(queriesToSearch, async (queryString, _) =>
             {
@@ -73,7 +74,7 @@ namespace PromptEnhancer.KnowledgeBaseCore.Examples
                     cb.Add(record);
                 }
             });
-
+            _logger.LogInformation("GoogleKnowledgeBase returned {Count} records for {QueryCount} queries.", cb.Count, queriesToSearch.Count());
             return [.. cb];
         }
 
@@ -100,6 +101,7 @@ namespace PromptEnhancer.KnowledgeBaseCore.Examples
             if (settings.UseScraper)
             {
                 //will be needed some specifications from config what to search for maybe? (selector)
+                _logger.LogInformation("GoogleKnowledgeBase is scraping data from {UrlCount} URLs for query: {Query}", usedUrls.Count(), queryString);
                 data = await _searchWebScraper.ScrapeDataFromUrlsAsync(usedUrls);
             }
             else

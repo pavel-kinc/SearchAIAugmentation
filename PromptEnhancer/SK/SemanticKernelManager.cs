@@ -1,4 +1,5 @@
 ﻿using ErrorOr;
+using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using PromptEnhancer.Extensions;
 using PromptEnhancer.Models.Configurations;
@@ -18,20 +19,23 @@ namespace PromptEnhancer.SK
     /// optionally add internal services and context plugins during kernel creation.</remarks>
     public class SemanticKernelManager : ISemanticKernelManager
     {
+        private readonly IKernelServiceFactory _kernelServiceFactory;
+
         // context plugins for semantic kernel creation (for later usage in steps)
         private readonly IEnumerable<ISemanticKernelContextPlugin> _contextPlugins;
+        private readonly ILogger<SemanticKernelManager> _logger;
 
-        public IKernelServiceFactory KernelServiceFactory { get; }
-
-        public SemanticKernelManager(IKernelServiceFactory kernelServiceFactory, IEnumerable<ISemanticKernelContextPlugin> contextPlugins)
+        public SemanticKernelManager(IKernelServiceFactory kernelServiceFactory, IEnumerable<ISemanticKernelContextPlugin> contextPlugins, ILogger<SemanticKernelManager> logger)
         {
-            KernelServiceFactory = kernelServiceFactory;
+            _kernelServiceFactory = kernelServiceFactory;
             _contextPlugins = contextPlugins;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
         public void AddPluginToSemanticKernel<Plugin>(Kernel kernel) where Plugin : class
         {
+            _logger.LogInformation("Adding plugin {PluginName} to Semantic Kernel.", typeof(Plugin).Name);
             kernel.Plugins.AddFromType<Plugin>(typeof(Plugin).Name);
         }
 
@@ -40,9 +44,9 @@ namespace PromptEnhancer.SK
         {
             try
             {
-                var factory = KernelServiceFactory ?? new KernelServiceFactory();
+                _logger.LogInformation("Creating Semantic Kernel with {ServiceCount} services. AddInternalServices: {AddInternalServices}, AddContextPlugins: {AddContextPlugins}", kernelServiceConfigs.Count(), addInternalServices, addContextPlugins);
                 IKernelBuilder kernelBuilder = Kernel.CreateBuilder();
-                var kernelServices = factory.CreateKernelServicesConfig(kernelServiceConfigs);
+                var kernelServices = _kernelServiceFactory.CreateKernelServicesConfig(kernelServiceConfigs);
                 kernelBuilder.Services.AddKernelServices(kernelServices);
                 if (addInternalServices)
                 {
@@ -60,6 +64,7 @@ namespace PromptEnhancer.SK
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to create Semantic Kernel.");
                 return Error.Failure($"{nameof(CreateKernel)}: failed kernel creation. - {ex.Message}");
             }
 
@@ -70,6 +75,7 @@ namespace PromptEnhancer.SK
         {
             try
             {
+                _logger.LogInformation("Converting KernelConfiguration to KernelServiceBaseConfig.");
                 var configs = new List<KernelServiceBaseConfig>
                 {
                     new(kernelData.Provider, kernelData.Model!, kernelData.AIApiKey!, kernelData.DeploymentName, serviceId: kernelData.ClientServiceId)
@@ -88,6 +94,7 @@ namespace PromptEnhancer.SK
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to convert KernelConfiguration to KernelServiceBaseConfig.");
                 return Error.Failure($"{nameof(ConvertConfig)} failed", ex.Message);
             }
 
