@@ -1,4 +1,5 @@
-﻿using PromptEnhancer.KnowledgeRecord.Interfaces;
+﻿using Microsoft.Extensions.Logging;
+using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.Models;
 
 namespace PromptEnhancer.Services.RecordPickerService
@@ -11,6 +12,12 @@ namespace PromptEnhancer.Services.RecordPickerService
     /// scenarios where dynamic  selection of records is required based on customizable criteria.</remarks>
     public class RecordPickerService : IRecordPickerService
     {
+        private readonly ILogger<RecordPickerService> _logger;
+
+        public RecordPickerService(ILogger<RecordPickerService> logger)
+        {
+            _logger = logger;
+        }
         /// <inheritdoc/>
         public virtual async Task<IEnumerable<IKnowledgeRecord>> GetPickedRecordsBasedOnFilter(RecordPickerOptions filter, IEnumerable<IKnowledgeRecord> records)
         {
@@ -26,38 +33,39 @@ namespace PromptEnhancer.Services.RecordPickerService
         /// optional descending order.</description> </item> <item> <description>Applies paging by skipping a specified
         /// number of records and taking a limited number of records.</description> </item> </list> If no options are
         /// specified, the method returns the input collection unchanged.</remarks>
-        /// <param name="query">The initial collection of <see cref="IKnowledgeRecord"/> to which the options will be applied.</param>
+        /// <param name="records">The initial collection of <see cref="IKnowledgeRecord"/> to which the options will be applied.</param>
         /// <param name="options">The <see cref="RecordPickerOptions"/> specifying the filtering, ordering, and paging criteria.</param>
         /// <returns>A filtered, ordered, and paged collection of <see cref="IKnowledgeRecord"/> based on the specified options.</returns>
-        private IEnumerable<IKnowledgeRecord> ApplyPickerOptions(IEnumerable<IKnowledgeRecord> query, RecordPickerOptions options)
+        private IEnumerable<IKnowledgeRecord> ApplyPickerOptions(IEnumerable<IKnowledgeRecord> records, RecordPickerOptions options)
         {
-            query = options.MinScoreSimilarity.HasValue ? query.Where(r => r.SimilarityScore.HasValue && r.SimilarityScore.Value >= options.MinScoreSimilarity.Value) : query;
+            _logger.LogDebug("Applying RecordPickerOptions to {RecordCount} records.", records.Count());
+            records = options.MinScoreSimilarity.HasValue ? records.Where(r => r.SimilarityScore.HasValue && r.SimilarityScore.Value >= options.MinScoreSimilarity.Value) : records;
 
-            query = !string.IsNullOrWhiteSpace(options.EmbeddingSourceEquals) ?
-                query.Where(r => r.Embeddings != null && r.Embeddings.EmbeddingSource == options.EmbeddingSourceEquals) : query;
+            records = !string.IsNullOrWhiteSpace(options.EmbeddingSourceEquals) ?
+                records.Where(r => r.Embeddings != null && r.Embeddings.EmbeddingSource == options.EmbeddingSourceEquals) : records;
 
             foreach (var predicate in options.Predicate)
             {
-                query = query.Where(predicate);
+                records = records.Where(predicate);
             }
 
             foreach (var (keySelector, descending) in options.OrderByClauses)
             {
-                query = descending
-                    ? query.OrderByDescending(keySelector)
-                    : query.OrderBy(keySelector);
+                records = descending
+                    ? records.OrderByDescending(keySelector)
+                    : records.OrderBy(keySelector);
             }
 
-            query = options.OrderByScoreDescending.HasValue && options.OrderByScoreDescending.Value ? query.OrderByDescending(x => x.SimilarityScore) : query;
+            records = options.OrderByScoreDescending.HasValue && options.OrderByScoreDescending.Value ? records.OrderByDescending(x => x.SimilarityScore) : records;
 
             // Paging
             if (options.Skip > 0)
-                query = query.Skip(options.Skip);
+                records = records.Skip(options.Skip);
 
             if (options.Take.HasValue)
-                query = query.Take(options.Take.Value);
+                records = records.Take(options.Take.Value);
 
-            return query;
+            return records;
         }
     }
 }

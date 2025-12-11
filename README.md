@@ -473,7 +473,7 @@ The application demonstrates the library's ability to automatically combine and 
 ## The Secrets File template
 The demo applications need a secret json file in their project root to work correctly. It is loaded through IConfiguration in *Program.cs*.
 ```json
-// *appsettings.secrets.json*
+// appsettings.secrets.json
 {
   "AIServices": {
     "OpenAI": {

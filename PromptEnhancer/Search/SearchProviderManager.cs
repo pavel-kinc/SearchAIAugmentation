@@ -1,4 +1,5 @@
-﻿using Microsoft.SemanticKernel.Data;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.SemanticKernel.Data;
 using Microsoft.SemanticKernel.Plugins.Web.Google;
 using PromptEnhancer.Models.Enums;
 using PromptEnhancer.Search.Interfaces;
@@ -14,16 +15,24 @@ namespace PromptEnhancer.Search
     /// allowing different search providers to be used.</remarks>
     public class SearchProviderManager : ISearchProviderManager
     {
+        private readonly ILogger<SearchProviderManager> _logger;
+
+        public SearchProviderManager(ILogger<SearchProviderManager> logger)
+        {
+            _logger = logger;
+        }
         /// <inheritdoc/>
         public virtual ITextSearch? CreateTextSearch(SearchProviderSettings searchProviderData)
         {
             if (searchProviderData.Provider == SearchProviderEnum.Google)
             {
+                _logger.LogInformation("Creating Google Text Search with Engine: {Engine}", searchProviderData.Engine);
                 var textSearch = new GoogleTextSearch(
                     searchEngineId: searchProviderData.Engine!,
                     apiKey: searchProviderData.SearchApiKey!);
                 return textSearch;
             }
+            _logger.LogWarning("SearchProviderManager could not create a text search instance for provider: {Provider}", searchProviderData.Provider);
             return null;
         }
 

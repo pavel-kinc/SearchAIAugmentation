@@ -70,7 +70,7 @@ namespace DemoApp.Pages
         public IActionResult OnPostUpdateSearchConf()
         {
             if (ModelState.IsValid)
-            { 
+            {
                 _logger.LogInformation("Updating Search Configuration");
                 _configurationService.UpdateSearchConfig(ViewModel.ConfigurationSetup.SearchConfiguration);
                 ViewModel.FloatingAlertMessage = "Search Configuration Saved";
@@ -232,7 +232,7 @@ namespace DemoApp.Pages
 
             enhancerConfig.PipelineAdditionalSettings = AssignExecutionSettingsAndOptions(enhancerConfig.PipelineAdditionalSettings, appConfig.GenerationConfiguration);
 
-            enhancerConfig.Steps = _enhancerService.CreateDefaultGoogleSearchPipelineSteps(apiKey, engine, searchFilter);
+            enhancerConfig.Steps = _enhancerService.CreateDefaultGoogleSearchPipelineSteps(apiKey, engine, searchFilter, useScraper: true);
             return enhancerConfig;
         }
 

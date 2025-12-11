@@ -1,4 +1,5 @@
-﻿using SemanticSlicer;
+﻿using Microsoft.Extensions.Logging;
+using SemanticSlicer;
 
 namespace PromptEnhancer.ChunkService
 {
@@ -8,10 +9,12 @@ namespace PromptEnhancer.ChunkService
     /// </summary>
     public class SemanticSlicerChunkService : IChunkGeneratorService
     {
+        private readonly ILogger<SemanticSlicerChunkService> _logger;
         private readonly SlicerOptions _slicerOptions;
 
-        public SemanticSlicerChunkService(SlicerOptions? options = null)
+        public SemanticSlicerChunkService(ILogger<SemanticSlicerChunkService> logger, SlicerOptions? options = null)
         {
+            _logger = logger;
             _slicerOptions = options ?? new SlicerOptions
             {
                 MaxChunkTokenCount = 300,
@@ -36,6 +39,7 @@ namespace PromptEnhancer.ChunkService
             {
                 results.Add(chunk.Content);
             }
+            _logger.LogInformation("Generated {ChunkCount} chunks from input data.", results.Count);
 
             return results;
         }
