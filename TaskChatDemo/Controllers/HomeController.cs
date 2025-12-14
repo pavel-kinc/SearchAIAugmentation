@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.AI;
 using PromptEnhancer.Models;
 using PromptEnhancer.Models.Pipeline;
+using PromptEnhancer.Services.ChatHistoryService;
 using PromptEnhancer.Services.EnhancerService;
 using System.Diagnostics;
 using System.Text.Json;
@@ -22,15 +23,15 @@ public class HomeController : Controller
     private const string ChatHistory = "EntryKey";
     private readonly ILogger<HomeController> _logger;
     private readonly IEnhancerService _enhancerService;
-    private readonly IConfiguration _configuration;
     private readonly IEnhancerUtilityService _enhancerUtilityService;
+    private readonly IChatHistoryService _chatHistoryService;
 
-    public HomeController(IEnhancerService enhancerService, ILogger<HomeController> logger, IConfiguration configuration, IEnhancerUtilityService enhancerUtilityService)
+    public HomeController(IEnhancerService enhancerService, ILogger<HomeController> logger, IEnhancerUtilityService enhancerUtilityService, IChatHistoryService chatHistoryService)
     {
         _enhancerService = enhancerService;
         _logger = logger;
-        _configuration = configuration;
         _enhancerUtilityService = enhancerUtilityService;
+        _chatHistoryService = chatHistoryService;
     }
 
     public IActionResult Index()
@@ -129,8 +130,8 @@ public class HomeController : Controller
         await Response.Body.FlushAsync(ct);
         chatHistory = context.ChatHistory?.ToList() ?? [];
         var chatResponse = updates.ToChatResponse();
-        //TODO delete
-        var inputTokens = chatResponse.Usage?.InputTokenCount;
+        // add output token usage, input is added in streaming response
+        _chatHistoryService.AddTokenUsageToPipelineRunContext(context, [], response: chatResponse);
         chatHistory.AddRange(chatResponse.Messages);
         return chatHistory;
     }

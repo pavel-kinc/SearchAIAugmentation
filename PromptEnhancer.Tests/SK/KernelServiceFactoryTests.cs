@@ -92,9 +92,6 @@ namespace PromptEnhancer.SK.Tests
                 Times.Exactly(3));
         }
 
-        // =========================================================================
-        // --- 2. Validation Logic Tests ---
-        // =========================================================================
 
         [Fact(DisplayName = "Factory skips creation if API Key is null/whitespace and logs a warning")]
         public void AddToServiceTemplatesIfValid_MissingKey_SkipsAndLogsWarning()

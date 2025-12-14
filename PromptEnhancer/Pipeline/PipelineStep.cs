@@ -1,6 +1,8 @@
 ﻿using ErrorOr;
+using Microsoft.Extensions.AI;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Pipeline.Interfaces;
+using PromptEnhancer.Services.ChatHistoryService;
 
 namespace PromptEnhancer.Pipeline
 {
@@ -88,6 +90,11 @@ namespace PromptEnhancer.Pipeline
             return _isRequired ?
                 (string.IsNullOrEmpty(reason) ? Error.Failure($"{GetType().Name}: Execution for this required step failed.") : Error.Failure(reason)) :
                 false;
+        }
+
+        protected virtual void AssignTokensToContext(PipelineRun context, IChatHistoryService chatHistoryService, List<ChatMessage>? inputMessages = null, string? prompt = null, ChatResponse? response = null)
+        {
+            chatHistoryService.AddTokenUsageToPipelineRunContext(context, inputMessages ?? [], prompt, response);
         }
     }
 }

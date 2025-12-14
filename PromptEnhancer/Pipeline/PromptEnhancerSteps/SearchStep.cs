@@ -71,17 +71,5 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 
             return FailCondition();
         }
-
-        //private DateTimePlugin? GetDateTimePlugin(Microsoft.SemanticKernel.Kernel kernel)
-        //{
-        //    var plugin = kernel.Plugins.TryGetPlugin<DateTimePlugin>(nameof(DateTimePlugin));
-        //    return plugin;
-        //}
     }
-
-    //TODO replace interfaces with "empty" base classes if needed
-    //public class SearchStep<TRecord, T> : SearchStep<TRecord, IKnowledgeBaseSearchFilter, IKnowledgeBaseSearchSettings, IRecordFilter<T>, T>
-    //where TRecord : class, IKnowledgeRecord
-    //where T : class
-    //{ }
 }

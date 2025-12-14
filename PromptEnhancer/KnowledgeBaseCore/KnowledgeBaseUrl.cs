@@ -1,8 +1,8 @@
-﻿using PromptEnhancer.ChunkService;
-using PromptEnhancer.KnowledgeBaseCore.Interfaces;
+﻿using PromptEnhancer.KnowledgeBaseCore.Interfaces;
 using PromptEnhancer.KnowledgeRecord;
 using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.Search.Interfaces;
+using PromptEnhancer.Services.ChunkService;
 
 namespace PromptEnhancer.KnowledgeBaseCore
 {

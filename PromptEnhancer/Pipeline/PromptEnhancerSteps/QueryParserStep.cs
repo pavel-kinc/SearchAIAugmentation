@@ -1,7 +1,7 @@
 ﻿using ErrorOr;
 using Microsoft.Extensions.AI;
-using PromptEnhancer.AIUtility.ChatHistory;
 using PromptEnhancer.Models.Pipeline;
+using PromptEnhancer.Services.ChatHistoryService;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
@@ -32,6 +32,8 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 
         public const int MaxResponseLength = 200;
 
+        public const char Delimiter = ';';
+
         private readonly int _maxSplit;
         private readonly ChatOptions? _options;
 
@@ -50,19 +52,19 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
         {
             //TODO maybe more checks for the llm response?
             var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.Settings.ChatClientKey);
+            var chatHistoryService = settings.GetService<IChatHistoryService>();
             var inputPrompt = string.Format(PromptTemplate, context.QueryString, _maxSplit, FailResponseLLM);
             if (inputPrompt.Length > settings.Settings.MaximumInputLength)
             {
-                return FailExecution(ChatHistoryUtility.GetInputSizeExceededLimitMessage(GetType().Name));
+                return FailExecution(chatHistoryService.GetInputSizeExceededLimitMessage(GetType().Name));
             }
             var res = await chatClient.GetResponseAsync(inputPrompt, _options ?? settings.Settings.ChatOptions, cancellationToken: cancellationToken);
-            if (res.Text == FailResponseLLM || res.Text.Length > MaxResponseLength || res.Text.Count(c => c == ';') >= _maxSplit)
+            AssignTokensToContext(context, chatHistoryService, prompt: inputPrompt, response: res);
+            if (res.Text == FailResponseLLM || res.Text.Length > MaxResponseLength || res.Text.Count(c => c == Delimiter) >= _maxSplit)
             {
                 return FailExecution();
             }
-            context.InputTokenUsage = res.Usage?.InputTokenCount ?? 0;
-            context.OutputTokenUsage = res.Usage?.OutputTokenCount ?? 0;
-            context.QueryStrings = res.Text.Split(';').Select(x => x.Trim()).Where(x => !string.IsNullOrEmpty(x) && !x.Equals(FailResponseLLM));
+            context.QueryStrings = res.Text.Split(Delimiter).Select(x => x.Trim()).Where(x => !string.IsNullOrEmpty(x) && !x.Equals(FailResponseLLM));
 
             return true;
         }

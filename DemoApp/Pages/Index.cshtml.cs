@@ -61,6 +61,7 @@ namespace DemoApp.Pages
             if (ModelState.IsValid)
             {
                 _logger.LogInformation("Updating Kernel Configuration");
+                ViewModel.ConfigurationSetup.KernelConfiguration.UseLLMConfigForEmbeddings = true;
                 _configurationService.UpdateKernelConfig(ViewModel.ConfigurationSetup.KernelConfiguration);
                 ViewModel.FloatingAlertMessage = "Kernel Configuration Saved";
             }

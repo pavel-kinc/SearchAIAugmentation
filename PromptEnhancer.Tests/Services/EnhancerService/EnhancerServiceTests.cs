@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Moq;
 using Newtonsoft.Json;
-using PromptEnhancer.ChunkService;
 using PromptEnhancer.KnowledgeBaseCore;
 using PromptEnhancer.KnowledgeBaseCore.Examples;
 using PromptEnhancer.KnowledgeBaseCore.Interfaces;
@@ -17,6 +16,8 @@ using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Pipeline.Interfaces;
 using PromptEnhancer.Pipeline.PromptEnhancerSteps;
 using PromptEnhancer.Search.Interfaces;
+using PromptEnhancer.Services.ChatHistoryService;
+using PromptEnhancer.Services.ChunkService;
 using PromptEnhancer.SK.Interfaces;
 using PromptEnhancer.Tests.TestClasses;
 using PromptEnhancer.Tests.TestDataFactory;
@@ -35,6 +36,7 @@ namespace PromptEnhancer.Services.EnhancerService.Tests
         private readonly Mock<IChunkGeneratorService> _mockChunkGenerator = new();
         private readonly Mock<ISearchProviderManager> _mockSearchProviderManager = new();
         private readonly Mock<ILogger<GoogleKnowledgeBase>> _mockGoogleKBLogger = new();
+        private readonly Mock<IChatHistoryService> _mockChatHistoryService = new();
         private readonly Mock<GoogleKnowledgeBase> _mockGoogleKB;
         private readonly Kernel _mockKernel = KernelMocks.GetRealKernelWithMocks();
         private readonly EnhancerService _service;
@@ -53,7 +55,8 @@ namespace PromptEnhancer.Services.EnhancerService.Tests
                 _mockOrchestrator.Object,
                 _mockServiceProvider.Object,
                 _mockGoogleKB.Object,
-                _mockLogger.Object
+                _mockLogger.Object,
+                _mockChatHistoryService.Object
             );
 
         }
@@ -158,16 +161,7 @@ namespace PromptEnhancer.Services.EnhancerService.Tests
         [Fact]
         public void Setup_2_CreatePipelineSettingsFromConfig_FailsIfNoKernelAvailable()
         {
-            // Use a service without a default kernel setup
-            var serviceWithoutDefaultKernel = new EnhancerService(
-                _mockSKManager.Object,
-                _mockOrchestrator.Object,
-                _mockServiceProvider.Object,
-                _mockGoogleKB.Object,
-                _mockLogger.Object
-            );
-
-            var result = serviceWithoutDefaultKernel.CreatePipelineSettingsFromConfig(new PromptConfiguration(), new PipelineAdditionalSettings(), kernelData: null, kernel: null);
+            var result = _service.CreatePipelineSettingsFromConfig(new PromptConfiguration(), new PipelineAdditionalSettings(), kernelData: null, kernel: null);
 
             Assert.True(result.IsError);
             Assert.Equal("No kernel could be created or resolved.", result.Errors.First().Code);
@@ -272,6 +266,14 @@ namespace PromptEnhancer.Services.EnhancerService.Tests
         [Fact]
         public async Task Streaming_1_GetStreamingResponse_CallsChatClientWithHistory()
         {
+            _mockChatHistoryService
+                .Setup(s => s.CreateChatHistoryFromPipelineRun(It.IsAny<PipelineRun>()))
+                .Returns(new List<ChatMessage> { new ChatMessage(ChatRole.Assistant, "chunk") });
+
+            _mockChatHistoryService
+                .Setup(s => s.GetHistoryLength(It.IsAny<List<ChatMessage>>()))
+                .Returns((List<ChatMessage> history) => 5);
+
             var chatClientMock = new Mock<IChatClient>();
             var chatUpdates = new List<ChatResponseUpdate> { new(ChatRole.Assistant, "chunk") }.ToAsyncEnumerable();
             chatClientMock.Setup(c => c.GetStreamingResponseAsync(
@@ -294,12 +296,14 @@ namespace PromptEnhancer.Services.EnhancerService.Tests
         [Fact]
         public void Streaming_2_GetStreamingResponse_ThrowsIfInputSizeExceeded()
         {
+            _mockChatHistoryService
+                .Setup(s => s.GetHistoryLength(It.IsAny<List<ChatMessage>>()))
+                .Returns((List<ChatMessage> history) => 20);
             var chatClientMock = new Mock<IChatClient>();
             var kernelMock = KernelMocks.GetRealKernelWithMocks(chatClient: chatClientMock);
             var settings = new PipelineSettings(kernelMock, _mockServiceProvider.Object, new PipelineAdditionalSettings { MaximumInputLength = 10 }, new PromptConfiguration());
-            var context = new PipelineRun() { UserPromptToLLM = new string('X', 20) };
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => _service.GetStreamingResponse(settings, context));
+            Assert.Throws<ArgumentOutOfRangeException>(() => _service.GetStreamingResponse(settings, new PipelineRun()));
         }
 
         #endregion

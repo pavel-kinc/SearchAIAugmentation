@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.SemanticKernel;
-using PromptEnhancer.ChunkService;
 using PromptEnhancer.KernelServiceTemplates;
 using PromptEnhancer.KnowledgeBaseCore;
 using PromptEnhancer.KnowledgeBaseCore.Examples;
@@ -15,12 +14,15 @@ using PromptEnhancer.Plugins;
 using PromptEnhancer.Plugins.Interfaces;
 using PromptEnhancer.Search;
 using PromptEnhancer.Search.Interfaces;
+using PromptEnhancer.Services.ChatHistoryService;
+using PromptEnhancer.Services.ChunkService;
 using PromptEnhancer.Services.EmbeddingService;
 using PromptEnhancer.Services.EnhancerService;
 using PromptEnhancer.Services.PromptBuildingService;
 using PromptEnhancer.Services.RankerService;
 using PromptEnhancer.Services.RecordPickerService;
 using PromptEnhancer.Services.RecordRankerService;
+using PromptEnhancer.Services.TokenCounterService;
 using PromptEnhancer.SK;
 using PromptEnhancer.SK.Interfaces;
 
@@ -146,6 +148,8 @@ namespace PromptEnhancer.Extensions
             services.TryAddSingleton<IRankerService, CosineSimilarityRankerService>();
             services.TryAddSingleton<IRecordPickerService, RecordPickerService>();
             services.TryAddSingleton<IPromptBuildingService, PromptBuildingService>();
+            services.TryAddSingleton<ITokenCounterService, TokenCounterService>();
+            services.TryAddSingleton<IChatHistoryService, ChatHistoryService>();
         }
 
         /// <summary>
