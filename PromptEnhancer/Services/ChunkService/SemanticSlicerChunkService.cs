@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using SemanticSlicer;
 
-namespace PromptEnhancer.ChunkService
+namespace PromptEnhancer.Services.ChunkService
 {
 
     /// <summary>
