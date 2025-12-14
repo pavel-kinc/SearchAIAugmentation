@@ -1,9 +1,9 @@
 # PromptEnhancer - For Prompt Augmentation
-The PromptEnhancer library provides a flexible, configurable **Retrieval-Augmented Generation based pipeline system** that automatically searches for relevant context and uses it to systematically augment a user's base prompt. It contains steps from processing user input to final LLM generation for various tasks. This process prepares a highly structured, context-rich query for reliable output generation by a Large Language Model (LLM). The library uses **Semantic Kernel** for working with AI services. It is provider agnostic, meaning it can interact with any supported AI service (e.g., OpenAI, Gemini, Claude) - AI service is for exmample embedding generation and LLM text generation (inference).
+The PromptEnhancer library provides a flexible, configurable **Retrieval-Augmented Generation-based pipeline system** that automatically searches for relevant context and uses it to systematically augment a user's base prompt. It contains steps from processing user input to final LLM generation for various tasks. This process prepares a highly structured, context-rich query for reliable output generation by a Large Language Model (LLM). The library uses **Semantic Kernel** for working with AI services. It is provider agnostic, meaning it can interact with any supported AI service (e.g., OpenAI, Gemini, Claude) - AI service is for example embedding generation and LLM text generation (inference).
 
 It includes **two demonstration applications** built on the library to showcase various use cases.
 
-Learn more about the library and surrounding solution with demonstration apps on github  <a href="https://github.com/pavel-kinc/SearchAIAugmentation" target="_blank">here</a>.
+Learn more about the library and surrounding solution with demonstration apps on GitHub: https://github.com/pavel-kinc/SearchAIAugmentation.
 ## Overview
 ### Safe Usage Disclaimer
 Please be aware of the functionality within the solution (as it is highly configurable):
@@ -20,8 +20,9 @@ The PromptEnhancer library is a flexible, configurable .NET 9 RAG-based pipeline
 
 For demonstration purposes, I created 2 Demo applications, that showcase, how the library can be used for real tasks:
 
-* <a href="https://github.com/pavel-kinc/SearchAIAugmentation?tab=readme-ov-file#the-google-demo" target="_blank">GoogleSearchDemo</a>
-* <a href="https://github.com/pavel-kinc/SearchAIAugmentation?tab=readme-ov-file#the-task-chat-demo" target="_blank">TaskChatDemo</a>
+* [GoogleSearchDemo](https://github.com/pavel-kinc/SearchAIAugmentation?tab=readme-ov-file#the-google-demo)
+* [TaskChatDemo](https://github.com/pavel-kinc/SearchAIAugmentation?tab=readme-ov-file#the-task-chat-demo)
+* [GitHub with whole solution](https://github.com/pavel-kinc/SearchAIAugmentation)
 
 ## Technology
 
