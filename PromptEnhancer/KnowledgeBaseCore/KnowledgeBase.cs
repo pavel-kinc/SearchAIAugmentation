@@ -40,7 +40,7 @@ namespace PromptEnhancer.KnowledgeBaseCore
         }
 
         /// <inheritdoc/>
-        public virtual string Description => $"Knowledge base with name {GetType().Name} and data {typeof(TModel).Name} and record {typeof(TRecord).Name}";
+        public virtual string Description => $"Knowledge base with name {GetType().FullName} and data {typeof(TModel).FullName} and record {typeof(TRecord).FullName}";
 
         /// <inheritdoc/>
         // perhaps add optional Data of TModel to this method and allow user to set it up with their data?

@@ -125,7 +125,7 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 
             // Filter the list by the deserialized indices; caller handles any exceptions.
             var resultText = res.Text.Trim();
-            var ids = resultText.All(x => char.IsDigit(x) || x == Separator) ? resultText.Split(Separator).Select(x => int.Parse(x)) : [];
+            var ids = !string.IsNullOrEmpty(resultText) && resultText.All(x => char.IsDigit(x) || x == Separator) ? resultText.Split(Separator).Select(x => int.Parse(x)) : [];
             IEnumerable<IKnowledgeBaseContainer> picked = ids!
                 .Where(i => i >= 0 && i < knowledgeBases.Count())
                 .Select(i => knowledgeBases.ElementAt(i));
