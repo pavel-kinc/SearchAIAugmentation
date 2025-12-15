@@ -1,4 +1,4 @@
-﻿namespace PromptEnhancer.ChunkService
+﻿namespace PromptEnhancer.Services.ChunkService
 {
     /// <summary>
     /// Provides functionality to generate chunks of text from a given raw text input.

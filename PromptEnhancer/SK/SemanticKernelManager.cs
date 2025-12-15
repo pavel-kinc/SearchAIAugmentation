@@ -76,6 +76,11 @@ namespace PromptEnhancer.SK
             try
             {
                 _logger.LogInformation("Converting KernelConfiguration to KernelServiceBaseConfig.");
+                if (kernelData.Model is null || kernelData.AIApiKey is null)
+                {
+                    _logger.LogError("Failed to convert KernelConfiguration to KernelServiceBaseConfig. Model or Api key is null");
+                    return Error.Failure($"{nameof(ConvertConfig)} failed");
+                }
                 var configs = new List<KernelServiceBaseConfig>
                 {
                     new(kernelData.Provider, kernelData.Model!, kernelData.AIApiKey!, kernelData.DeploymentName, serviceId: kernelData.ClientServiceId)

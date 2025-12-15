@@ -1,8 +1,8 @@
 ﻿using ErrorOr;
 using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
-using PromptEnhancer.AIUtility.ChatHistory;
 using PromptEnhancer.Models.Pipeline;
+using PromptEnhancer.Services.ChatHistoryService;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
@@ -45,16 +45,14 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
                 return false;
             }
             var prompt = GetPrompt(context.QueryString);
+            var chatHistoryService = settings.GetService<IChatHistoryService>();
             if (prompt.Length > settings.Settings.MaximumInputLength)
             {
-                return FailExecution(ChatHistoryUtility.GetInputSizeExceededLimitMessage(GetType().Name));
+                return FailExecution(chatHistoryService.GetInputSizeExceededLimitMessage(GetType().Name));
             }
-
             // invokes the prompt against the kernel, resulting in fucntion calling
             var res = await settings.Kernel.InvokePromptAsync<ChatResponse>(prompt, new(settings.Settings.KernelRequestSettings), cancellationToken: cancellationToken);
-            var tokenUsage = res?.Usage?.TotalTokenCount;
-            context.InputTokenUsage += res?.Usage?.InputTokenCount ?? 0;
-            context.OutputTokenUsage += res?.Usage?.OutputTokenCount ?? 0;
+            AssignTokensToContext(context, chatHistoryService, prompt: prompt, response: res);
             var stringResult = res?.Text;
             if (stringResult != null && stringResult != LLMResponseNoResult)
             {

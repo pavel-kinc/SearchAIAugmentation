@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Newtonsoft.Json;
-using PromptEnhancer.AIUtility.ChatHistory;
 using PromptEnhancer.CustomJsonResolver;
 using PromptEnhancer.KnowledgeBaseCore;
 using PromptEnhancer.KnowledgeBaseCore.Examples;
@@ -19,6 +18,7 @@ using PromptEnhancer.Models.Enums;
 using PromptEnhancer.Models.Pipeline;
 using PromptEnhancer.Pipeline.Interfaces;
 using PromptEnhancer.Pipeline.PromptEnhancerSteps;
+using PromptEnhancer.Services.ChatHistoryService;
 using PromptEnhancer.SK.Interfaces;
 using System.Collections.Concurrent;
 using System.Text;
@@ -40,8 +40,9 @@ namespace PromptEnhancer.Services.EnhancerService
         private readonly IServiceProvider _serviceProvider;
         private readonly GoogleKnowledgeBase _googleKB;
         private readonly ILogger<EnhancerService> _logger;
+        private readonly IChatHistoryService _chatHistoryService;
 
-        public EnhancerService(ISemanticKernelManager semanticKernelManager, IPipelineOrchestrator pipelineOrchestrator, IServiceProvider serviceProvider, GoogleKnowledgeBase googleKB, ILogger<EnhancerService> logger, Kernel? kernel = null)
+        public EnhancerService(ISemanticKernelManager semanticKernelManager, IPipelineOrchestrator pipelineOrchestrator, IServiceProvider serviceProvider, GoogleKnowledgeBase googleKB, ILogger<EnhancerService> logger, IChatHistoryService chatHistoryService, Kernel? kernel = null)
         {
             _semanticKernelManager = semanticKernelManager;
             _pipelineOrchestrator = pipelineOrchestrator;
@@ -49,6 +50,7 @@ namespace PromptEnhancer.Services.EnhancerService
             _serviceProvider = serviceProvider;
             _googleKB = googleKB;
             _logger = logger;
+            _chatHistoryService = chatHistoryService;
         }
 
         /// <inheritdoc/>
@@ -105,14 +107,14 @@ namespace PromptEnhancer.Services.EnhancerService
         {
             _logger.LogInformation("Getting streaming response from chat client");
             var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.Settings.ChatClientKey);
-            List<ChatMessage> history = ChatHistoryUtility.AddToChatHistoryPipeline(context);
+            List<ChatMessage> history = _chatHistoryService.CreateChatHistoryFromPipelineRun(context);
             context.ChatHistory = history;
-            if (ChatHistoryUtility.GetHistoryLength(history) > settings.Settings.MaximumInputLength)
+            if (_chatHistoryService.GetHistoryLength(history) > settings.Settings.MaximumInputLength)
             {
                 _logger.LogError("Input size exceeded limit for GetStreamingResponse");
-                throw new ArgumentOutOfRangeException(nameof(context), ChatHistoryUtility.GetInputSizeExceededLimitMessage(nameof(GetStreamingResponse)));
+                throw new ArgumentOutOfRangeException(nameof(context), _chatHistoryService.GetInputSizeExceededLimitMessage(nameof(GetStreamingResponse)));
             }
-
+            _chatHistoryService.AddTokenUsageToPipelineRunContext(context, history);
             return chatClient.GetStreamingResponseAsync(history, settings.Settings.ChatOptions, ct);
         }
 

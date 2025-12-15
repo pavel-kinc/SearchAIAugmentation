@@ -1,8 +1,7 @@
 ﻿using ErrorOr;
 using Microsoft.Extensions.AI;
-using PromptEnhancer.AIUtility.ChatHistory;
-using PromptEnhancer.AIUtility.TokenCountFallback;
 using PromptEnhancer.Models.Pipeline;
+using PromptEnhancer.Services.ChatHistoryService;
 
 namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
 {
@@ -25,15 +24,15 @@ namespace PromptEnhancer.Pipeline.PromptEnhancerSteps
         protected async override Task<ErrorOr<bool>> ExecuteStepAsync(PipelineSettings settings, PipelineRun context, CancellationToken cancellationToken = default)
         {
             var chatClient = settings.Kernel.GetRequiredService<IChatClient>(settings.Settings.ChatClientKey);
-            List<ChatMessage> history = ChatHistoryUtility.AddToChatHistoryPipeline(context);
-            if (ChatHistoryUtility.GetHistoryLength(history) > settings.Settings.MaximumInputLength)
+            var chatHistoryService = settings.GetService<IChatHistoryService>();
+            List<ChatMessage> history = chatHistoryService.CreateChatHistoryFromPipelineRun(context);
+            if (chatHistoryService.GetHistoryLength(history) > settings.Settings.MaximumInputLength)
             {
-                return FailExecution(ChatHistoryUtility.GetInputSizeExceededLimitMessage(GetType().Name));
+                return FailExecution(chatHistoryService.GetInputSizeExceededLimitMessage(GetType().Name));
             }
 
             var res = await chatClient.GetResponseAsync(history, settings.Settings.ChatOptions, cancellationToken);
-            context.InputTokenUsage += res.Usage?.InputTokenCount ?? TokenCounter.CountTokens(history);
-            context.OutputTokenUsage += res.Usage?.OutputTokenCount ?? TokenCounter.CountTokens(res.Messages);
+            AssignTokensToContext(context, chatHistoryService, history, response: res);
             context.FinalResponse = res;
             history.AddRange(res.Messages);
             context.ChatHistory = history;

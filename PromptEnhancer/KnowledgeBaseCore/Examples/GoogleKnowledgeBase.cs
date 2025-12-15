@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.Data;
-using PromptEnhancer.ChunkService;
 using PromptEnhancer.KnowledgeRecord;
 using PromptEnhancer.KnowledgeSearchRequest.Examples;
 using PromptEnhancer.KnowledgeSearchRequest.Interfaces;
 using PromptEnhancer.Models.Examples;
 using PromptEnhancer.Search;
 using PromptEnhancer.Search.Interfaces;
+using PromptEnhancer.Services.ChunkService;
 using System.Collections.Concurrent;
 
 namespace PromptEnhancer.KnowledgeBaseCore.Examples

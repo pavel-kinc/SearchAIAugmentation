@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <WarningsNotAsErrors>SKEXP0010</WarningsNotAsErrors>
     <PackageId>$(AssemblyName)</PackageId>
-    <Version>0.1.0-beta</Version>
+    <Version>0.2.0-beta</Version>
     <Title>PromptEnhancer</Title>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
@@ -15,7 +15,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <RepositoryUrl>https://github.com/pavel-kinc/SearchAIAugmentation</RepositoryUrl>
     <Copyright>Copyright © 2025 Pavel Kinc</Copyright>
-    <PackageTags>LLM;AI;RAG;Pipeline;Semantic Kernel</PackageTags>
+    <PackageTags>LLM;AI;RAG;Pipeline;SemanticKernel</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
