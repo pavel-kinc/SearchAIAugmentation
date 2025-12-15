@@ -152,9 +152,7 @@ namespace PromptEnhancer.Services.RecordRankerService.Tests
                 new DummyKnowledgeRecord { UsedSearchQuery = "Common Query", SimilarityScore = null }
             };
 
-
-            await _service.AssignSimilarityScoreToRecordsAsync(kernel, records, TestQuery);
-
+            await _service.AssignSimilarityScoreToRecordsAsync(kernel, records, "Common Query");
 
             // Record query embedding ("Common Query") is generated once and reused (caching test)
             generatorMock.Verify(g => g.GenerateAsync(

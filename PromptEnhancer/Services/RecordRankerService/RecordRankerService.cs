@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using PromptEnhancer.KnowledgeRecord.Interfaces;
 using PromptEnhancer.Services.RankerService;
+using System.Collections.Concurrent;
 
 namespace PromptEnhancer.Services.RecordRankerService
 {
@@ -29,22 +30,22 @@ namespace PromptEnhancer.Services.RecordRankerService
         public async Task<bool> AssignSimilarityScoreToRecordsAsync(Kernel kernel, IEnumerable<IKnowledgeRecord> records, string? queryString, string? generatorKey = null)
         {
             _logger.LogInformation("Assigning similarity scores to {RecordCount} records using query: {QueryString}", records.Count(), queryString ?? "null");
-            var dict = new Dictionary<string, Embedding<float>>();
+            var dict = new ConcurrentDictionary<string, Embedding<float>>();
             var generator = kernel.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>(generatorKey);
             _logger.LogInformation("Using embedding generator with key: {GeneratorKey}", generatorKey ?? "default");
             if (queryString is not null)
             {
                 var query = await generator.GenerateAsync(queryString);
-                dict.Add(queryString, query);
+                dict.TryAdd(queryString, query);
             }
 
             //TODO what if it needs rewrite for repetitive context? (now its like this for me to not rewrite sent data from base that returns them)
             // if there are embeddings, it just recalculates
-            foreach (var record in records.Where(x => x.SimilarityScore is null || x.Embeddings is not null))
+            var recordsToProcess = records.Where(x => x.SimilarityScore is null || x.Embeddings is not null);
+            await Parallel.ForEachAsync(recordsToProcess, async (record, _) =>
             {
-                //TODO what if 1 assignment fails? now i just ignore the result
                 await TryAssignScoreToRecord(record, generator, dict);
-            }
+            });
             return true;
         }
 
@@ -65,7 +66,7 @@ namespace PromptEnhancer.Services.RecordRankerService
         /// embeddings.</param>
         /// <returns><see langword="true"/> if a similarity score was successfully assigned to the record; otherwise, <see
         /// langword="false"/>.</returns>
-        private async Task<bool> TryAssignScoreToRecord(IKnowledgeRecord record, IEmbeddingGenerator<string, Embedding<float>> generator, Dictionary<string, Embedding<float>> dict, Embedding<float>? embed = null)
+        private async Task<bool> TryAssignScoreToRecord(IKnowledgeRecord record, IEmbeddingGenerator<string, Embedding<float>> generator, ConcurrentDictionary<string, Embedding<float>> dict, Embedding<float>? embed = null)
         {
             //TODO maybe just give it the basic query from context? but that could lead to some random data
             if (record.UsedSearchQuery is null)
@@ -73,12 +74,13 @@ namespace PromptEnhancer.Services.RecordRankerService
                 return false;
             }
 
-            if (!dict.ContainsKey(record.UsedSearchQuery))
+            if (!dict.TryGetValue(record.UsedSearchQuery, out var queryEmbed))
             {
-                dict.Add(record.UsedSearchQuery, await generator.GenerateAsync(record.UsedSearchQuery));
+                var embedding = await generator.GenerateAsync(record.UsedSearchQuery);
+
+                queryEmbed = dict.GetOrAdd(record.UsedSearchQuery, embedding);
             }
 
-            var queryEmbed = dict[record.UsedSearchQuery];
             var recordEmbed = embed;
             if (recordEmbed is null && record.Embeddings is not null)
             {

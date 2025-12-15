@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <WarningsNotAsErrors>SKEXP0010</WarningsNotAsErrors>
     <PackageId>$(AssemblyName)</PackageId>
-    <Version>0.2.1-beta</Version>
+    <Version>0.2.2-beta</Version>
     <Title>PromptEnhancer</Title>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
