@@ -131,6 +131,7 @@ namespace PromptEnhancer.Services.EnhancerService
                 var cb = new ConcurrentBag<PipelineResultModel>();
                 await Parallel.ForEachAsync(entries, async (context, _) =>
                 {
+                    context.ChatHistory ??= context.Entry?.ChatHistory;
                     var pipelineRes = await _pipelineOrchestrator.RunPipelineAsync(pipeline, context, cancellationToken);
                     var resultModel = new PipelineResultModel
                     {
